@@ -1,12 +1,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FileSpreadsheet, Upload, Database, Download } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { FileSpreadsheet, Upload, Database, Download, CheckCircle } from "lucide-react";
 import { useRef, useState } from "react";
+import * as XLSX from 'xlsx';
 
 export default function ImportProfiles() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [excelData, setExcelData] = useState<any[][]>([]);
+  const [headers, setHeaders] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleFileSelect = () => {
     fileInputRef.current?.click();
@@ -16,8 +21,34 @@ export default function ImportProfiles() {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
+      setIsProcessing(true);
       console.log('Fichier sélectionné:', file.name);
+      readExcelFile(file);
     }
+  };
+
+  const readExcelFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        if (jsonData.length > 0) {
+          setHeaders(jsonData[0] as string[]);
+          setExcelData(jsonData.slice(1) as any[][]);
+        }
+        setIsProcessing(false);
+        console.log('Données Excel chargées:', jsonData.length, 'lignes');
+      } catch (error) {
+        console.error('Erreur lors de la lecture du fichier:', error);
+        setIsProcessing(false);
+      }
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   return (
@@ -50,13 +81,33 @@ export default function ImportProfiles() {
                 className="hidden"
               />
               <div className="border-2 border-dashed border-border rounded-lg p-8 text-center bg-muted/20">
-                <FileSpreadsheet className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-4">
-                  {selectedFile ? `Fichier sélectionné: ${selectedFile.name}` : "Glissez-déposez votre fichier Excel ici ou cliquez pour sélectionner"}
-                </p>
-                <Button className="bg-gradient-primary" onClick={handleFileSelect}>
-                  {selectedFile ? "Changer de fichier" : "Sélectionner fichier"}
-                </Button>
+                {isProcessing ? (
+                  <div className="flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                    <p className="text-muted-foreground">Traitement du fichier en cours...</p>
+                  </div>
+                ) : selectedFile ? (
+                  <div className="flex flex-col items-center">
+                    <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+                    <p className="text-foreground font-medium mb-2">{selectedFile.name}</p>
+                    <p className="text-muted-foreground text-sm mb-4">
+                      {excelData.length} lignes détectées
+                    </p>
+                    <Button className="bg-gradient-primary" onClick={handleFileSelect}>
+                      Changer de fichier
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <FileSpreadsheet className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground mb-4">
+                      Glissez-déposez votre fichier Excel ici ou cliquez pour sélectionner
+                    </p>
+                    <Button className="bg-gradient-primary" onClick={handleFileSelect}>
+                      Sélectionner fichier
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="text-sm text-muted-foreground">
                 <p>Formats acceptés: .xlsx, .xls</p>
@@ -105,6 +156,60 @@ export default function ImportProfiles() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Aperçu des données */}
+        {excelData.length > 0 && (
+          <Card className="mt-8 shadow-card border-0 bg-gradient-card">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center">
+                <Database className="mr-3 h-6 w-6 text-primary" />
+                Aperçu des Données
+              </CardTitle>
+              <CardDescription>
+                Prévisualisation des {excelData.length} lignes importées
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {headers.map((header, index) => (
+                        <TableHead key={index} className="whitespace-nowrap">
+                          {header}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {excelData.slice(0, 10).map((row, rowIndex) => (
+                      <TableRow key={rowIndex}>
+                        {row.map((cell, cellIndex) => (
+                          <TableCell key={cellIndex} className="whitespace-nowrap">
+                            {cell || '-'}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              {excelData.length > 10 && (
+                <p className="text-sm text-muted-foreground mt-4">
+                  Affichage des 10 premières lignes sur {excelData.length} au total
+                </p>
+              )}
+              <div className="mt-6 flex gap-4">
+                <Button className="bg-gradient-primary">
+                  Importer ces données
+                </Button>
+                <Button variant="outline">
+                  Mapper les colonnes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
