@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Users, 
   FileSpreadsheet, 
@@ -15,15 +16,20 @@ import {
   CheckCircle
 } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
+import { useStats } from "@/hooks/useStats";
+import { useCampaigns } from "@/hooks/useCampaigns";
 
 export default function Dashboard() {
+  const { data: stats, isLoading: statsLoading } = useStats();
+  const { data: campaigns, isLoading: campaignsLoading } = useCampaigns(10);
+
   const modules = [
     {
       icon: FileSpreadsheet,
       title: "Import de Profils",
       description: "Importez vos CVthèques Excel et mappez automatiquement les colonnes",
       status: "active",
-      count: "2,341 profils",
+      count: `${stats?.totalExperts || 0} profils`,
       color: "bg-gradient-primary"
     },
     {
@@ -31,7 +37,7 @@ export default function Dashboard() {
       title: "Base de Données",
       description: "Consultez et gérez tous vos profils d'experts qualifiés",
       status: "active", 
-      count: "1,897 validés",
+      count: `${stats?.qualifiedProfiles || 0} validés`,
       color: "bg-gradient-primary"
     },
     {
@@ -39,7 +45,7 @@ export default function Dashboard() {
       title: "Qualification Dynamique",
       description: "Envoyez des formulaires personnalisés pour enrichir les profils",
       status: "pending",
-      count: "156 en cours",
+      count: `${stats?.pendingApplications || 0} en cours`,
       color: "bg-warning"
     },
     {
@@ -47,7 +53,7 @@ export default function Dashboard() {
       title: "Appels à Candidatures",
       description: "Lancez des campagnes ciblées et gérez les réponses",
       status: "active",
-      count: "23 actifs",
+      count: `${stats?.activeCampaigns || 0} actifs`,
       color: "bg-success"
     },
     {
@@ -55,16 +61,36 @@ export default function Dashboard() {
       title: "Tableau de Bord",
       description: "Analysez vos données et générez des rapports détaillés",
       status: "active",
-      count: "12 rapports",
+      count: `${campaigns?.length || 0} rapports`,
       color: "bg-info"
     }
   ];
 
-  const stats = [
-    { label: "Experts Totaux", value: "2,341", trend: "+12%", icon: Users },
-    { label: "Profils Qualifiés", value: "1,897", trend: "+8%", icon: CheckCircle },
-    { label: "Taux de Réponse", value: "78%", trend: "+5%", icon: TrendingUp },
-    { label: "Missions en Cours", value: "45", trend: "+15%", icon: Clock }
+  const dashboardStats = [
+    { 
+      label: "Experts Totaux", 
+      value: stats?.totalExperts?.toLocaleString() || "0", 
+      trend: "+12%", 
+      icon: Users 
+    },
+    { 
+      label: "Profils Qualifiés", 
+      value: stats?.qualifiedProfiles?.toLocaleString() || "0", 
+      trend: "+8%", 
+      icon: CheckCircle 
+    },
+    { 
+      label: "Taux de Réponse", 
+      value: `${stats?.responseRate || 0}%`, 
+      trend: "+5%", 
+      icon: TrendingUp 
+    },
+    { 
+      label: "Missions en Cours", 
+      value: stats?.activeMissions?.toString() || "0", 
+      trend: "+15%", 
+      icon: Clock 
+    }
   ];
 
   return (
@@ -72,10 +98,13 @@ export default function Dashboard() {
       {/* Hero Section */}
       <div className="relative bg-gradient-hero text-white overflow-hidden">
         <div className="absolute inset-0 bg-black/20" />
-        <div 
-          className="absolute inset-0 bg-cover bg-center opacity-10"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        />
+          <img 
+            src={heroImage}
+            alt="QUALI-RH EXPERTS - Plateforme de gestion d'experts"
+            className="absolute inset-0 w-full h-full object-cover opacity-10"
+            loading="lazy"
+            decoding="async"
+          />
         <div className="relative max-w-7xl mx-auto px-6 py-20">
           <div className="max-w-4xl">
             <h1 className="text-5xl font-bold mb-6">
@@ -101,25 +130,31 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {stats.map((stat, index) => (
-            <Card key={index} className="shadow-card border-0 bg-gradient-card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-                    <p className="text-sm text-success flex items-center mt-1">
-                      <TrendingUp className="h-4 w-4 mr-1" />
-                      {stat.trend}
-                    </p>
+          {statsLoading ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-32" />
+            ))
+          ) : (
+            dashboardStats.map((stat, index) => (
+              <Card key={index} className="shadow-card border-0 bg-gradient-card">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{stat.label}</p>
+                      <p className="text-3xl font-bold text-foreground">{stat.value}</p>
+                      <p className="text-sm text-success flex items-center mt-1">
+                        <TrendingUp className="h-4 w-4 mr-1" />
+                        {stat.trend}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-primary/10 rounded-full">
+                      <stat.icon className="h-6 w-6 text-primary" />
+                    </div>
                   </div>
-                  <div className="p-3 bg-primary/10 rounded-full">
-                    <stat.icon className="h-6 w-6 text-primary" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* Module Cards */}
