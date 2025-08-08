@@ -27,6 +27,7 @@ export default function ImportProfiles() {
   const [showMapping, setShowMapping] = useState(false);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [hasHeaders, setHasHeaders] = useState(true);
+  const [fileReader, setFileReader] = useState<FileReader | null>(null);
 
   // Définition des champs de la base de données
   const dbFields: DbField[] = [
@@ -55,6 +56,7 @@ export default function ImportProfiles() {
 
   const readExcelFile = (file: File) => {
     const reader = new FileReader();
+    setFileReader(reader); // Stocker la référence pour pouvoir annuler
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
@@ -78,13 +80,27 @@ export default function ImportProfiles() {
           }
         }
         setIsProcessing(false);
+        setFileReader(null); // Nettoyer la référence
         console.log('Données Excel chargées:', jsonData.length, 'lignes');
       } catch (error) {
         console.error('Erreur lors de la lecture du fichier:', error);
         setIsProcessing(false);
+        setFileReader(null); // Nettoyer la référence
       }
     };
     reader.readAsArrayBuffer(file);
+  };
+
+  const handleCancelProcessing = () => {
+    if (fileReader) {
+      fileReader.abort(); // Annuler la lecture du fichier
+      setIsProcessing(false);
+      setFileReader(null);
+      setSelectedFile(null);
+      setExcelData([]);
+      setHeaders([]);
+      console.log('Traitement du fichier annulé');
+    }
   };
 
   const handleColumnMappingClick = () => {
@@ -187,7 +203,14 @@ export default function ImportProfiles() {
                 {isProcessing ? (
                   <div className="flex flex-col items-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                    <p className="text-muted-foreground">Traitement du fichier en cours...</p>
+                    <p className="text-muted-foreground mb-4">Traitement du fichier en cours...</p>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleCancelProcessing}
+                      className="text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      Annuler
+                    </Button>
                   </div>
                 ) : selectedFile ? (
                   <div className="flex flex-col items-center">
