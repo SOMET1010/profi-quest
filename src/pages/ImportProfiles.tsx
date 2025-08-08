@@ -1,8 +1,25 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { FileSpreadsheet, Upload, Database, Download } from "lucide-react";
+import { useRef, useState } from "react";
 
 export default function ImportProfiles() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      console.log('Fichier sélectionné:', file.name);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
@@ -25,13 +42,20 @@ export default function ImportProfiles() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <Input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileChange}
+                className="hidden"
+              />
               <div className="border-2 border-dashed border-border rounded-lg p-8 text-center bg-muted/20">
                 <FileSpreadsheet className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground mb-4">
-                  Glissez-déposez votre fichier Excel ici ou cliquez pour sélectionner
+                  {selectedFile ? `Fichier sélectionné: ${selectedFile.name}` : "Glissez-déposez votre fichier Excel ici ou cliquez pour sélectionner"}
                 </p>
-                <Button className="bg-gradient-primary">
-                  Sélectionner fichier
+                <Button className="bg-gradient-primary" onClick={handleFileSelect}>
+                  {selectedFile ? "Changer de fichier" : "Sélectionner fichier"}
                 </Button>
               </div>
               <div className="text-sm text-muted-foreground">
