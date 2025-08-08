@@ -2,9 +2,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FileSpreadsheet, Upload, Database, Download, CheckCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { FileSpreadsheet, Upload, Database, Download, CheckCircle, ArrowRight, AlertCircle } from "lucide-react";
 import { useRef, useState } from "react";
 import * as XLSX from 'xlsx';
+
+// Types pour le mapping
+interface DbField {
+  key: string;
+  label: string;
+  required: boolean;
+  type: string;
+}
 
 export default function ImportProfiles() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -12,6 +22,19 @@ export default function ImportProfiles() {
   const [excelData, setExcelData] = useState<any[][]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showMapping, setShowMapping] = useState(false);
+  const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
+
+  // Définition des champs de la base de données
+  const dbFields: DbField[] = [
+    { key: 'first_name', label: 'Prénom', required: true, type: 'text' },
+    { key: 'last_name', label: 'Nom', required: true, type: 'text' },
+    { key: 'email', label: 'Email', required: true, type: 'email' },
+    { key: 'phone', label: 'Téléphone', required: false, type: 'text' },
+    { key: 'location', label: 'Localisation', required: false, type: 'text' },
+    { key: 'experience_years', label: 'Années d\'expérience', required: false, type: 'number' },
+    { key: 'hourly_rate', label: 'Taux horaire', required: false, type: 'number' },
+  ];
 
   const handleFileSelect = () => {
     fileInputRef.current?.click();
@@ -50,6 +73,56 @@ export default function ImportProfiles() {
     };
     reader.readAsArrayBuffer(file);
   };
+
+  const handleColumnMappingClick = () => {
+    setShowMapping(true);
+  };
+
+  const handleMappingChange = (excelColumn: string, dbField: string) => {
+    setColumnMapping(prev => ({
+      ...prev,
+      [excelColumn]: dbField === 'ignore' ? '' : dbField
+    }));
+  };
+
+  const getRequiredFieldsStatus = () => {
+    const requiredFields = dbFields.filter(field => field.required);
+    const mappedRequiredFields = requiredFields.filter(field => 
+      Object.values(columnMapping).includes(field.key)
+    );
+    return {
+      total: requiredFields.length,
+      mapped: mappedRequiredFields.length,
+      missing: requiredFields.filter(field => 
+        !Object.values(columnMapping).includes(field.key)
+      )
+    };
+  };
+
+  const transformDataForImport = () => {
+    return excelData.map(row => {
+      const transformedRow: any = {};
+      
+      headers.forEach((header, index) => {
+        const dbField = columnMapping[header];
+        if (dbField) {
+          let value = row[index];
+          
+          // Transformation basée sur le type de champ
+          const fieldConfig = dbFields.find(f => f.key === dbField);
+          if (fieldConfig?.type === 'number' && value) {
+            value = parseFloat(value) || 0;
+          }
+          
+          transformedRow[dbField] = value;
+        }
+      });
+      
+      return transformedRow;
+    });
+  };
+
+  const requiredStatus = getRequiredFieldsStatus();
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -200,13 +273,126 @@ export default function ImportProfiles() {
                 </p>
               )}
               <div className="mt-6 flex gap-4">
-                <Button className="bg-gradient-primary">
+                <Button 
+                  className="bg-gradient-primary"
+                  disabled={!showMapping || requiredStatus.mapped < requiredStatus.total}
+                >
                   Importer ces données
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleColumnMappingClick}>
                   Mapper les colonnes
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Interface de mapping des colonnes */}
+        {showMapping && excelData.length > 0 && (
+          <Card className="mt-8 shadow-card border-0 bg-gradient-card">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center">
+                <ArrowRight className="mr-3 h-6 w-6 text-primary" />
+                Mapping des Colonnes
+              </CardTitle>
+              <CardDescription>
+                Associez les colonnes de votre fichier Excel aux champs de la base de données
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Statut des champs requis */}
+              <div className="mb-6 p-4 rounded-lg bg-muted/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="h-5 w-5 text-orange-500" />
+                  <span className="font-medium">Champs requis: {requiredStatus.mapped}/{requiredStatus.total}</span>
+                </div>
+                {requiredStatus.missing.length > 0 && (
+                  <div className="text-sm text-muted-foreground">
+                    Champs manquants: {requiredStatus.missing.map(field => field.label).join(', ')}
+                  </div>
+                )}
+              </div>
+
+              {/* Mapping des colonnes */}
+              <div className="grid gap-4">
+                {headers.map((header, index) => (
+                  <div key={index} className="flex items-center gap-4 p-4 border border-border rounded-lg">
+                    <div className="flex-1">
+                      <div className="font-medium text-foreground">{header}</div>
+                      <div className="text-sm text-muted-foreground">
+                        Exemple: {excelData[0]?.[index] || 'Pas de données'}
+                      </div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Select
+                        value={columnMapping[header] || 'ignore'}
+                        onValueChange={(value) => handleMappingChange(header, value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Sélectionner un champ" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ignore">
+                            <span className="text-muted-foreground">Ignorer cette colonne</span>
+                          </SelectItem>
+                          {dbFields.map((field) => (
+                            <SelectItem key={field.key} value={field.key}>
+                              <div className="flex items-center gap-2">
+                                <span>{field.label}</span>
+                                {field.required && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    Requis
+                                  </Badge>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Aperçu du mapping */}
+              {Object.keys(columnMapping).length > 0 && (
+                <div className="mt-6">
+                  <h4 className="font-medium mb-4">Aperçu des données transformées</h4>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          {dbFields
+                            .filter(field => Object.values(columnMapping).includes(field.key))
+                            .map((field) => (
+                              <TableHead key={field.key} className="whitespace-nowrap">
+                                {field.label}
+                                {field.required && <span className="text-red-500 ml-1">*</span>}
+                              </TableHead>
+                            ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {transformDataForImport().slice(0, 3).map((row, rowIndex) => (
+                          <TableRow key={rowIndex}>
+                            {dbFields
+                              .filter(field => Object.values(columnMapping).includes(field.key))
+                              .map((field) => (
+                                <TableCell key={field.key} className="whitespace-nowrap">
+                                  {row[field.key] || '-'}
+                                </TableCell>
+                              ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Aperçu des 3 premières lignes transformées
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
