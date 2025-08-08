@@ -323,28 +323,41 @@ export default function ImportProfiles() {
                 )}
               </div>
 
-              {/* Mapping des colonnes */}
-              <div className="grid gap-4">
+              {/* Mapping des colonnes - Interface simplifiée */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4 p-4 bg-muted/10 rounded-lg border font-medium">
+                  <div>Colonne Excel</div>
+                  <div className="text-center">→</div>
+                  <div>Champ Base de Données</div>
+                </div>
+                
                 {headers.map((header, index) => (
-                  <div key={index} className="flex items-center gap-4 p-4 border border-border rounded-lg">
-                    <div className="flex-1">
+                  <div key={index} className="grid grid-cols-3 gap-4 p-4 border border-border rounded-lg items-center">
+                    {/* Colonne Excel */}
+                    <div>
                       <div className="font-medium text-foreground">{header}</div>
-                      <div className="text-sm text-muted-foreground">
-                        Exemple: {excelData[0]?.[index] || 'Pas de données'}
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Ex: {excelData[0]?.[index] || 'Aucune donnée'}
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
+                    
+                    {/* Flèche */}
+                    <div className="text-center">
+                      <ArrowRight className="h-5 w-5 text-muted-foreground mx-auto" />
+                    </div>
+                    
+                    {/* Champ Base de Données */}
+                    <div>
                       <Select
                         value={columnMapping[header] || 'ignore'}
                         onValueChange={(value) => handleMappingChange(header, value)}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Sélectionner un champ" />
+                          <SelectValue placeholder="Choisir le champ" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="ignore">
-                            <span className="text-muted-foreground">Ignorer cette colonne</span>
+                            <span className="text-muted-foreground">❌ Ignorer cette colonne</span>
                           </SelectItem>
                           {dbFields.map((field) => (
                             <SelectItem key={field.key} value={field.key}>
@@ -352,7 +365,7 @@ export default function ImportProfiles() {
                                 <span>{field.label}</span>
                                 {field.required && (
                                   <Badge variant="destructive" className="text-xs">
-                                    Requis
+                                    Obligatoire
                                   </Badge>
                                 )}
                               </div>
@@ -360,6 +373,11 @@ export default function ImportProfiles() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {columnMapping[header] && columnMapping[header] !== 'ignore' && (
+                        <div className="text-xs text-green-600 mt-1">
+                          ✅ Mappé vers: {dbFields.find(f => f.key === columnMapping[header])?.label}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
