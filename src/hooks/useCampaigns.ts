@@ -17,30 +17,9 @@ export const useCampaigns = (limit = 20) => {
     queryKey: ["campaigns", limit],
     queryFn: async (): Promise<Campaign[]> => {
       try {
-        // Mock data for now since database schema is not yet created
-        // This will be replaced with real queries once the migration is approved
-        return [
-          {
-            id: "1",
-            title: "Experts en IA pour mission gouvernementale",
-            description: "Recherche d'experts en intelligence artificielle",
-            status: "active",
-            budget: 50000,
-            deadline: "2024-12-31",
-            created_at: "2024-01-15T10:00:00Z",
-            updated_at: "2024-01-15T10:00:00Z",
-          },
-          {
-            id: "2", 
-            title: "Consultants en cybersécurité",
-            description: "Mission de sécurisation des systèmes",
-            status: "active",
-            budget: 75000,
-            deadline: "2024-11-30",
-            created_at: "2024-01-10T09:00:00Z",
-            updated_at: "2024-01-10T09:00:00Z",
-          },
-        ];
+        // Since migration hasn't been run yet, return empty array
+        // This will be replaced with real queries once tables exist
+        return [];
       } catch (error) {
         console.error("Error fetching campaigns:", error);
         return [];

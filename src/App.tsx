@@ -8,6 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const ImportProfiles = lazy(() => import("./pages/ImportProfiles"));
+const Database = lazy(() => import("./pages/Database"));
+const Campaigns = lazy(() => import("./pages/Campaigns"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const Qualification = lazy(() => import("./pages/Qualification"));
 
 // Optimized React Query configuration
 const queryClient = new QueryClient({
@@ -51,6 +56,11 @@ const App = () => (
         <Suspense fallback={<PageFallback />}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/import" element={<ImportProfiles />} />
+            <Route path="/database" element={<Database />} />
+            <Route path="/campaigns" element={<Campaigns />} />
+            <Route path="/qualification" element={<Qualification />} />
+            <Route path="/analytics" element={<Analytics />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

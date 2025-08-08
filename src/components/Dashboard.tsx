@@ -18,8 +18,10 @@ import {
 import heroImage from "@/assets/hero-image.jpg";
 import { useStats } from "@/hooks/useStats";
 import { useCampaigns } from "@/hooks/useCampaigns";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useStats();
   const { data: campaigns, isLoading: campaignsLoading } = useCampaigns(10);
 
@@ -30,7 +32,8 @@ export default function Dashboard() {
       description: "Importez vos CVthèques Excel et mappez automatiquement les colonnes",
       status: "active",
       count: `${stats?.totalExperts || 0} profils`,
-      color: "bg-gradient-primary"
+      color: "bg-gradient-primary",
+      path: "/import"
     },
     {
       icon: Users,
@@ -38,7 +41,8 @@ export default function Dashboard() {
       description: "Consultez et gérez tous vos profils d'experts qualifiés",
       status: "active", 
       count: `${stats?.qualifiedProfiles || 0} validés`,
-      color: "bg-gradient-primary"
+      color: "bg-gradient-primary",
+      path: "/database"
     },
     {
       icon: UserCheck,
@@ -46,7 +50,8 @@ export default function Dashboard() {
       description: "Envoyez des formulaires personnalisés pour enrichir les profils",
       status: "pending",
       count: `${stats?.pendingApplications || 0} en cours`,
-      color: "bg-warning"
+      color: "bg-warning",
+      path: "/qualification"
     },
     {
       icon: Megaphone,
@@ -54,7 +59,8 @@ export default function Dashboard() {
       description: "Lancez des campagnes ciblées et gérez les réponses",
       status: "active",
       count: `${stats?.activeCampaigns || 0} actifs`,
-      color: "bg-success"
+      color: "bg-success",
+      path: "/campaigns"
     },
     {
       icon: BarChart3,
@@ -62,7 +68,8 @@ export default function Dashboard() {
       description: "Analysez vos données et générez des rapports détaillés",
       status: "active",
       count: `${campaigns?.length || 0} rapports`,
-      color: "bg-info"
+      color: "bg-info",
+      path: "/analytics"
     }
   ];
 
@@ -114,11 +121,21 @@ export default function Dashboard() {
               Plateforme complète de gestion, qualification et mobilisation d'experts thématiques
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-white/90">
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="bg-white text-primary hover:bg-white/90"
+                onClick={() => navigate('/database')}
+              >
                 <Plus className="mr-2 h-5 w-5" />
                 Nouveau Profil
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-white text-white hover:bg-white/10"
+                onClick={() => navigate('/database')}
+              >
                 <Search className="mr-2 h-5 w-5" />
                 Rechercher Expert
               </Button>
@@ -169,7 +186,11 @@ export default function Dashboard() {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
             {modules.map((module, index) => (
-              <Card key={index} className="shadow-card border-0 bg-gradient-card hover:shadow-elegant transition-all duration-300 group cursor-pointer">
+              <Card 
+                key={index} 
+                className="shadow-card border-0 bg-gradient-card hover:shadow-elegant transition-all duration-300 group cursor-pointer"
+                onClick={() => navigate(module.path)}
+              >
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <div className={`p-3 rounded-full ${module.color} text-white`}>
@@ -212,21 +233,35 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button className="h-16 text-left justify-start bg-gradient-primary hover:opacity-90" size="lg">
+              <Button 
+                className="h-16 text-left justify-start bg-gradient-primary hover:opacity-90" 
+                size="lg"
+                onClick={() => navigate('/import')}
+              >
                 <FileSpreadsheet className="mr-3 h-6 w-6" />
                 <div>
                   <div className="font-semibold">Importer Excel</div>
                   <div className="text-sm opacity-90">Nouvelle CVthèque</div>
                 </div>
               </Button>
-              <Button variant="outline" className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" size="lg">
+              <Button 
+                variant="outline" 
+                className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" 
+                size="lg"
+                onClick={() => navigate('/campaigns')}
+              >
                 <Megaphone className="mr-3 h-6 w-6" />
                 <div>
                   <div className="font-semibold">Nouvel Appel</div>
                   <div className="text-sm">Lancer campagne</div>
                 </div>
               </Button>
-              <Button variant="outline" className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" size="lg">
+              <Button 
+                variant="outline" 
+                className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" 
+                size="lg"
+                onClick={() => navigate('/analytics')}
+              >
                 <BarChart3 className="mr-3 h-6 w-6" />
                 <div>
                   <div className="font-semibold">Rapport</div>

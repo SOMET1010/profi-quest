@@ -17,17 +17,29 @@ export const useStats = () => {
     queryKey: ["dashboard-stats"],
     queryFn: async (): Promise<DashboardStats> => {
       try {
-        // Mock data for now since database schema is not yet created
-        // This will be replaced with real queries once the migration is approved
+        // Since migration hasn't been run yet, return default values
+        // These will be replaced with real queries once tables exist
+        const totalExperts = 0;
+        const qualifiedProfiles = 0;
+        const totalCampaigns = 0;
+        const activeCampaigns = 0;
+        const pendingApplications = 0;
+        const completedApplications = 0;
+
+        // Calculate response rate (simplified: applications vs profiles contacted)
+        const responseRate = totalExperts && pendingApplications 
+          ? Math.round((pendingApplications / totalExperts) * 100)
+          : 0;
+
         return {
-          totalExperts: 2341,
-          qualifiedProfiles: 1897,
-          responseRate: 78,
-          activeMissions: 45,
-          totalCampaigns: 23,
-          activeCampaigns: 23,
-          pendingApplications: 156,
-          completedApplications: 312,
+          totalExperts: totalExperts || 0,
+          qualifiedProfiles: qualifiedProfiles || 0,
+          responseRate,
+          activeMissions: activeCampaigns || 0,
+          totalCampaigns: totalCampaigns || 0,
+          activeCampaigns: activeCampaigns || 0,
+          pendingApplications: pendingApplications || 0,
+          completedApplications: completedApplications || 0,
         };
       } catch (error) {
         console.error("Error fetching stats:", error);
