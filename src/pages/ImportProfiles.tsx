@@ -75,7 +75,10 @@ export default function ImportProfiles() {
   };
 
   const handleColumnMappingClick = () => {
+    console.log('Bouton mapper les colonnes cliqué');
+    console.log('showMapping actuel:', showMapping);
     setShowMapping(true);
+    console.log('showMapping après setState:', true);
   };
 
   const handleMappingChange = (excelColumn: string, dbField: string) => {
@@ -123,6 +126,9 @@ export default function ImportProfiles() {
   };
 
   const requiredStatus = getRequiredFieldsStatus();
+
+  // Debug logs
+  console.log('Current state - showMapping:', showMapping, 'excelData.length:', excelData.length);
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -279,7 +285,11 @@ export default function ImportProfiles() {
                 >
                   Importer ces données
                 </Button>
-                <Button variant="outline" onClick={handleColumnMappingClick}>
+                <Button 
+                  variant="outline" 
+                  onClick={handleColumnMappingClick}
+                  className="bg-secondary hover:bg-secondary/80"
+                >
                   Mapper les colonnes
                 </Button>
               </div>
