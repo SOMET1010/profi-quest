@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { FileSpreadsheet, Upload, Database, Download, CheckCircle, ArrowRight, AlertCircle } from "lucide-react";
 import { useRef, useState } from "react";
 import * as XLSX from 'xlsx';
@@ -24,6 +26,7 @@ export default function ImportProfiles() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showMapping, setShowMapping] = useState(false);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
+  const [hasHeaders, setHasHeaders] = useState(true);
 
   // Définition des champs de la base de données
   const dbFields: DbField[] = [
@@ -61,8 +64,18 @@ export default function ImportProfiles() {
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         
         if (jsonData.length > 0) {
-          setHeaders(jsonData[0] as string[]);
-          setExcelData(jsonData.slice(1) as any[][]);
+          // Si on considère qu'il y a des en-têtes, on prend la première ligne comme en-têtes
+          // Sinon, on génère des en-têtes automatiques (Colonne A, B, C, etc.)
+          if (hasHeaders && jsonData.length > 1) {
+            setHeaders(jsonData[0] as string[]);
+            setExcelData(jsonData.slice(1) as any[][]);
+          } else {
+            // Générer des en-têtes automatiques basés sur le nombre de colonnes
+            const firstRow = jsonData[0] as any[];
+            const autoHeaders = firstRow.map((_, index) => `Colonne ${String.fromCharCode(65 + index)}`);
+            setHeaders(autoHeaders);
+            setExcelData(jsonData as any[][]);
+          }
         }
         setIsProcessing(false);
         console.log('Données Excel chargées:', jsonData.length, 'lignes');
@@ -79,6 +92,14 @@ export default function ImportProfiles() {
     console.log('showMapping actuel:', showMapping);
     setShowMapping(true);
     console.log('showMapping après setState:', true);
+  };
+
+  const handleHeadersChange = (checked: boolean) => {
+    setHasHeaders(checked);
+    // Retraiter le fichier si il existe
+    if (selectedFile) {
+      readExcelFile(selectedFile);
+    }
   };
 
   const handleMappingChange = (excelColumn: string, dbField: string) => {
@@ -103,7 +124,10 @@ export default function ImportProfiles() {
   };
 
   const transformDataForImport = () => {
-    return excelData.map(row => {
+    // Utiliser les bonnes données selon s'il y a des en-têtes ou non
+    const dataToTransform = hasHeaders ? excelData : excelData;
+    
+    return dataToTransform.map(row => {
       const transformedRow: any = {};
       
       headers.forEach((header, index) => {
@@ -310,6 +334,26 @@ export default function ImportProfiles() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Configuration en-têtes */}
+              <div className="mb-6 p-4 rounded-lg bg-muted/10 border">
+                <div className="flex items-center space-x-3">
+                  <Checkbox 
+                    id="has-headers" 
+                    checked={hasHeaders}
+                    onCheckedChange={(checked) => handleHeadersChange(checked as boolean)}
+                  />
+                  <Label htmlFor="has-headers" className="text-sm font-medium">
+                    La première ligne contient les en-têtes de colonnes
+                  </Label>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {hasHeaders 
+                    ? "Les noms des colonnes seront pris de la première ligne" 
+                    : "Des noms de colonnes automatiques seront générés (Colonne A, B, C...)"
+                  }
+                </p>
+              </div>
+
               {/* Statut des champs requis */}
               <div className="mb-6 p-4 rounded-lg bg-muted/20">
                 <div className="flex items-center gap-2 mb-2">
@@ -337,7 +381,7 @@ export default function ImportProfiles() {
                     <div>
                       <div className="font-medium text-foreground">{header}</div>
                       <div className="text-sm text-muted-foreground mt-1">
-                        Ex: {excelData[0]?.[index] || 'Aucune donnée'}
+                        Ex: {(hasHeaders ? excelData[0] : excelData[0])?.[index] || 'Aucune donnée'}
                       </div>
                     </div>
                     
