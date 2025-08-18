@@ -13,17 +13,25 @@ import {
   Filter,
   TrendingUp,
   Clock,
-  CheckCircle
+  CheckCircle,
+  LogOut,
+  UserCircle
 } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import { useStats } from "@/hooks/useStats";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const { data: stats, isLoading: statsLoading } = useStats();
   const { data: campaigns, isLoading: campaignsLoading } = useCampaigns(10);
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   const modules = [
     {
@@ -113,31 +121,46 @@ export default function Dashboard() {
             decoding="async"
           />
         <div className="relative max-w-7xl mx-auto px-6 py-20">
-          <div className="max-w-4xl">
-            <h1 className="text-5xl font-bold mb-6">
-              QUALI-RH EXPERTS
-            </h1>
-            <p className="text-xl mb-8 text-blue-100">
-              Plateforme complète de gestion, qualification et mobilisation d'experts thématiques
-            </p>
-            <div className="flex flex-wrap gap-4">
+          <div className="flex justify-between items-start">
+            <div className="max-w-4xl">
+              <h1 className="text-5xl font-bold mb-6">
+                QUALI-RH EXPERTS
+              </h1>
+              <p className="text-xl mb-8 text-blue-100">
+                Plateforme complète de gestion, qualification et mobilisation d'experts thématiques
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Button 
+                  size="lg" 
+                  variant="secondary" 
+                  className="bg-white text-primary hover:bg-white/90"
+                  onClick={() => navigate('/candidature')}
+                >
+                  <UserCircle className="mr-2 h-5 w-5" />
+                  Commencer ma candidature
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-white text-white hover:bg-white/10"
+                  onClick={() => navigate('/database')}
+                >
+                  <Search className="mr-2 h-5 w-5" />
+                  Rechercher Expert
+                </Button>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-blue-100 mb-4">Connecté en tant que:</p>
+              <p className="text-white font-semibold mb-4">{user?.email}</p>
               <Button 
-                size="lg" 
-                variant="secondary" 
-                className="bg-white text-primary hover:bg-white/90"
-                onClick={() => navigate('/database')}
-              >
-                <Plus className="mr-2 h-5 w-5" />
-                Nouveau Profil
-              </Button>
-              <Button 
-                size="lg" 
                 variant="outline" 
+                size="sm"
                 className="border-white text-white hover:bg-white/10"
-                onClick={() => navigate('/database')}
+                onClick={handleSignOut}
               >
-                <Search className="mr-2 h-5 w-5" />
-                Rechercher Expert
+                <LogOut className="mr-2 h-4 w-4" />
+                Se déconnecter
               </Button>
             </div>
           </div>

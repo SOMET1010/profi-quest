@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -13,6 +15,8 @@ const Database = lazy(() => import("./pages/Database"));
 const Campaigns = lazy(() => import("./pages/Campaigns"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Qualification = lazy(() => import("./pages/Qualification"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Candidature = lazy(() => import("./pages/Candidature"));
 
 // Optimized React Query configuration
 const queryClient = new QueryClient({
@@ -47,26 +51,58 @@ const PageFallback = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner />
-      <BrowserRouter future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true,
-      }}>
-        <Suspense fallback={<PageFallback />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/import" element={<ImportProfiles />} />
-            <Route path="/database" element={<Database />} />
-            <Route path="/campaigns" element={<Campaigns />} />
-            <Route path="/qualification" element={<Qualification />} />
-            <Route path="/analytics" element={<Analytics />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Sonner />
+        <BrowserRouter future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}>
+          <Suspense fallback={<PageFallback />}>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              } />
+              <Route path="/candidature" element={
+                <ProtectedRoute>
+                  <Candidature />
+                </ProtectedRoute>
+              } />
+              <Route path="/import" element={
+                <ProtectedRoute>
+                  <ImportProfiles />
+                </ProtectedRoute>
+              } />
+              <Route path="/database" element={
+                <ProtectedRoute>
+                  <Database />
+                </ProtectedRoute>
+              } />
+              <Route path="/campaigns" element={
+                <ProtectedRoute>
+                  <Campaigns />
+                </ProtectedRoute>
+              } />
+              <Route path="/qualification" element={
+                <ProtectedRoute>
+                  <Qualification />
+                </ProtectedRoute>
+              } />
+              <Route path="/analytics" element={
+                <ProtectedRoute>
+                  <Analytics />
+                </ProtectedRoute>
+              } />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

@@ -16,8 +16,13 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          application_status: string | null
+          application_submitted_at: string | null
           available: boolean | null
+          behavioral_skills: string | null
+          certificates_url: string | null
           created_at: string
+          diplomas_url: string | null
           email: string
           experience_years: number | null
           first_name: string
@@ -25,13 +30,20 @@ export type Database = {
           id: string
           last_name: string
           location: string | null
+          motivation_letter_url: string | null
           phone: string | null
+          technical_skills: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          application_status?: string | null
+          application_submitted_at?: string | null
           available?: boolean | null
+          behavioral_skills?: string | null
+          certificates_url?: string | null
           created_at?: string
+          diplomas_url?: string | null
           email: string
           experience_years?: number | null
           first_name: string
@@ -39,13 +51,20 @@ export type Database = {
           id?: string
           last_name: string
           location?: string | null
+          motivation_letter_url?: string | null
           phone?: string | null
+          technical_skills?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          application_status?: string | null
+          application_submitted_at?: string | null
           available?: boolean | null
+          behavioral_skills?: string | null
+          certificates_url?: string | null
           created_at?: string
+          diplomas_url?: string | null
           email?: string
           experience_years?: number | null
           first_name?: string
@@ -53,7 +72,9 @@ export type Database = {
           id?: string
           last_name?: string
           location?: string | null
+          motivation_letter_url?: string | null
           phone?: string | null
+          technical_skills?: string | null
           updated_at?: string
           user_id?: string | null
         }
