@@ -27,31 +27,23 @@ export default function RoleManagement() {
   
   const queryClient = useQueryClient();
 
-  // Fetch all users with their roles
+  // Fetch all users with their roles using Edge Function
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['users-with-roles'],
     queryFn: async (): Promise<UserWithRole[]> => {
-      // First get all users from auth
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      if (authError) throw authError;
+      try {
+        const { data, error } = await supabase.functions.invoke('get-users-with-roles');
+        
+        if (error) {
+          console.error('Error fetching users with roles:', error);
+          return [];
+        }
 
-      // Then get all roles
-      const { data: roles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role, created_at');
-      if (rolesError) throw rolesError;
-
-      // Combine the data
-      return authUsers.users.map(user => {
-        const userRole = roles.find(r => r.user_id === user.id);
-        return {
-          id: user.id,
-          email: user.email || '',
-          created_at: user.created_at,
-          role: userRole?.role as AppRole,
-          role_created_at: userRole?.created_at
-        };
-      });
+        return data || [];
+      } catch (error) {
+        console.error('Error fetching users with roles:', error);
+        return [];
+      }
     },
     staleTime: 30000, // 30 seconds
   });
