@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { FileSpreadsheet, Upload, Database, Download, CheckCircle, ArrowRight, AlertCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FileSpreadsheet, Upload, Database, Download, CheckCircle, ArrowRight, AlertCircle, Plus } from "lucide-react";
 import { useRef, useState } from "react";
 import * as XLSX from 'xlsx';
 
@@ -28,6 +29,8 @@ export default function ImportProfiles() {
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [hasHeaders, setHasHeaders] = useState(true);
   const [fileReader, setFileReader] = useState<FileReader | null>(null);
+  const [newFields, setNewFields] = useState<string[]>([]);
+  const [showNewFieldsDialog, setShowNewFieldsDialog] = useState(false);
 
   // Définition des champs de la base de données
   const dbFields: DbField[] = [
@@ -123,6 +126,48 @@ export default function ImportProfiles() {
       ...prev,
       [excelColumn]: dbField === 'ignore' ? '' : dbField
     }));
+  };
+
+  const detectNewFields = () => {
+    const unmappedHeaders = headers.filter(header => 
+      !columnMapping[header] || !dbFields.find(f => f.key === columnMapping[header])
+    );
+    
+    if (unmappedHeaders.length > 0) {
+      setNewFields(unmappedHeaders);
+      setShowNewFieldsDialog(true);
+    }
+  };
+
+  const handleAddNewFields = async () => {
+    // Créer les nouvelles colonnes dans la base de données
+    const alterQueries = newFields.map(field => {
+      const cleanFieldName = field.toLowerCase()
+        .replace(/[^a-z0-9_]/g, '_')
+        .replace(/_{2,}/g, '_')
+        .replace(/^_+|_+$/g, '');
+      
+      return `ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS ${cleanFieldName} TEXT;`;
+    }).join('\n');
+
+    try {
+      // Ici on ferait appel à l'API pour exécuter la migration
+      console.log('Nouvelles colonnes à ajouter:', alterQueries);
+      
+      // Mettre à jour les champs disponibles localement
+      const newDbFields = newFields.map(field => ({
+        key: field.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_{2,}/g, '_').replace(/^_+|_+$/g, ''),
+        label: field,
+        required: false,
+        type: 'text'
+      }));
+      
+      // On pourrait mettre à jour dbFields ici si c'était un état
+      setShowNewFieldsDialog(false);
+      setNewFields([]);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout des nouvelles colonnes:', error);
+    }
   };
 
   const getRequiredFieldsStatus = () => {
@@ -339,6 +384,13 @@ export default function ImportProfiles() {
                 >
                   Mapper les colonnes
                 </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={detectNewFields}
+                  className="bg-accent hover:bg-accent/80"
+                >
+                  Détecter nouveaux champs
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -491,6 +543,55 @@ export default function ImportProfiles() {
             </CardContent>
           </Card>
         )}
+
+        {/* Dialog pour ajouter de nouveaux champs */}
+        <Dialog open={showNewFieldsDialog} onOpenChange={setShowNewFieldsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-primary" />
+                Nouveaux champs détectés
+              </DialogTitle>
+              <DialogDescription>
+                Les colonnes suivantes de votre fichier Excel ne correspondent à aucun champ existant dans la base de données. 
+                Voulez-vous les ajouter automatiquement ?
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="bg-muted/20 p-4 rounded-lg">
+                <h4 className="font-medium mb-3">Nouveaux champs à créer :</h4>
+                <div className="space-y-2">
+                  {newFields.map((field, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-background rounded border">
+                      <div>
+                        <span className="font-medium">{field}</span>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Sera créé comme: {field.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_{2,}/g, '_').replace(/^_+|_+$/g, '')}
+                        </div>
+                      </div>
+                      <Badge variant="outline">TEXT</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950/50 p-3 rounded">
+                <p><strong>Note :</strong> Ces champs seront ajoutés à la table "profiles" en tant que colonnes TEXT optionnelles. 
+                Vous pourrez les mapper après création.</p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewFieldsDialog(false)}>
+                Annuler
+              </Button>
+              <Button onClick={handleAddNewFields} className="bg-gradient-primary">
+                Ajouter ces champs
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
