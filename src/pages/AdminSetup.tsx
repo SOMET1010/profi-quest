@@ -25,7 +25,34 @@ export default function AdminSetup() {
     setIsLoading(true);
     
     try {
-      // Insert admin role directly
+      // First check if any admin already exists
+      const { data: existingAdmins, error: checkError } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('role', 'admin')
+        .limit(1);
+
+      if (checkError) {
+        console.error('Error checking existing admins:', checkError);
+        toast({
+          title: "Erreur",
+          description: "Erreur lors de la vérification des administrateurs existants",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // If admins already exist, don't allow self-assignment
+      if (existingAdmins && existingAdmins.length > 0) {
+        toast({
+          title: "Accès refusé",
+          description: "Un administrateur existe déjà. Contactez l'administrateur pour obtenir des permissions.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Insert admin role only if no admin exists
       const { error } = await supabase
         .from('user_roles')
         .insert({
