@@ -6,6 +6,7 @@ import { lazy, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AppLayout } from "@/components/AppLayout";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
