@@ -70,7 +70,7 @@ export default function Campaigns() {
                 <Euro className="h-8 w-8 text-warning mr-3" />
                 <div>
                   <p className="text-2xl font-bold">
-                    {campaigns?.reduce((sum, c) => sum + (c.budget || 0), 0).toLocaleString()}€
+                    {campaigns?.reduce((sum, c) => sum + (c.budget || 0), 0).toLocaleString()} CFA
                   </p>
                   <p className="text-sm text-muted-foreground">Budget Total</p>
                 </div>
@@ -130,7 +130,7 @@ export default function Campaigns() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                           <div className="flex items-center">
                             <Euro className="h-4 w-4 mr-2 text-muted-foreground" />
-                            <span>Budget: {campaign.budget?.toLocaleString()}€</span>
+                            <span>Budget: {campaign.budget?.toLocaleString()} CFA</span>
                           </div>
                           <div className="flex items-center">
                             <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
