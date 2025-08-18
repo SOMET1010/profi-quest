@@ -89,16 +89,16 @@ const Auth = () => {
       <div className="w-full max-w-lg">
         {/* ANSUT Logo et branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white shadow-elegant mb-4">
+          <div className="inline-flex items-center justify-center w-32 h-20 rounded-lg bg-white shadow-elegant mb-4 p-4">
             <img 
-              src="/src/assets/ansut-logo.png" 
-              alt="ANSUT Logo" 
-              className="w-12 h-12 object-contain"
+              src="/lovable-uploads/eebdb674-f051-486d-bb7c-acc1f973cde9.png" 
+              alt="ANSUT - Agence Nationale du Service Universel des Télécommunications-TIC" 
+              className="w-full h-full object-contain"
             />
           </div>
-          <h1 className="text-3xl font-bold text-primary mb-2">QUALI-RH EXPERTS</h1>
+          <h1 className="text-2xl font-bold text-primary mb-2">QUALI-RH EXPERTS</h1>
           <p className="text-muted-foreground text-sm">
-            Agence Nationale du Service Universel des Télécommunications - TIC
+            Plateforme de gestion d'experts thématiques
           </p>
         </div>
 

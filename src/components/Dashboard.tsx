@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { lazy, Suspense } from "react";
 import heroImage from "@/assets/hero-image.jpg";
-import ansutLogo from "@/assets/ansut-logo.png";
+import ansutLogo from "/lovable-uploads/eebdb674-f051-486d-bb7c-acc1f973cde9.png";
 import { useStats } from "@/hooks/useStats";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useNavigate } from "react-router-dom";
