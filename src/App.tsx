@@ -18,6 +18,7 @@ const Analytics = lazy(() => import("./pages/Analytics"));
 const Qualification = lazy(() => import("./pages/Qualification"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Candidature = lazy(() => import("./pages/Candidature"));
+const RoleManagement = lazy(() => import("./pages/RoleManagement"));
 
 // Optimized React Query configuration
 const queryClient = new QueryClient({
@@ -95,6 +96,11 @@ const App = () => (
               <Route path="/analytics" element={
                 <ProtectedRoute>
                   <AppLayout><Analytics /></AppLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/roles" element={
+                <ProtectedRoute>
+                  <AppLayout><RoleManagement /></AppLayout>
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

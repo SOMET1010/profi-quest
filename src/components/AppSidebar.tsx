@@ -8,7 +8,8 @@ import {
   BarChart3,
   UserCircle,
   LogOut,
-  Menu
+  Menu,
+  Shield
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -93,6 +94,15 @@ const analyticsNavigation: NavigationItem[] = [
     title: "Analytics",
     url: "/analytics",
     icon: BarChart3,
+    requiredRole: "admin"
+  }
+];
+
+const adminNavigation: NavigationItem[] = [
+  {
+    title: "Gestion des Rôles",
+    url: "/admin/roles",
+    icon: Shield,
     requiredRole: "admin"
   }
 ];
@@ -249,6 +259,30 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {filterNavigation(analyticsNavigation).map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink 
+                        to={item.url} 
+                        className={getNavClassName(item.url)}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {/* Administration Navigation */}
+        {filterNavigation(adminNavigation).length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filterNavigation(adminNavigation).map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <NavLink 
