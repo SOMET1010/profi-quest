@@ -16,7 +16,7 @@ import {
   UserCircle
 } from "lucide-react";
 import { lazy, Suspense } from "react";
-import heroImage from "@/assets/ansut-hero-background.jpg";
+import heroImage from "@/assets/ansut-cote-divoire-background.jpg";
 import { useStats } from "@/hooks/useStats";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useNavigate } from "react-router-dom";

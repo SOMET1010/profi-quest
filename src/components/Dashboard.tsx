@@ -18,7 +18,7 @@ import {
   UserCircle
 } from "lucide-react";
 import { lazy, Suspense } from "react";
-import heroImage from "@/assets/ansut-hero-background.jpg";
+import heroImage from "@/assets/ansut-cote-divoire-background.jpg";
 import ansutLogo from "/lovable-uploads/eebdb674-f051-486d-bb7c-acc1f973cde9.png";
 import { useStats } from "@/hooks/useStats";
 import { useCampaigns } from "@/hooks/useCampaigns";
