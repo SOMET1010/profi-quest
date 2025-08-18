@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const { user } = useAuth();
-  const { hasRole: isExpert, userRole, isLoading } = useHasRole('expert');
+  const { userRole, isLoading } = useHasRole('expert'); // Get role info
   
   // Show loading while checking role
   if (isLoading) {
@@ -24,6 +24,12 @@ const Index = () => {
     return <ExpertProfile />;
   }
   
+  // Admins and HR managers can access the Dashboard
+  if (userRole === 'admin' || userRole === 'hr_manager') {
+    return <Dashboard />;
+  }
+  
+  // Fallback for any other case
   return (
     <RoleGuard requiredRole="hr_manager">
       <Dashboard />
