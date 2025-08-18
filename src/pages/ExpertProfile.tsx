@@ -24,36 +24,18 @@ export default function ExpertProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-hero text-white">
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <img 
-                src={ansutLogo} 
-                alt="ANSUT" 
-                className="h-12 w-24 object-contain bg-white/10 backdrop-blur-sm rounded p-2"
-              />
-              <div>
-                <h1 className="text-2xl font-bold">Espace Expert</h1>
-                <p className="text-white/80">QUALI-RH EXPERTS</p>
-              </div>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="border-white text-white hover:bg-white/10"
-              onClick={handleSignOut}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Se déconnecter
-            </Button>
+    <div className="p-6 space-y-8">
+      {/* Welcome Header - Compact version for sidebar layout */}
+      <div className="bg-gradient-hero text-white rounded-xl p-8">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Espace Expert</h1>
+            <p className="text-white/90">QUALI-RH EXPERTS - ANSUT</p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Welcome Message */}
         <Card className="mb-8">
           <CardHeader>

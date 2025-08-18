@@ -63,37 +63,37 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={
                 <ProtectedRoute>
-                  <Index />
+                  <AppLayout><Index /></AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/candidature" element={
                 <ProtectedRoute>
-                  <Candidature />
+                  <AppLayout><Candidature /></AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/import" element={
                 <ProtectedRoute>
-                  <ImportProfiles />
+                  <AppLayout><ImportProfiles /></AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/database" element={
                 <ProtectedRoute>
-                  <Database />
+                  <AppLayout><Database /></AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/campaigns" element={
                 <ProtectedRoute>
-                  <Campaigns />
+                  <AppLayout><Campaigns /></AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/qualification" element={
                 <ProtectedRoute>
-                  <Qualification />
+                  <AppLayout><Qualification /></AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/analytics" element={
                 <ProtectedRoute>
-                  <Analytics />
+                  <AppLayout><Analytics /></AppLayout>
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

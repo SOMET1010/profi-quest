@@ -1,4 +1,4 @@
-import Dashboard from "@/components/Dashboard";
+import SimpleDashboard from "@/components/SimpleDashboard";
 import { RoleGuard } from "@/components/RoleGuard";
 import { useHasRole } from "@/hooks/useRole";
 import ExpertProfile from "@/pages/ExpertProfile";
@@ -26,13 +26,13 @@ const Index = () => {
   
   // Admins and HR managers can access the Dashboard
   if (userRole === 'admin' || userRole === 'hr_manager') {
-    return <Dashboard />;
+    return <SimpleDashboard />;
   }
   
   // Fallback for any other case
   return (
     <RoleGuard requiredRole="hr_manager">
-      <Dashboard />
+      <SimpleDashboard />
     </RoleGuard>
   );
 };
