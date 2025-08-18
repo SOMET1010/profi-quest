@@ -25,6 +25,7 @@ import { useCampaigns } from "@/hooks/useCampaigns";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigationPreload } from "@/hooks/useNavigationPreload";
+import { useHasRole } from "@/hooks/useRole";
 
 // Lazy load the charts component
 const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
@@ -32,6 +33,8 @@ const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { hasRole: isAdmin, userRole } = useHasRole('admin');
+  const { hasRole: isHrManager } = useHasRole('hr_manager');
   const { data: stats, isLoading: statsLoading } = useStats();
   const { data: campaigns, isLoading: campaignsLoading } = useCampaigns(10);
   const {
@@ -47,7 +50,7 @@ export default function Dashboard() {
     await signOut();
   };
 
-  const modules = [
+  const allModules = [
     {
       icon: FileSpreadsheet,
       title: "Import de Profils",
@@ -55,7 +58,8 @@ export default function Dashboard() {
       status: "active",
       count: `${stats?.totalExperts || 0} profils`,
       color: "bg-gradient-primary",
-      path: "/import"
+      path: "/import",
+      requiredRole: "admin" as const
     },
     {
       icon: Users,
@@ -64,7 +68,8 @@ export default function Dashboard() {
       status: "active", 
       count: `${stats?.qualifiedProfiles || 0} validés`,
       color: "bg-gradient-primary",
-      path: "/database"
+      path: "/database",
+      requiredRole: "hr_manager" as const
     },
     {
       icon: UserCheck,
@@ -73,7 +78,8 @@ export default function Dashboard() {
       status: "pending",
       count: `${stats?.pendingApplications || 0} en cours`,
       color: "bg-warning",
-      path: "/qualification"
+      path: "/qualification",
+      requiredRole: "hr_manager" as const
     },
     {
       icon: Megaphone,
@@ -82,7 +88,8 @@ export default function Dashboard() {
       status: "active",
       count: `${stats?.activeCampaigns || 0} actifs`,
       color: "bg-success",
-      path: "/campaigns"
+      path: "/campaigns",
+      requiredRole: "hr_manager" as const
     },
     {
       icon: BarChart3,
@@ -91,9 +98,18 @@ export default function Dashboard() {
       status: "active",
       count: `${campaigns?.length || 0} rapports`,
       color: "bg-info",
-      path: "/analytics"
+      path: "/analytics",
+      requiredRole: "admin" as const
     }
   ];
+
+  // Filter modules based on user role
+  const modules = allModules.filter(module => {
+    const roleHierarchy = { admin: 3, hr_manager: 2, expert: 1 };
+    const userRoleLevel = userRole ? roleHierarchy[userRole] : 0;
+    const requiredRoleLevel = roleHierarchy[module.requiredRole];
+    return userRoleLevel >= requiredRoleLevel;
+  });
 
   const dashboardStats = [
     { 
