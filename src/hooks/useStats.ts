@@ -17,29 +17,41 @@ export const useStats = () => {
     queryKey: ["dashboard-stats"],
     queryFn: async (): Promise<DashboardStats> => {
       try {
-        // Since migration hasn't been run yet, return default values
-        // These will be replaced with real queries once tables exist
-        const totalExperts = 0;
-        const qualifiedProfiles = 0;
+        // Optimized Supabase queries using existing profiles table
+        // Query specific columns only, avoid select("*")
+        const [profilesResult, qualifiedProfilesResult] = await Promise.all([
+          supabase
+            .from('profiles')
+            .select('id', { count: 'exact', head: true }),
+          supabase
+            .from('profiles')
+            .select('id', { count: 'exact', head: true })
+            .eq('available', true)
+        ]);
+
+        const totalExperts = profilesResult.count || 0;
+        const qualifiedProfiles = qualifiedProfilesResult.count || 0;
+        
+        // Mock values for features not yet implemented in database
         const totalCampaigns = 0;
         const activeCampaigns = 0;
         const pendingApplications = 0;
         const completedApplications = 0;
 
-        // Calculate response rate (simplified: applications vs profiles contacted)
+        // Calculate response rate
         const responseRate = totalExperts && pendingApplications 
           ? Math.round((pendingApplications / totalExperts) * 100)
           : 0;
 
         return {
-          totalExperts: totalExperts || 0,
-          qualifiedProfiles: qualifiedProfiles || 0,
+          totalExperts,
+          qualifiedProfiles,
           responseRate,
-          activeMissions: activeCampaigns || 0,
-          totalCampaigns: totalCampaigns || 0,
-          activeCampaigns: activeCampaigns || 0,
-          pendingApplications: pendingApplications || 0,
-          completedApplications: completedApplications || 0,
+          activeMissions: activeCampaigns,
+          totalCampaigns,
+          activeCampaigns,
+          pendingApplications,
+          completedApplications,
         };
       } catch (error) {
         console.error("Error fetching stats:", error);

@@ -17,17 +17,31 @@ import {
   LogOut,
   UserCircle
 } from "lucide-react";
+import { lazy, Suspense } from "react";
 import heroImage from "@/assets/hero-image.jpg";
+import ansutLogo from "@/assets/ansut-logo.png";
 import { useStats } from "@/hooks/useStats";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigationPreload } from "@/hooks/useNavigationPreload";
+
+// Lazy load the charts component
+const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { data: stats, isLoading: statsLoading } = useStats();
   const { data: campaigns, isLoading: campaignsLoading } = useCampaigns(10);
+  const {
+    preloadImportProfiles,
+    preloadDatabase,
+    preloadCampaigns,
+    preloadAnalytics,
+    preloadQualification,
+    preloadCandidature,
+  } = useNavigationPreload();
 
   const handleSignOut = async () => {
     await signOut();
@@ -123,10 +137,24 @@ export default function Dashboard() {
         <div className="relative max-w-7xl mx-auto px-6 py-20">
           <div className="flex justify-between items-start">
             <div className="max-w-4xl">
-              <h1 className="text-5xl font-bold mb-6">
-                QUALI-RH EXPERTS
-              </h1>
-              <p className="text-xl mb-8 text-blue-100">
+              <div className="flex items-center mb-6">
+                <img 
+                  src={ansutLogo} 
+                  alt="ANSUT Logo" 
+                  className="h-16 w-32 mr-6 object-contain"
+                  loading="eager"
+                  decoding="async"
+                  width="128"
+                  height="64"
+                />
+                <div>
+                  <h1 className="text-5xl font-bold">
+                    QUALI-RH EXPERTS
+                  </h1>
+                  <p className="text-lg text-primary-glow/90 mt-2">Powered by ANSUT</p>
+                </div>
+              </div>
+              <p className="text-xl mb-8 text-white/90">
                 Plateforme complète de gestion, qualification et mobilisation d'experts thématiques
               </p>
               <div className="flex flex-wrap gap-4">
@@ -135,6 +163,8 @@ export default function Dashboard() {
                   variant="secondary" 
                   className="bg-white text-primary hover:bg-white/90"
                   onClick={() => navigate('/candidature')}
+                  onMouseEnter={preloadCandidature}
+                  onFocus={preloadCandidature}
                 >
                   <UserCircle className="mr-2 h-5 w-5" />
                   Commencer ma candidature
@@ -144,6 +174,8 @@ export default function Dashboard() {
                   variant="outline" 
                   className="border-white text-white hover:bg-white/10"
                   onClick={() => navigate('/database')}
+                  onMouseEnter={preloadDatabase}
+                  onFocus={preloadDatabase}
                 >
                   <Search className="mr-2 h-5 w-5" />
                   Rechercher Expert
@@ -151,7 +183,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-blue-100 mb-4">Connecté en tant que:</p>
+              <p className="text-white/80 mb-4">Connecté en tant que:</p>
               <p className="text-white font-semibold mb-4">{user?.email}</p>
               <Button 
                 variant="outline" 
@@ -169,7 +201,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 content-[auto] contain-intrinsic-size-[1px_160px]">
           {statsLoading ? (
             Array.from({ length: 4 }).map((_, index) => (
               <Skeleton key={index} className="h-32" />
@@ -197,6 +229,16 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* Charts Section - Lazy Loaded */}
+        <Suspense fallback={
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+            <Skeleton className="h-80" />
+            <Skeleton className="h-80" />
+          </div>
+        }>
+          <DashboardCharts isLoading={statsLoading} stats={stats} />
+        </Suspense>
+
         {/* Module Cards */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-8">
@@ -213,6 +255,13 @@ export default function Dashboard() {
                 key={index} 
                 className="shadow-card border-0 bg-gradient-card hover:shadow-elegant transition-all duration-300 group cursor-pointer"
                 onClick={() => navigate(module.path)}
+                onMouseEnter={() => {
+                  if (module.path === '/import') preloadImportProfiles();
+                  if (module.path === '/database') preloadDatabase();
+                  if (module.path === '/campaigns') preloadCampaigns();
+                  if (module.path === '/analytics') preloadAnalytics();
+                  if (module.path === '/qualification') preloadQualification();
+                }}
               >
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
@@ -260,6 +309,8 @@ export default function Dashboard() {
                 className="h-16 text-left justify-start bg-gradient-primary hover:opacity-90" 
                 size="lg"
                 onClick={() => navigate('/import')}
+                onMouseEnter={preloadImportProfiles}
+                onFocus={preloadImportProfiles}
               >
                 <FileSpreadsheet className="mr-3 h-6 w-6" />
                 <div>
@@ -272,6 +323,8 @@ export default function Dashboard() {
                 className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" 
                 size="lg"
                 onClick={() => navigate('/campaigns')}
+                onMouseEnter={preloadCampaigns}
+                onFocus={preloadCampaigns}
               >
                 <Megaphone className="mr-3 h-6 w-6" />
                 <div>
@@ -284,6 +337,8 @@ export default function Dashboard() {
                 className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" 
                 size="lg"
                 onClick={() => navigate('/analytics')}
+                onMouseEnter={preloadAnalytics}
+                onFocus={preloadAnalytics}
               >
                 <BarChart3 className="mr-3 h-6 w-6" />
                 <div>

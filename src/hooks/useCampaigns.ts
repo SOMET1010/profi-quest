@@ -17,8 +17,8 @@ export const useCampaigns = (limit = 20) => {
     queryKey: ["campaigns", limit],
     queryFn: async (): Promise<Campaign[]> => {
       try {
-        // Since migration hasn't been run yet, return empty array
-        // This will be replaced with real queries once tables exist
+        // Return empty array until campaigns table is implemented
+        // This will be replaced with real queries once the campaigns table exists
         return [];
       } catch (error) {
         console.error("Error fetching campaigns:", error);
