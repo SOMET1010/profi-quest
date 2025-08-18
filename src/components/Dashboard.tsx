@@ -138,20 +138,27 @@ export default function Dashboard() {
           <div className="flex justify-between items-start">
             <div className="max-w-4xl">
               <div className="flex items-center mb-6">
-                <img 
-                  src={ansutLogo} 
-                  alt="ANSUT Logo" 
-                  className="h-16 w-32 mr-6 object-contain"
-                  loading="eager"
-                  decoding="async"
-                  width="128"
-                  height="64"
-                />
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mr-6">
+                  <img 
+                    src={ansutLogo} 
+                    alt="ANSUT - Agence Nationale du Service Universel des Télécommunications" 
+                    className="h-20 w-40 object-contain"
+                    loading="eager"
+                    decoding="async"
+                    width="160"
+                    height="80"
+                  />
+                </div>
                 <div>
-                  <h1 className="text-5xl font-bold">
+                  <h1 className="text-5xl font-bold font-sans">
                     QUALI-RH EXPERTS
                   </h1>
-                  <p className="text-lg text-primary-glow/90 mt-2">Powered by ANSUT</p>
+                  <p className="text-lg text-white/90 mt-2 font-medium">
+                    Agence Nationale du Service Universel des Télécommunications
+                  </p>
+                  <p className="text-sm text-primary-glow/80 uppercase tracking-wide">
+                    Plateforme de Gestion d'Experts
+                  </p>
                 </div>
               </div>
               <p className="text-xl mb-8 text-white/90">
