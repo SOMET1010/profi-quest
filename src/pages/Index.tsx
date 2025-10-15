@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const { user } = useAuth();
-  const { userRole, isLoading } = useHasRole('expert'); // Get role info
+  const { userRole, isLoading } = useHasRole('READONLY'); // Get role info
   
   // Show loading while checking role
   if (isLoading) {
@@ -19,19 +19,19 @@ const Index = () => {
     return <AdminSetup />;
   }
   
-  // Redirect experts to their dedicated interface
-  if (userRole === 'expert') {
+  // Redirect AGENT to their dedicated interface
+  if (userRole === 'AGENT') {
     return <ExpertProfile />;
   }
   
-  // Admins and HR managers can access the Dashboard
-  if (userRole === 'admin' || userRole === 'hr_manager') {
+  // DG and FINANCE can access the Dashboard
+  if (userRole === 'DG' || userRole === 'FINANCE' || userRole === 'READONLY') {
     return <SimpleDashboard />;
   }
   
   // Fallback for any other case
   return (
-    <RoleGuard requiredRole="hr_manager">
+    <RoleGuard requiredRole="FINANCE">
       <SimpleDashboard />
     </RoleGuard>
   );

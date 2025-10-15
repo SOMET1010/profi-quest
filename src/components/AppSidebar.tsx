@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useHasRole } from "@/hooks/useRole";
+import { useHasRole, AppRole } from "@/hooks/useRole";
 import {
   Sidebar,
   SidebarContent,
@@ -41,7 +41,7 @@ interface NavigationItem {
   title: string;
   url: string;
   icon: React.ComponentType<{ className?: string }>;
-  requiredRole?: "admin" | "hr_manager" | "expert";
+  requiredRole?: AppRole;
 }
 
 const mainNavigation: NavigationItem[] = [
@@ -49,7 +49,7 @@ const mainNavigation: NavigationItem[] = [
     title: "Tableau de Bord",
     url: "/",
     icon: Home,
-    requiredRole: "hr_manager"
+    requiredRole: "FINANCE"
   }
 ];
 
@@ -58,19 +58,19 @@ const managementNavigation: NavigationItem[] = [
     title: "Import de Profils",
     url: "/import",
     icon: FileSpreadsheet,
-    requiredRole: "admin"
+    requiredRole: "DG"
   },
   {
     title: "Base de Données",
     url: "/database",
     icon: Users,
-    requiredRole: "hr_manager"
+    requiredRole: "FINANCE"
   },
   {
     title: "Qualification",
     url: "/qualification",
     icon: UserCheck,
-    requiredRole: "hr_manager"
+    requiredRole: "FINANCE"
   }
 ];
 
@@ -79,13 +79,13 @@ const campaignsNavigation: NavigationItem[] = [
     title: "Appels à Candidatures",
     url: "/campaigns",
     icon: Megaphone,
-    requiredRole: "hr_manager"
+    requiredRole: "FINANCE"
   },
   {
     title: "Candidature",
     url: "/candidature",
     icon: UserCircle,
-    requiredRole: "expert"
+    requiredRole: "AGENT"
   }
 ];
 
@@ -94,7 +94,7 @@ const analyticsNavigation: NavigationItem[] = [
     title: "Analytics",
     url: "/analytics",
     icon: BarChart3,
-    requiredRole: "admin"
+    requiredRole: "DG"
   }
 ];
 
@@ -103,7 +103,7 @@ const adminNavigation: NavigationItem[] = [
     title: "Gestion des Rôles",
     url: "/admin/roles",
     icon: Shield,
-    requiredRole: "admin"
+    requiredRole: "DG"
   }
 ];
 
@@ -112,16 +112,16 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { userRole } = useHasRole('expert');
+  const { userRole } = useHasRole('READONLY');
   
   const currentPath = location.pathname;
   
-  const hasPermission = (requiredRole?: string) => {
+  const hasPermission = (requiredRole?: AppRole) => {
     if (!requiredRole || !userRole) return false;
     
-    const roleHierarchy = { admin: 3, hr_manager: 2, expert: 1 };
+    const roleHierarchy = { DG: 4, FINANCE: 3, AGENT: 2, READONLY: 1 };
     const userRoleLevel = roleHierarchy[userRole];
-    const requiredRoleLevel = roleHierarchy[requiredRole as keyof typeof roleHierarchy];
+    const requiredRoleLevel = roleHierarchy[requiredRole];
     
     return userRoleLevel >= requiredRoleLevel;
   };
@@ -147,9 +147,10 @@ export function AppSidebar() {
 
   const getRoleLabel = () => {
     const roleLabels = {
-      admin: "Administrateur",
-      hr_manager: "Gestionnaire RH", 
-      expert: "Expert"
+      DG: "Directeur Général",
+      FINANCE: "Finance", 
+      AGENT: "Agent",
+      READONLY: "Lecture seule"
     };
     return userRole ? roleLabels[userRole] : "Utilisateur";
   };

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export type AppRole = 'admin' | 'hr_manager' | 'expert';
+export type AppRole = 'DG' | 'FINANCE' | 'AGENT' | 'READONLY';
 
 export function useRole() {
   const { user } = useAuth();
@@ -38,8 +38,8 @@ export function useHasRole(requiredRole: AppRole) {
   const hasRole = () => {
     if (!userRole) return false;
     
-    // Role hierarchy: admin > hr_manager > expert
-    const roleHierarchy = { admin: 3, hr_manager: 2, expert: 1 };
+    // Role hierarchy: DG > FINANCE > AGENT > READONLY
+    const roleHierarchy = { DG: 4, FINANCE: 3, AGENT: 2, READONLY: 1 };
     return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
   };
 

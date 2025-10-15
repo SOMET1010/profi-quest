@@ -28,7 +28,7 @@ const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
 
 export default function SimpleDashboard() {
   const navigate = useNavigate();
-  const { userRole } = useHasRole('admin');
+  const { userRole } = useHasRole('DG');
   const { data: stats, isLoading: statsLoading } = useStats();
   const { data: campaigns, isLoading: campaignsLoading } = useCampaigns(10);
   const {
@@ -49,7 +49,7 @@ export default function SimpleDashboard() {
       count: `${stats?.totalExperts || 0} profils`,
       color: "bg-gradient-primary",
       path: "/import",
-      requiredRole: "admin" as const
+      requiredRole: "DG" as const
     },
     {
       icon: Users,
@@ -59,7 +59,7 @@ export default function SimpleDashboard() {
       count: `${stats?.qualifiedProfiles || 0} validés`,
       color: "bg-gradient-primary",
       path: "/database",
-      requiredRole: "hr_manager" as const
+      requiredRole: "FINANCE" as const
     },
     {
       icon: UserCheck,
@@ -69,7 +69,7 @@ export default function SimpleDashboard() {
       count: `${stats?.pendingApplications || 0} en cours`,
       color: "bg-warning",
       path: "/qualification",
-      requiredRole: "hr_manager" as const
+      requiredRole: "FINANCE" as const
     },
     {
       icon: Megaphone,
@@ -79,7 +79,7 @@ export default function SimpleDashboard() {
       count: `${stats?.activeCampaigns || 0} actifs`,
       color: "bg-success",
       path: "/campaigns",
-      requiredRole: "hr_manager" as const
+      requiredRole: "FINANCE" as const
     },
     {
       icon: BarChart3,
@@ -89,13 +89,13 @@ export default function SimpleDashboard() {
       count: `${campaigns?.length || 0} rapports`,
       color: "bg-info",
       path: "/analytics",
-      requiredRole: "admin" as const
+      requiredRole: "DG" as const
     }
   ];
 
   // Filter modules based on user role
   const modules = allModules.filter(module => {
-    const roleHierarchy = { admin: 3, hr_manager: 2, expert: 1 };
+    const roleHierarchy = { DG: 4, FINANCE: 3, AGENT: 2, READONLY: 1 };
     const userRoleLevel = userRole ? roleHierarchy[userRole] : 0;
     const requiredRoleLevel = roleHierarchy[module.requiredRole];
     return userRoleLevel >= requiredRoleLevel;

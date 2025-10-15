@@ -60,11 +60,11 @@ export default function RoleManagement() {
     mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
       const { error } = await supabase
         .from('user_roles')
-        .upsert({ 
+        .upsert([{ 
           user_id: userId, 
-          role,
+          role: role as any, // Type will be regenerated after migration
           updated_at: new Date().toISOString()
-        }, {
+        }], {
           onConflict: 'user_id'
         });
       if (error) throw error;
@@ -113,9 +113,10 @@ export default function RoleManagement() {
 
   const roleStats = {
     total: users.length,
-    admin: users.filter(u => u.role === 'admin').length,
-    hr_manager: users.filter(u => u.role === 'hr_manager').length,
-    expert: users.filter(u => u.role === 'expert').length,
+    dg: users.filter(u => u.role === 'DG').length,
+    finance: users.filter(u => u.role === 'FINANCE').length,
+    agent: users.filter(u => u.role === 'AGENT').length,
+    readonly: users.filter(u => u.role === 'READONLY').length,
     noRole: users.filter(u => !u.role).length,
   };
 
@@ -149,31 +150,31 @@ export default function RoleManagement() {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Administrateurs</CardTitle>
+              <CardTitle className="text-sm font-medium">DG</CardTitle>
               <Shield className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-destructive">{roleStats.admin}</div>
+              <div className="text-2xl font-bold text-destructive">{roleStats.dg}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Gestionnaires RH</CardTitle>
+              <CardTitle className="text-sm font-medium">Finance</CardTitle>
               <UserPlus className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{roleStats.hr_manager}</div>
+              <div className="text-2xl font-bold text-primary">{roleStats.finance}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Experts</CardTitle>
+              <CardTitle className="text-sm font-medium">Agents</CardTitle>
               <Users className="h-4 w-4 text-accent-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-accent-foreground">{roleStats.expert}</div>
+              <div className="text-2xl font-bold text-accent-foreground">{roleStats.agent}</div>
             </CardContent>
           </Card>
 
@@ -215,22 +216,22 @@ export default function RoleManagement() {
                   Tous
                 </Button>
                 <Button
-                  variant={roleFilter === "admin" ? "default" : "outline"}
-                  onClick={() => setRoleFilter("admin")}
+                  variant={roleFilter === "DG" ? "default" : "outline"}
+                  onClick={() => setRoleFilter("DG")}
                 >
-                  Admin
+                  DG
                 </Button>
                 <Button
-                  variant={roleFilter === "hr_manager" ? "default" : "outline"}
-                  onClick={() => setRoleFilter("hr_manager")}
+                  variant={roleFilter === "FINANCE" ? "default" : "outline"}
+                  onClick={() => setRoleFilter("FINANCE")}
                 >
-                  RH
+                  Finance
                 </Button>
                 <Button
-                  variant={roleFilter === "expert" ? "default" : "outline"}
-                  onClick={() => setRoleFilter("expert")}
+                  variant={roleFilter === "AGENT" ? "default" : "outline"}
+                  onClick={() => setRoleFilter("AGENT")}
                 >
-                  Expert
+                  Agent
                 </Button>
               </div>
             </div>

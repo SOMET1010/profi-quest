@@ -38,23 +38,23 @@ const roles: Array<{
   color: string;
 }> = [
   {
-    value: 'admin',
-    label: 'Administrateur',
+    value: 'DG',
+    label: 'Directeur Général',
     description: 'Accès complet à toutes les fonctionnalités, gestion des utilisateurs et paramètres système.',
     icon: Shield,
     color: 'text-destructive',
   },
   {
-    value: 'hr_manager',
-    label: 'Gestionnaire RH',
-    description: 'Gestion des profils, campagnes de recrutement, qualification des candidats.',
+    value: 'FINANCE',
+    label: 'Finance',
+    description: 'Gestion des chèques, factures, fournisseurs et finances.',
     icon: Users,
     color: 'text-primary',
   },
   {
-    value: 'expert',
-    label: 'Expert',
-    description: 'Accès aux candidatures, soumission de profil et consultation des opportunités.',
+    value: 'AGENT',
+    label: 'Agent',
+    description: 'Accès aux opérations courantes et consultation des données.',
     icon: User,
     color: 'text-accent-foreground',
   },

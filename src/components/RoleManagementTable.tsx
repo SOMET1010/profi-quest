@@ -30,12 +30,14 @@ interface RoleManagementTableProps {
 
 const getRoleIcon = (role?: AppRole) => {
   switch (role) {
-    case 'admin':
+    case 'DG':
       return <Shield className="h-4 w-4 text-destructive" />;
-    case 'hr_manager':
+    case 'FINANCE':
       return <Users className="h-4 w-4 text-primary" />;
-    case 'expert':
+    case 'AGENT':
       return <User className="h-4 w-4 text-accent-foreground" />;
+    case 'READONLY':
+      return <User className="h-4 w-4 text-muted-foreground" />;
     default:
       return <User className="h-4 w-4 text-muted-foreground" />;
   }
@@ -43,12 +45,14 @@ const getRoleIcon = (role?: AppRole) => {
 
 const getRoleBadge = (role?: AppRole) => {
   switch (role) {
-    case 'admin':
-      return <Badge variant="destructive">Administrateur</Badge>;
-    case 'hr_manager':
-      return <Badge variant="default">Gestionnaire RH</Badge>;
-    case 'expert':
-      return <Badge variant="secondary">Expert</Badge>;
+    case 'DG':
+      return <Badge variant="destructive">DG</Badge>;
+    case 'FINANCE':
+      return <Badge variant="default">Finance</Badge>;
+    case 'AGENT':
+      return <Badge variant="secondary">Agent</Badge>;
+    case 'READONLY':
+      return <Badge variant="outline">Lecture seule</Badge>;
     default:
       return <Badge variant="outline">Aucun rôle</Badge>;
   }

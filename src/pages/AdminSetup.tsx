@@ -29,7 +29,7 @@ export default function AdminSetup() {
       const { data: existingAdmins, error: checkError } = await supabase
         .from('user_roles')
         .select('id')
-        .eq('role', 'admin')
+        .eq('role', 'DG' as any)
         .limit(1);
 
       if (checkError) {
@@ -55,10 +55,10 @@ export default function AdminSetup() {
       // Insert admin role only if no admin exists
       const { error } = await supabase
         .from('user_roles')
-        .insert({
+        .insert([{
           user_id: user.id,
-          role: 'admin'
-        });
+          role: 'DG' as any // Type will be regenerated after migration
+        }]);
 
       if (error) {
         console.error('Error assigning admin role:', error);
