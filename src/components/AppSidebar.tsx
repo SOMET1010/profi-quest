@@ -156,16 +156,18 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-sidebar-border">
+    <Sidebar className="border-r border-sidebar-border" aria-label="Navigation principale">
       {/* Header */}
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-3">
           <img 
             src={ansutLogo} 
-            alt="ANSUT" 
+            alt="Logo ANSUT - Agence Nationale du Service Universel des Télécommunications" 
             className={`object-contain transition-all duration-200 ${
               collapsed ? "h-8 w-8" : "h-10 w-20"
             }`}
+            width={collapsed ? 32 : 80}
+            height={collapsed ? 32 : 40}
           />
           {!collapsed && (
             <div className="flex flex-col">
@@ -189,15 +191,17 @@ export function AppSidebar() {
               <SidebarMenu>
                 {filterNavigation(mainNavigation).map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        className={getNavClassName(item.url)}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
+                     <SidebarMenuButton asChild>
+                       <NavLink 
+                         to={item.url} 
+                         className={getNavClassName(item.url)}
+                         aria-label={item.title}
+                         aria-current={currentPath === item.url ? 'page' : undefined}
+                       >
+                         <item.icon className="h-4 w-4" aria-hidden="true" />
+                         {!collapsed && <span>{item.title}</span>}
+                       </NavLink>
+                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -213,87 +217,95 @@ export function AppSidebar() {
               <SidebarMenu>
                 {filterNavigation(managementNavigation).map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        className={getNavClassName(item.url)}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+                     <SidebarMenuButton asChild>
+                       <NavLink 
+                         to={item.url} 
+                         className={getNavClassName(item.url)}
+                         aria-label={item.title}
+                         aria-current={currentPath === item.url ? 'page' : undefined}
+                       >
+                         <item.icon className="h-4 w-4" aria-hidden="true" />
+                         {!collapsed && <span>{item.title}</span>}
+                       </NavLink>
+                     </SidebarMenuButton>
+                   </SidebarMenuItem>
+                 ))}
+               </SidebarMenu>
+             </SidebarGroupContent>
+           </SidebarGroup>
+         )}
 
-        {/* Campaigns Navigation */}
-        {filterNavigation(campaignsNavigation).length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Campagnes</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {filterNavigation(campaignsNavigation).map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        className={getNavClassName(item.url)}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+         {/* Campaigns Navigation */}
+         {filterNavigation(campaignsNavigation).length > 0 && (
+           <SidebarGroup>
+             <SidebarGroupLabel>Campagnes</SidebarGroupLabel>
+             <SidebarGroupContent>
+               <SidebarMenu>
+                 {filterNavigation(campaignsNavigation).map((item) => (
+                   <SidebarMenuItem key={item.title}>
+                     <SidebarMenuButton asChild>
+                       <NavLink 
+                         to={item.url} 
+                         className={getNavClassName(item.url)}
+                         aria-label={item.title}
+                         aria-current={currentPath === item.url ? 'page' : undefined}
+                       >
+                         <item.icon className="h-4 w-4" aria-hidden="true" />
+                         {!collapsed && <span>{item.title}</span>}
+                       </NavLink>
+                     </SidebarMenuButton>
+                   </SidebarMenuItem>
+                 ))}
+               </SidebarMenu>
+             </SidebarGroupContent>
+           </SidebarGroup>
+         )}
 
-        {/* Analytics Navigation */}
-        {filterNavigation(analyticsNavigation).length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Analytics</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {filterNavigation(analyticsNavigation).map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        className={getNavClassName(item.url)}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+         {/* Analytics Navigation */}
+         {filterNavigation(analyticsNavigation).length > 0 && (
+           <SidebarGroup>
+             <SidebarGroupLabel>Analytics</SidebarGroupLabel>
+             <SidebarGroupContent>
+               <SidebarMenu>
+                 {filterNavigation(analyticsNavigation).map((item) => (
+                   <SidebarMenuItem key={item.title}>
+                     <SidebarMenuButton asChild>
+                       <NavLink 
+                         to={item.url} 
+                         className={getNavClassName(item.url)}
+                         aria-label={item.title}
+                         aria-current={currentPath === item.url ? 'page' : undefined}
+                       >
+                         <item.icon className="h-4 w-4" aria-hidden="true" />
+                         {!collapsed && <span>{item.title}</span>}
+                       </NavLink>
+                     </SidebarMenuButton>
+                   </SidebarMenuItem>
+                 ))}
+               </SidebarMenu>
+             </SidebarGroupContent>
+           </SidebarGroup>
+         )}
 
-        {/* Administration Navigation */}
-        {filterNavigation(adminNavigation).length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Administration</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {filterNavigation(adminNavigation).map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        className={getNavClassName(item.url)}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
+         {/* Administration Navigation */}
+         {filterNavigation(adminNavigation).length > 0 && (
+           <SidebarGroup>
+             <SidebarGroupLabel>Administration</SidebarGroupLabel>
+             <SidebarGroupContent>
+               <SidebarMenu>
+                 {filterNavigation(adminNavigation).map((item) => (
+                   <SidebarMenuItem key={item.title}>
+                     <SidebarMenuButton asChild>
+                       <NavLink 
+                         to={item.url} 
+                         className={getNavClassName(item.url)}
+                         aria-label={item.title}
+                         aria-current={currentPath === item.url ? 'page' : undefined}
+                       >
+                         <item.icon className="h-4 w-4" aria-hidden="true" />
+                         {!collapsed && <span>{item.title}</span>}
+                       </NavLink>
+                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -307,39 +319,40 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton 
-                  size="lg" 
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-                      {getUserInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {!collapsed && (
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">
-                        {user?.email?.split('@')[0]}
-                      </span>
-                      <span className="truncate text-xs text-sidebar-foreground/70">
-                        {getRoleLabel()}
-                      </span>
-                    </div>
-                  )}
-                  <ChevronUp className="ml-auto h-4 w-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
+               <DropdownMenuTrigger asChild>
+                 <SidebarMenuButton 
+                   size="lg" 
+                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                   aria-label={`Menu utilisateur: ${user?.email?.split('@')[0]} - ${getRoleLabel()}`}
+                 >
+                   <Avatar className="h-8 w-8">
+                     <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+                       {getUserInitials()}
+                     </AvatarFallback>
+                   </Avatar>
+                   {!collapsed && (
+                     <div className="grid flex-1 text-left text-sm leading-tight">
+                       <span className="truncate font-semibold">
+                         {user?.email?.split('@')[0]}
+                       </span>
+                       <span className="truncate text-xs text-sidebar-foreground/70">
+                         {getRoleLabel()}
+                       </span>
+                     </div>
+                   )}
+                   <ChevronUp className="ml-auto h-4 w-4" aria-hidden="true" />
+                 </SidebarMenuButton>
+               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
                 side="right" 
                 align="end" 
                 sideOffset={4}
               >
-                <DropdownMenuItem onClick={handleSignOut} className="gap-2">
-                  <LogOut className="h-4 w-4" />
-                  <span>Se déconnecter</span>
-                </DropdownMenuItem>
+                 <DropdownMenuItem onClick={handleSignOut} className="gap-2" role="menuitem">
+                   <LogOut className="h-4 w-4" aria-hidden="true" />
+                   <span>Se déconnecter</span>
+                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>

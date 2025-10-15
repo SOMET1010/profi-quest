@@ -129,13 +129,17 @@ export default function SimpleDashboard() {
   ];
 
   return (
-    <div className="p-6 space-y-8">
+    <main className="p-6 space-y-8" role="main" aria-label="Tableau de bord principal">
       {/* Welcome Hero Section - Compact */}
-      <div className="relative bg-gradient-hero text-white rounded-xl overflow-hidden">
+      <section 
+        className="relative bg-gradient-hero text-white rounded-xl overflow-hidden"
+        aria-labelledby="hero-heading"
+      >
         <div className="absolute inset-0 bg-black/20" />
         <img 
           src={heroImage}
-          alt="QUALI-RH EXPERTS - Plateforme de gestion d'experts"
+          alt=""
+          role="presentation"
           className="absolute inset-0 w-full h-full object-cover opacity-10"
           loading="lazy"
           decoding="async"
@@ -143,7 +147,7 @@ export default function SimpleDashboard() {
           height="400"
         />
         <div className="relative px-8 py-12">
-          <h1 className="text-4xl font-bold mb-2">QUALI-RH EXPERTS</h1>
+          <h1 id="hero-heading" className="text-4xl font-bold mb-2">QUALI-RH EXPERTS</h1>
           <p className="text-lg text-white/90 mb-6">
             Plateforme complète de gestion d'experts thématiques ANSUT
           </p>
@@ -154,8 +158,9 @@ export default function SimpleDashboard() {
               className="bg-white text-primary hover:bg-white/90"
               onClick={() => navigate('/candidature')}
               onMouseEnter={preloadCandidature}
+              aria-label="Commencer ma candidature en tant qu'expert"
             >
-              <UserCircle className="mr-2 h-5 w-5" />
+              <UserCircle className="mr-2 h-5 w-5" aria-hidden="true" />
               Commencer ma candidature
             </Button>
             <Button 
@@ -164,42 +169,46 @@ export default function SimpleDashboard() {
               className="border-white text-white hover:bg-white/10"
               onClick={() => navigate('/database')}
               onMouseEnter={preloadDatabase}
+              aria-label="Rechercher un expert dans la base de données"
             >
-              <Search className="mr-2 h-5 w-5" />
+              <Search className="mr-2 h-5 w-5" aria-hidden="true" />
               Rechercher Expert
             </Button>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statsLoading ? (
-          Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="h-32" />
-          ))
-        ) : (
-          dashboardStats.map((stat, index) => (
-            <Card key={index} className="shadow-card border-0 bg-gradient-card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-                    <p className="text-sm text-success flex items-center mt-1">
-                      <TrendingUp className="h-4 w-4 mr-1" />
-                      {stat.trend}
-                    </p>
+      <section aria-labelledby="stats-heading">
+        <h2 id="stats-heading" className="sr-only">Statistiques principales</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {statsLoading ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-32" aria-label="Chargement des statistiques" />
+            ))
+          ) : (
+            dashboardStats.map((stat, index) => (
+              <Card key={index} className="shadow-card border-0 bg-gradient-card">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{stat.label}</p>
+                      <p className="text-3xl font-bold text-foreground">{stat.value}</p>
+                      <p className="text-sm text-success flex items-center mt-1">
+                        <TrendingUp className="h-4 w-4 mr-1" aria-hidden="true" />
+                        <span aria-label={`Évolution de ${stat.trend}`}>{stat.trend}</span>
+                      </p>
+                    </div>
+                    <div className="p-3 bg-primary/10 rounded-full" aria-hidden="true">
+                      <stat.icon className="h-6 w-6 text-primary" />
+                    </div>
                   </div>
-                  <div className="p-3 bg-primary/10 rounded-full">
-                    <stat.icon className="h-6 w-6 text-primary" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      </section>
 
       {/* Charts Section - Lazy Loaded */}
       <Suspense fallback={
@@ -212,11 +221,15 @@ export default function SimpleDashboard() {
       </Suspense>
 
       {/* Module Cards */}
-      <div>
+      <section aria-labelledby="modules-heading">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-foreground">Modules Fonctionnels</h2>
-          <Button variant="outline" className="border-primary text-primary hover:bg-primary/5">
-            <Filter className="mr-2 h-4 w-4" />
+          <h2 id="modules-heading" className="text-3xl font-bold text-foreground">Modules Fonctionnels</h2>
+          <Button 
+            variant="outline" 
+            className="border-primary text-primary hover:bg-primary/5"
+            aria-label="Filtrer les modules"
+          >
+            <Filter className="mr-2 h-4 w-4" aria-hidden="true" />
             Filtrer
           </Button>
         </div>
@@ -225,7 +238,7 @@ export default function SimpleDashboard() {
           {modules.map((module, index) => (
             <Card 
               key={index} 
-              className="shadow-card border-0 bg-gradient-card hover:shadow-elegant transition-all duration-300 group cursor-pointer"
+              className="shadow-card border-0 bg-gradient-card hover:shadow-elegant transition-all duration-300 group cursor-pointer focus-within:ring-2 focus-within:ring-primary"
               onClick={() => navigate(module.path)}
               onMouseEnter={() => {
                 if (module.path === '/import') preloadImportProfiles();
@@ -234,10 +247,19 @@ export default function SimpleDashboard() {
                 if (module.path === '/analytics') preloadAnalytics();
                 if (module.path === '/qualification') preloadQualification();
               }}
+              tabIndex={0}
+              role="button"
+              aria-label={`${module.title}: ${module.description}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  navigate(module.path);
+                }
+              }}
             >
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <div className={`p-3 rounded-full ${module.color} text-white`}>
+                  <div className={`p-3 rounded-full ${module.color} text-white`} aria-hidden="true">
                     <module.icon className="h-6 w-6" />
                   </div>
                   <Badge 
@@ -257,67 +279,74 @@ export default function SimpleDashboard() {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-primary">{module.count}</span>
-                  <Button variant="ghost" size="sm" className="group-hover:bg-primary/10">
+                  <span className="text-sm group-hover:text-primary transition-colors" aria-hidden="true">
                     Accéder →
-                  </Button>
+                  </span>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* Quick Actions */}
-      <Card className="shadow-card border-0 bg-gradient-card">
-        <CardHeader>
-          <CardTitle className="text-2xl">Actions Rapides</CardTitle>
-          <CardDescription>
-            Accédez rapidement aux fonctionnalités les plus utilisées
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button 
-              className="h-16 text-left justify-start bg-gradient-primary hover:opacity-90" 
-              size="lg"
-              onClick={() => navigate('/import')}
-              onMouseEnter={preloadImportProfiles}
-            >
-              <FileSpreadsheet className="mr-3 h-6 w-6" />
-              <div>
-                <div className="font-semibold">Importer Excel</div>
-                <div className="text-sm opacity-90">Nouvelle CVthèque</div>
+      <section aria-labelledby="quick-actions-heading">
+        <Card className="shadow-card border-0 bg-gradient-card">
+          <CardHeader>
+            <CardTitle id="quick-actions-heading" className="text-2xl">Actions Rapides</CardTitle>
+            <CardDescription>
+              Accédez rapidement aux fonctionnalités les plus utilisées
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <nav aria-label="Actions rapides">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button 
+                  className="h-16 text-left justify-start bg-gradient-primary hover:opacity-90" 
+                  size="lg"
+                  onClick={() => navigate('/import')}
+                  onMouseEnter={preloadImportProfiles}
+                  aria-label="Importer une CVthèque Excel"
+                >
+                  <FileSpreadsheet className="mr-3 h-6 w-6" aria-hidden="true" />
+                  <div>
+                    <div className="font-semibold">Importer Excel</div>
+                    <div className="text-sm opacity-90">Nouvelle CVthèque</div>
+                  </div>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" 
+                  size="lg"
+                  onClick={() => navigate('/campaigns')}
+                  onMouseEnter={preloadCampaigns}
+                  aria-label="Lancer un nouvel appel à candidatures"
+                >
+                  <Megaphone className="mr-3 h-6 w-6" aria-hidden="true" />
+                  <div>
+                    <div className="font-semibold">Nouvel Appel</div>
+                    <div className="text-sm">Lancer campagne</div>
+                  </div>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" 
+                  size="lg"
+                  onClick={() => navigate('/analytics')}
+                  onMouseEnter={preloadAnalytics}
+                  aria-label="Générer un rapport d'analyse"
+                >
+                  <BarChart3 className="mr-3 h-6 w-6" aria-hidden="true" />
+                  <div>
+                    <div className="font-semibold">Rapport</div>
+                    <div className="text-sm">Générer analyse</div>
+                  </div>
+                </Button>
               </div>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" 
-              size="lg"
-              onClick={() => navigate('/campaigns')}
-              onMouseEnter={preloadCampaigns}
-            >
-              <Megaphone className="mr-3 h-6 w-6" />
-              <div>
-                <div className="font-semibold">Nouvel Appel</div>
-                <div className="text-sm">Lancer campagne</div>
-              </div>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" 
-              size="lg"
-              onClick={() => navigate('/analytics')}
-              onMouseEnter={preloadAnalytics}
-            >
-              <BarChart3 className="mr-3 h-6 w-6" />
-              <div>
-                <div className="font-semibold">Rapport</div>
-                <div className="text-sm">Générer analyse</div>
-              </div>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+            </nav>
+          </CardContent>
+        </Card>
+      </section>
+    </main>
   );
 }

@@ -48,24 +48,27 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <SidebarProvider>
+      <a href="#main-content" className="skip-to-main">
+        Aller au contenu principal
+      </a>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
-          <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border bg-background px-6">
+          <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border bg-background px-6" role="banner">
             <div className="flex items-center gap-4 flex-1">
-              <SidebarTrigger className="h-8 w-8" />
+              <SidebarTrigger className="h-8 w-8" aria-label="Ouvrir/fermer le menu de navigation" />
               
               {/* Breadcrumbs */}
-              <Breadcrumb>
+              <Breadcrumb aria-label="Fil d'Ariane">
                 <BreadcrumbList>
                   {breadcrumbs.map((breadcrumb, index) => (
                     <div key={breadcrumb.path} className="flex items-center">
-                      {index > 0 && <BreadcrumbSeparator />}
+                      {index > 0 && <BreadcrumbSeparator aria-hidden="true" />}
                       <BreadcrumbItem>
                         {breadcrumb.isLast ? (
-                          <BreadcrumbPage className="font-medium">
+                          <BreadcrumbPage className="font-medium" aria-current="page">
                             {breadcrumb.name}
                           </BreadcrumbPage>
                         ) : (
@@ -85,7 +88,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 overflow-auto">
+          <main id="main-content" className="flex-1 overflow-auto" role="main" tabIndex={-1}>
             {children}
           </main>
         </div>
