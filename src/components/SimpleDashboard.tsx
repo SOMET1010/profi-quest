@@ -16,7 +16,7 @@ import {
   UserCircle
 } from "lucide-react";
 import { lazy, Suspense } from "react";
-import heroImage from "@/assets/ansut-cote-divoire-background.jpg";
+import heroImage from "@/assets/ansut-cote-divoire-background.webp";
 import { useStats } from "@/hooks/useStats";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useNavigate } from "react-router-dom";
@@ -139,6 +139,8 @@ export default function SimpleDashboard() {
           className="absolute inset-0 w-full h-full object-cover opacity-10"
           loading="lazy"
           decoding="async"
+          width="1920"
+          height="400"
         />
         <div className="relative px-8 py-12">
           <h1 className="text-4xl font-bold mb-2">QUALI-RH EXPERTS</h1>

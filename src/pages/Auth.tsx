@@ -91,9 +91,12 @@ const Auth = () => {
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-32 h-20 rounded-lg bg-white shadow-elegant mb-4 p-4">
             <img 
-              src="/lovable-uploads/eebdb674-f051-486d-bb7c-acc1f973cde9.png" 
+              src="/lovable-uploads/eebdb674-f051-486d-bb7c-acc1f973cde9.webp" 
               alt="ANSUT - Agence Nationale du Service Universel des Télécommunications-TIC" 
               className="w-full h-full object-contain"
+              width="128"
+              height="80"
+              loading="eager"
             />
           </div>
           <h1 className="text-2xl font-bold text-primary mb-2">QUALI-RH EXPERTS</h1>
@@ -204,6 +207,7 @@ const Auth = () => {
                           size="sm"
                           className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                           onClick={() => setShowPassword(!showPassword)}
+                          aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                         >
                           {showPassword ? (
                             <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -254,6 +258,7 @@ const Auth = () => {
                           size="sm"
                           className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                           onClick={() => setShowPassword(!showPassword)}
+                          aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                         >
                           {showPassword ? (
                             <EyeOff className="h-4 w-4 text-muted-foreground" />
