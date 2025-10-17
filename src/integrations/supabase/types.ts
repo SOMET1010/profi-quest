@@ -1203,6 +1203,10 @@ export type Database = {
         Args: { "": string } | { "": unknown }
         Returns: unknown
       }
+      calculate_cosine_similarity: {
+        Args: { vec1: string; vec2: string }
+        Returns: number
+      }
       check_admin_role: {
         Args: { _user_id: string }
         Returns: boolean
