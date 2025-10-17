@@ -2,3 +2,15 @@ project_id = "fuqijxcyudibacaatgpj"
 
 [functions.get-users-with-roles]
 verify_jwt = true
+
+[functions.parse-cv]
+verify_jwt = true
+
+[functions.generate-embedding]
+verify_jwt = false
+
+[functions.match-candidates]
+verify_jwt = true
+
+[functions.screen-application]
+verify_jwt = false
