@@ -1583,6 +1583,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity_logs: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"] | null
+          actor_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string | null
+          id: string | null
+          record_id: string | null
+          table_name: string | null
+        }
+        Insert: {
+          action?: Database["public"]["Enums"]["audit_action"] | null
+          actor_id?: string | null
+          after_data?: never
+          before_data?: never
+          created_at?: string | null
+          id?: string | null
+          record_id?: string | null
+          table_name?: string | null
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"] | null
+          actor_id?: string | null
+          after_data?: never
+          before_data?: never
+          created_at?: string | null
+          id?: string | null
+          record_id?: string | null
+          table_name?: string | null
+        }
+        Relationships: []
+      }
       v_cheques_status_corrections_summary: {
         Row: {
           correction_type: string | null
