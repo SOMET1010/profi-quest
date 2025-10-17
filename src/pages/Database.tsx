@@ -141,10 +141,18 @@ export default function Database() {
                       </div>
                       
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(`/expert/${profile.id}`, '_blank')}
+                        >
                           Voir
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.location.href = `/candidature?profile=${profile.id}`}
+                        >
                           Modifier
                         </Button>
                       </div>

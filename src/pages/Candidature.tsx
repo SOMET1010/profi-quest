@@ -67,7 +67,7 @@ const Candidature = () => {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('ansut_profile_id', user.id)
+      .eq('id', user.id)
       .maybeSingle();
 
     if (data) {
@@ -150,7 +150,7 @@ const Candidature = () => {
         .from('profiles')
         .upsert({
           ...formData,
-          ansut_profile_id: user.id,
+          id: user.id,
           updated_at: new Date().toISOString()
         });
 
@@ -175,7 +175,7 @@ const Candidature = () => {
         .from('profiles')
         .upsert({
           ...formData,
-          ansut_profile_id: user!.id,
+          id: user!.id,
           application_status: 'submitted',
           application_submitted_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
