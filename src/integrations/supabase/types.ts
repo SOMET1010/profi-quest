@@ -961,6 +961,10 @@ export type Database = {
       }
     }
     Functions: {
+      check_admin_role: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       get_ansut_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
