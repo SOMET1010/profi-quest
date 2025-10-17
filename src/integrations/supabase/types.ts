@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -358,15 +358,7 @@ export type Database = {
           type?: string
           urgence?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "courriers_memos_responsable_id_fkey"
-            columns: ["responsable_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       debug_sessions: {
         Row: {
@@ -473,13 +465,6 @@ export type Database = {
             columns: ["courrier_id"]
             isOneToOne: false
             referencedRelation: "courriers_memos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "diligences_responsable_id_fkey"
-            columns: ["responsable_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -849,41 +834,9 @@ export type Database = {
         }
         Relationships: []
       }
-      kyc_workflows: {
-        Row: {
-          ballerine_data: Json | null
-          created_at: string | null
-          id: string
-          status: string
-          updated_at: string | null
-          user_id: string
-          workflow_id: string
-          workflow_type: string
-        }
-        Insert: {
-          ballerine_data?: Json | null
-          created_at?: string | null
-          id?: string
-          status: string
-          updated_at?: string | null
-          user_id: string
-          workflow_id: string
-          workflow_type: string
-        }
-        Update: {
-          ballerine_data?: Json | null
-          created_at?: string | null
-          id?: string
-          status?: string
-          updated_at?: string | null
-          user_id?: string
-          workflow_id?: string
-          workflow_type?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
+          ansut_profile_id: string | null
           application_status: string | null
           application_submitted_at: string | null
           avatar_url: string | null
@@ -908,9 +861,9 @@ export type Database = {
           role: string
           technical_skills: string | null
           updated_at: string | null
-          user_id: string | null
         }
         Insert: {
+          ansut_profile_id?: string | null
           application_status?: string | null
           application_submitted_at?: string | null
           avatar_url?: string | null
@@ -935,9 +888,9 @@ export type Database = {
           role?: string
           technical_skills?: string | null
           updated_at?: string | null
-          user_id?: string | null
         }
         Update: {
+          ansut_profile_id?: string | null
           application_status?: string | null
           application_submitted_at?: string | null
           avatar_url?: string | null
@@ -962,9 +915,16 @@ export type Database = {
           role?: string
           technical_skills?: string | null
           updated_at?: string | null
-          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_ansut_profile_id_fkey"
+            columns: ["ansut_profile_id"]
+            isOneToOne: false
+            referencedRelation: "ansut_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       programmes: {
         Row: {
@@ -1024,114 +984,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      projects: {
-        Row: {
-          axe_principal: Database["public"]["Enums"]["project_axe"] | null
-          axes_casa: string
-          budget: number
-          chef_projet: string
-          code: string
-          created_at: string | null
-          date_debut: string
-          date_fin_prevue: string
-          direction: string
-          faisabilite_operationnelle: number | null
-          id: number
-          impact_strategique: number | null
-          nom: string
-          programme: string
-          statut: Database["public"]["Enums"]["project_status"] | null
-          taille_equipe: number | null
-          updated_at: string | null
-          viabilite_financiere: number | null
-        }
-        Insert: {
-          axe_principal?: Database["public"]["Enums"]["project_axe"] | null
-          axes_casa: string
-          budget: number
-          chef_projet: string
-          code: string
-          created_at?: string | null
-          date_debut: string
-          date_fin_prevue: string
-          direction: string
-          faisabilite_operationnelle?: number | null
-          id?: number
-          impact_strategique?: number | null
-          nom: string
-          programme: string
-          statut?: Database["public"]["Enums"]["project_status"] | null
-          taille_equipe?: number | null
-          updated_at?: string | null
-          viabilite_financiere?: number | null
-        }
-        Update: {
-          axe_principal?: Database["public"]["Enums"]["project_axe"] | null
-          axes_casa?: string
-          budget?: number
-          chef_projet?: string
-          code?: string
-          created_at?: string | null
-          date_debut?: string
-          date_fin_prevue?: string
-          direction?: string
-          faisabilite_operationnelle?: number | null
-          id?: number
-          impact_strategique?: number | null
-          nom?: string
-          programme?: string
-          statut?: Database["public"]["Enums"]["project_status"] | null
-          taille_equipe?: number | null
-          updated_at?: string | null
-          viabilite_financiere?: number | null
-        }
-        Relationships: []
-      }
-      projets: {
-        Row: {
-          avancement: string | null
-          budget_consomme: number | null
-          budget_prevu: number | null
-          code: string | null
-          date_debut: string | null
-          date_fin_prevue: string | null
-          direction_id: string | null
-          id: string
-          nom: string | null
-          objectif: string | null
-          programme_id: string | null
-          statut: string | null
-        }
-        Insert: {
-          avancement?: string | null
-          budget_consomme?: number | null
-          budget_prevu?: number | null
-          code?: string | null
-          date_debut?: string | null
-          date_fin_prevue?: string | null
-          direction_id?: string | null
-          id?: string
-          nom?: string | null
-          objectif?: string | null
-          programme_id?: string | null
-          statut?: string | null
-        }
-        Update: {
-          avancement?: string | null
-          budget_consomme?: number | null
-          budget_prevu?: number | null
-          code?: string | null
-          date_debut?: string | null
-          date_fin_prevue?: string | null
-          direction_id?: string | null
-          id?: string
-          nom?: string | null
-          objectif?: string | null
-          programme_id?: string | null
-          statut?: string | null
-        }
-        Relationships: []
       }
       projets_hierarchiques: {
         Row: {
@@ -1323,45 +1175,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_profiles: {
-        Row: {
-          created_at: string | null
-          full_name: string | null
-          id: string
-          kyc_completed_at: string | null
-          kyc_status: Database["public"]["Enums"]["kyc_status"] | null
-          phone: string | null
-          pro_member: boolean | null
-          updated_at: string | null
-          user_id: string
-          workflow_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          full_name?: string | null
-          id?: string
-          kyc_completed_at?: string | null
-          kyc_status?: Database["public"]["Enums"]["kyc_status"] | null
-          phone?: string | null
-          pro_member?: boolean | null
-          updated_at?: string | null
-          user_id: string
-          workflow_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          full_name?: string | null
-          id?: string
-          kyc_completed_at?: string | null
-          kyc_status?: Database["public"]["Enums"]["kyc_status"] | null
-          phone?: string | null
-          pro_member?: boolean | null
-          updated_at?: string | null
-          user_id?: string
-          workflow_id?: string | null
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           created_at: string
@@ -1383,36 +1196,6 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      users: {
-        Row: {
-          actif: boolean | null
-          created_at: string | null
-          direction: string | null
-          email: string
-          id: string
-          nom: string
-          role: string | null
-        }
-        Insert: {
-          actif?: boolean | null
-          created_at?: string | null
-          direction?: string | null
-          email: string
-          id?: string
-          nom: string
-          role?: string | null
-        }
-        Update: {
-          actif?: boolean | null
-          created_at?: string | null
-          direction?: string | null
-          email?: string
-          id?: string
-          nom?: string
-          role?: string | null
         }
         Relationships: []
       }
@@ -1534,26 +1317,6 @@ export type Database = {
       }
     }
     Views: {
-      kpi_performance_globale: {
-        Row: {
-          avancement_moyen_projets: number | null
-          budget_total_alloue: number | null
-          budget_total_consomme: number | null
-          courriers_traites: number | null
-          derniere_maj: string | null
-          diligences_dtdi: number | null
-          diligences_prioritaires: number | null
-          diligences_retard: number | null
-          score_performance_diligences: number | null
-          status_budget: string | null
-          taux_consommation_budget: number | null
-          taux_traitement_courriers: number | null
-          total_courriers: number | null
-          total_diligences: number | null
-          total_projets: number | null
-        }
-        Relationships: []
-      }
       mv_cheques_kpi: {
         Row: {
           en_attente: number | null

@@ -9,10 +9,6 @@ export const useNavigationPreload = () => {
     import("@/pages/Database");
   }, []);
 
-  const preloadCampaigns = useCallback(() => {
-    import("@/pages/Campaigns");
-  }, []);
-
   const preloadAnalytics = useCallback(() => {
     import("@/pages/Analytics");
   }, []);
@@ -28,7 +24,6 @@ export const useNavigationPreload = () => {
   return {
     preloadImportProfiles,
     preloadDatabase,
-    preloadCampaigns,
     preloadAnalytics,
     preloadQualification,
     preloadCandidature,

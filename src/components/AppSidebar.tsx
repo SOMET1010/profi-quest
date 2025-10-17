@@ -76,12 +76,6 @@ const managementNavigation: NavigationItem[] = [
 
 const campaignsNavigation: NavigationItem[] = [
   {
-    title: "Appels à Candidatures",
-    url: "/campaigns",
-    icon: Megaphone,
-    requiredRole: "FINANCE"
-  },
-  {
     title: "Candidature",
     url: "/candidature",
     icon: UserCircle,

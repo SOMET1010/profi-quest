@@ -18,7 +18,6 @@ import {
 import { lazy, Suspense } from "react";
 import heroImage from "@/assets/ansut-cote-divoire-background.webp";
 import { useStats } from "@/hooks/useStats";
-import { useCampaigns } from "@/hooks/useCampaigns";
 import { useNavigate } from "react-router-dom";
 import { useNavigationPreload } from "@/hooks/useNavigationPreload";
 import { useHasRole } from "@/hooks/useRole";
@@ -30,11 +29,9 @@ export default function SimpleDashboard() {
   const navigate = useNavigate();
   const { userRole } = useHasRole('DG');
   const { data: stats, isLoading: statsLoading } = useStats();
-  const { data: campaigns, isLoading: campaignsLoading } = useCampaigns(10);
   const {
     preloadImportProfiles,
     preloadDatabase,
-    preloadCampaigns,
     preloadAnalytics,
     preloadQualification,
     preloadCandidature,
@@ -72,21 +69,11 @@ export default function SimpleDashboard() {
       requiredRole: "FINANCE" as const
     },
     {
-      icon: Megaphone,
-      title: "Appels à Candidatures",
-      description: "Lancez des campagnes ciblées et gérez les réponses",
-      status: "active",
-      count: `${stats?.activeCampaigns || 0} actifs`,
-      color: "bg-success",
-      path: "/campaigns",
-      requiredRole: "FINANCE" as const
-    },
-    {
       icon: BarChart3,
       title: "Analytics",
       description: "Analysez vos données et générez des rapports détaillés",
       status: "active",
-      count: `${campaigns?.length || 0} rapports`,
+      count: `${stats?.totalExperts || 0} rapports`,
       color: "bg-info",
       path: "/analytics",
       requiredRole: "DG" as const
@@ -243,7 +230,6 @@ export default function SimpleDashboard() {
               onMouseEnter={() => {
                 if (module.path === '/import') preloadImportProfiles();
                 if (module.path === '/database') preloadDatabase();
-                if (module.path === '/campaigns') preloadCampaigns();
                 if (module.path === '/analytics') preloadAnalytics();
                 if (module.path === '/qualification') preloadQualification();
               }}
@@ -314,21 +300,7 @@ export default function SimpleDashboard() {
                     <div className="text-sm opacity-90">Nouvelle CVthèque</div>
                   </div>
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" 
-                  size="lg"
-                  onClick={() => navigate('/campaigns')}
-                  onMouseEnter={preloadCampaigns}
-                  aria-label="Lancer un nouvel appel à candidatures"
-                >
-                  <Megaphone className="mr-3 h-6 w-6" aria-hidden="true" />
-                  <div>
-                    <div className="font-semibold">Nouvel Appel</div>
-                    <div className="text-sm">Lancer campagne</div>
-                  </div>
-                </Button>
-                <Button 
+                <Button
                   variant="outline" 
                   className="h-16 text-left justify-start border-primary text-primary hover:bg-primary/5" 
                   size="lg"

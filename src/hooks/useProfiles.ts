@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 // Inclut les champs standards + champs de candidature d'expert
 export interface Profile {
   id: string;
-  user_id: string | null;
+  ansut_profile_id: string | null;
   full_name: string | null;
   email: string;
   phone: string | null;
