@@ -26,7 +26,7 @@ export const useStats = () => {
           supabase
             .from('profiles')
             .select('id', { count: 'exact', head: true })
-            .eq('available', true)
+            .eq('is_active', true)
         ]);
 
         const totalExperts = profilesResult.count || 0;

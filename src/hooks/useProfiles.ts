@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-// Interface alignée avec le schéma réel de la table profiles
+// Interface alignée avec le schéma complet de la table profiles
+// Inclut les champs standards + champs de candidature d'expert
 export interface Profile {
   id: string;
   user_id: string | null;
@@ -16,6 +17,19 @@ export interface Profile {
   preferences: any;
   created_at: string;
   updated_at: string;
+  // Champs de candidature d'expert
+  first_name: string | null;
+  last_name: string | null;
+  location: string | null;
+  experience_years: number | null;
+  hourly_rate: number | null;
+  technical_skills: string | null;
+  behavioral_skills: string | null;
+  motivation_letter_url: string | null;
+  diplomas_url: string | null;
+  certificates_url: string | null;
+  application_status: string | null;
+  application_submitted_at: string | null;
 }
 
 export const useProfiles = (limit = 50) => {
@@ -33,7 +47,7 @@ export const useProfiles = (limit = 50) => {
           return [];
         }
 
-        return data || [];
+        return (data || []) as Profile[];
       } catch (error) {
         console.error("Error fetching profiles:", error);
         return [];

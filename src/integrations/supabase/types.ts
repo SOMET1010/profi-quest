@@ -884,47 +884,83 @@ export type Database = {
       }
       profiles: {
         Row: {
+          application_status: string | null
+          application_submitted_at: string | null
           avatar_url: string | null
+          behavioral_skills: string | null
+          certificates_url: string | null
           created_at: string | null
           department: string | null
+          diplomas_url: string | null
           email: string
+          experience_years: number | null
+          first_name: string | null
           full_name: string | null
+          hourly_rate: number | null
           id: string
           is_active: boolean | null
           last_login_at: string | null
+          last_name: string | null
+          location: string | null
+          motivation_letter_url: string | null
           phone: string | null
           preferences: Json | null
           role: string
+          technical_skills: string | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
+          application_status?: string | null
+          application_submitted_at?: string | null
           avatar_url?: string | null
+          behavioral_skills?: string | null
+          certificates_url?: string | null
           created_at?: string | null
           department?: string | null
+          diplomas_url?: string | null
           email: string
+          experience_years?: number | null
+          first_name?: string | null
           full_name?: string | null
+          hourly_rate?: number | null
           id?: string
           is_active?: boolean | null
           last_login_at?: string | null
+          last_name?: string | null
+          location?: string | null
+          motivation_letter_url?: string | null
           phone?: string | null
           preferences?: Json | null
           role?: string
+          technical_skills?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
+          application_status?: string | null
+          application_submitted_at?: string | null
           avatar_url?: string | null
+          behavioral_skills?: string | null
+          certificates_url?: string | null
           created_at?: string | null
           department?: string | null
+          diplomas_url?: string | null
           email?: string
+          experience_years?: number | null
+          first_name?: string | null
           full_name?: string | null
+          hourly_rate?: number | null
           id?: string
           is_active?: boolean | null
           last_login_at?: string | null
+          last_name?: string | null
+          location?: string | null
+          motivation_letter_url?: string | null
           phone?: string | null
           preferences?: Json | null
           role?: string
+          technical_skills?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
