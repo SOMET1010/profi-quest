@@ -47,7 +47,7 @@ const roles: Array<{
   {
     value: 'FINANCE',
     label: 'Finance',
-    description: 'Gestion des chèques, factures, fournisseurs et finances.',
+    description: 'Gestion administrative, RH et coordination des projets.',
     icon: Users,
     color: 'text-primary',
   },

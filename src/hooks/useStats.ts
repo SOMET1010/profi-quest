@@ -28,13 +28,23 @@ export const useStats = () => {
           .select('*', { count: 'exact', head: true })
           .eq('is_active', true);
         
-        // Mock values for features not yet implemented in database
+        // Count pending applications (submitted status)
+        const { count: pendingApplications } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('application_status', 'submitted');
+
+        // Count completed applications (approved/rejected)
+        const { count: completedApplications } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .in('application_status', ['approved', 'rejected']);
+
+        // Campaigns not yet implemented
         const totalCampaigns = 0;
         const activeCampaigns = 0;
-        const pendingApplications = 0;
-        const completedApplications = 0;
 
-        // Calculate response rate
+        // Calculate response rate based on actual applications
         const responseRate = totalExperts && pendingApplications 
           ? Math.round((pendingApplications / totalExperts) * 100)
           : 0;
