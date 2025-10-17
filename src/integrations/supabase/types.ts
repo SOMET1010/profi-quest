@@ -199,6 +199,48 @@ export type Database = {
         }
         Relationships: []
       }
+      application_skills: {
+        Row: {
+          application_id: string
+          created_at: string | null
+          evidence_text: string | null
+          id: string
+          level_inferred: string | null
+          skill_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string | null
+          evidence_text?: string | null
+          id?: string
+          level_inferred?: string | null
+          skill_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string | null
+          evidence_text?: string | null
+          id?: string
+          level_inferred?: string | null
+          skill_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_skills_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_workflow: {
         Row: {
           application_id: string
@@ -242,6 +284,56 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      applications: {
+        Row: {
+          candidate_id: string
+          cover_letter_text: string | null
+          created_at: string | null
+          cv_file_path: string | null
+          id: string
+          job_id: string
+          notes: string | null
+          score_overall: number | null
+          screening_json: Json | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          candidate_id: string
+          cover_letter_text?: string | null
+          created_at?: string | null
+          cv_file_path?: string | null
+          id?: string
+          job_id: string
+          notes?: string | null
+          score_overall?: number | null
+          screening_json?: Json | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          cover_letter_text?: string | null
+          created_at?: string | null
+          cv_file_path?: string | null
+          id?: string
+          job_id?: string
+          notes?: string | null
+          score_overall?: number | null
+          screening_json?: Json | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
         ]
@@ -485,6 +577,41 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          application_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          payload_json: Json | null
+          type: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          payload_json?: Json | null
+          type: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          payload_json?: Json | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events_ledger: {
         Row: {
           action: string | null
@@ -512,6 +639,60 @@ export type Database = {
           hash_prev?: string | null
           id?: string
           payload?: Json | null
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          contract_type: string | null
+          created_at: string | null
+          created_by: string | null
+          hourly_rate_max: number | null
+          hourly_rate_min: number | null
+          id: string
+          location: string | null
+          mission: string
+          requirements_text: string
+          seniority_max: number | null
+          seniority_min: number | null
+          status: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          contract_type?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          hourly_rate_max?: number | null
+          hourly_rate_min?: number | null
+          id?: string
+          location?: string | null
+          mission: string
+          requirements_text: string
+          seniority_max?: number | null
+          seniority_min?: number | null
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          contract_type?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          hourly_rate_max?: number | null
+          hourly_rate_min?: number | null
+          id?: string
+          location?: string | null
+          mission?: string
+          requirements_text?: string
+          seniority_max?: number | null
+          seniority_min?: number | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -583,6 +764,8 @@ export type Database = {
           avatar_url: string | null
           behavioral_skills: string | null
           certificates_url: string | null
+          consent_gdpr: boolean | null
+          consent_gdpr_at: string | null
           created_at: string | null
           department: string | null
           diplomas_url: string | null
@@ -590,11 +773,13 @@ export type Database = {
           experience_years: number | null
           first_name: string | null
           full_name: string | null
+          github: string | null
           hourly_rate: number | null
           id: string
           is_active: boolean | null
           last_login_at: string | null
           last_name: string | null
+          linkedin: string | null
           location: string | null
           motivation_letter_url: string | null
           phone: string | null
@@ -610,6 +795,8 @@ export type Database = {
           avatar_url?: string | null
           behavioral_skills?: string | null
           certificates_url?: string | null
+          consent_gdpr?: boolean | null
+          consent_gdpr_at?: string | null
           created_at?: string | null
           department?: string | null
           diplomas_url?: string | null
@@ -617,11 +804,13 @@ export type Database = {
           experience_years?: number | null
           first_name?: string | null
           full_name?: string | null
+          github?: string | null
           hourly_rate?: number | null
           id?: string
           is_active?: boolean | null
           last_login_at?: string | null
           last_name?: string | null
+          linkedin?: string | null
           location?: string | null
           motivation_letter_url?: string | null
           phone?: string | null
@@ -637,6 +826,8 @@ export type Database = {
           avatar_url?: string | null
           behavioral_skills?: string | null
           certificates_url?: string | null
+          consent_gdpr?: boolean | null
+          consent_gdpr_at?: string | null
           created_at?: string | null
           department?: string | null
           diplomas_url?: string | null
@@ -644,11 +835,13 @@ export type Database = {
           experience_years?: number | null
           first_name?: string | null
           full_name?: string | null
+          github?: string | null
           hourly_rate?: number | null
           id?: string
           is_active?: boolean | null
           last_login_at?: string | null
           last_name?: string | null
+          linkedin?: string | null
           location?: string | null
           motivation_letter_url?: string | null
           phone?: string | null
@@ -859,6 +1052,27 @@ export type Database = {
           },
         ]
       }
+      skills: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       user_permissions: {
         Row: {
           created_at: string | null
@@ -924,6 +1138,30 @@ export type Database = {
         }
         Relationships: []
       }
+      vectors: {
+        Row: {
+          created_at: string | null
+          embedding: string | null
+          id: string
+          owner_id: string
+          owner_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          owner_id: string
+          owner_type: string
+        }
+        Update: {
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          owner_id?: string
+          owner_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       user_activity_logs: {
@@ -961,6 +1199,10 @@ export type Database = {
       }
     }
     Functions: {
+      binary_quantize: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
       check_admin_role: {
         Args: { _user_id: string }
         Returns: boolean
@@ -979,6 +1221,22 @@ export type Database = {
           permission_code: string
         }[]
       }
+      halfvec_avg: {
+        Args: { "": number[] }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
       has_ansut_permission: {
         Args: { required_roles: string[] }
         Returns: boolean
@@ -990,6 +1248,78 @@ export type Database = {
       has_permission: {
         Args: { _permission_code: string; _user_id: string }
         Returns: boolean
+      }
+      hnsw_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnswhandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflathandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      vector_avg: {
+        Args: { "": number[] }
+        Returns: string
+      }
+      vector_dims: {
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
+      vector_norm: {
+        Args: { "": string }
+        Returns: number
+      }
+      vector_out: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: { "": string }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
       }
     }
     Enums: {
