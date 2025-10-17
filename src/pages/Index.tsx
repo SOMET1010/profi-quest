@@ -1,7 +1,6 @@
 import SimpleDashboard from "@/components/SimpleDashboard";
 import { useHasRole } from "@/hooks/useRole";
 import ExpertProfile from "@/pages/ExpertProfile";
-import AdminSetup from "@/pages/AdminSetup";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHasPermission } from "@/hooks/usePermissions";
 
@@ -13,11 +12,6 @@ const Index = () => {
   // Show loading while checking role
   if (isLoading) {
     return <div>Chargement...</div>;
-  }
-  
-  // If user has no role, show admin setup
-  if (user && !userRole) {
-    return <AdminSetup />;
   }
   
   // POSTULANT and CONSULTANT see their expert profile
