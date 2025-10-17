@@ -139,6 +139,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ansut_roles: {
+        Row: {
+          code: Database["public"]["Enums"]["app_role"]
+          created_at: string | null
+          description: string | null
+          hierarchy_level: number
+          id: string
+          is_system_role: boolean | null
+          label: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: Database["public"]["Enums"]["app_role"]
+          created_at?: string | null
+          description?: string | null
+          hierarchy_level: number
+          id?: string
+          is_system_role?: boolean | null
+          label: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: Database["public"]["Enums"]["app_role"]
+          created_at?: string | null
+          description?: string | null
+          hierarchy_level?: number
+          id?: string
+          is_system_role?: boolean | null
+          label?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           description: string | null
@@ -165,6 +198,53 @@ export type Database = {
           value?: Json | null
         }
         Relationships: []
+      }
+      application_workflow: {
+        Row: {
+          application_id: string
+          comments: string | null
+          created_at: string | null
+          id: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          reviewer_role: Database["public"]["Enums"]["app_role"] | null
+          status: string | null
+          step_name: string
+          step_number: number
+        }
+        Insert: {
+          application_id: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_role?: Database["public"]["Enums"]["app_role"] | null
+          status?: string | null
+          step_name: string
+          step_number: number
+        }
+        Update: {
+          application_id?: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          reviewer_role?: Database["public"]["Enums"]["app_role"] | null
+          status?: string | null
+          step_name?: string
+          step_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_workflow_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       audit_logs: {
         Row: {
@@ -465,6 +545,36 @@ export type Database = {
         }
         Relationships: []
       }
+      permissions: {
+        Row: {
+          category: string
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          label: string
+          required_hierarchy_level: number | null
+        }
+        Insert: {
+          category: string
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          label: string
+          required_hierarchy_level?: number | null
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          label?: string
+          required_hierarchy_level?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           ansut_profile_id: string | null
@@ -720,26 +830,96 @@ export type Database = {
           },
         ]
       }
-      user_roles: {
+      role_default_permissions: {
         Row: {
-          created_at: string
+          created_at: string | null
           id: string
-          role: Database["public"]["Enums"]["app_role"]
-          updated_at: string
+          permission_code: string
+          role_code: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission_code: string
+          role_code: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission_code?: string
+          role_code?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_default_permissions_permission_code_fkey"
+            columns: ["permission_code"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      user_permissions: {
+        Row: {
+          created_at: string | null
+          granted: boolean | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          notes: string | null
+          permission_code: string
           user_id: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
+          granted?: boolean | null
+          granted_at?: string | null
+          granted_by?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          updated_at?: string
+          notes?: string | null
+          permission_code: string
           user_id: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
+          granted?: boolean | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          notes?: string | null
+          permission_code?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permissions_permission_code_fkey"
+            columns: ["permission_code"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
-          updated_at?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -789,6 +969,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_permissions: {
+        Args: { _user_id: string }
+        Returns: {
+          permission_code: string
+        }[]
+      }
       has_ansut_permission: {
         Args: { required_roles: string[] }
         Returns: boolean
@@ -797,9 +983,20 @@ export type Database = {
         Args: { required_role: string }
         Returns: boolean
       }
+      has_permission: {
+        Args: { _permission_code: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      app_role: "DG" | "FINANCE" | "AGENT" | "READONLY"
+      app_role:
+        | "DG"
+        | "SI"
+        | "DRH"
+        | "RDRH"
+        | "RH_ASSISTANT"
+        | "CONSULTANT"
+        | "POSTULANT"
       audit_action: "INSERT" | "UPDATE" | "DELETE"
       kyc_status: "not_started" | "in_progress" | "completed" | "rejected"
       project_axe: "Infra" | "Services" | "Compétences" | "Gouvernance"
@@ -932,7 +1129,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["DG", "FINANCE", "AGENT", "READONLY"],
+      app_role: [
+        "DG",
+        "SI",
+        "DRH",
+        "RDRH",
+        "RH_ASSISTANT",
+        "CONSULTANT",
+        "POSTULANT",
+      ],
       audit_action: ["INSERT", "UPDATE", "DELETE"],
       kyc_status: ["not_started", "in_progress", "completed", "rejected"],
       project_axe: ["Infra", "Services", "Compétences", "Gouvernance"],

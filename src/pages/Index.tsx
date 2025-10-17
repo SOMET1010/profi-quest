@@ -1,13 +1,14 @@
 import SimpleDashboard from "@/components/SimpleDashboard";
-import { RoleGuard } from "@/components/RoleGuard";
 import { useHasRole } from "@/hooks/useRole";
 import ExpertProfile from "@/pages/ExpertProfile";
 import AdminSetup from "@/pages/AdminSetup";
 import { useAuth } from "@/contexts/AuthContext";
+import { useHasPermission } from "@/hooks/usePermissions";
 
 const Index = () => {
   const { user } = useAuth();
-  const { userRole, isLoading } = useHasRole('READONLY'); // Get role info
+  const { userRole, isLoading } = useHasRole('POSTULANT'); // Get role info
+  const { hasPermission: canViewDashboard } = useHasPermission('view_dashboard');
   
   // Show loading while checking role
   if (isLoading) {
@@ -19,22 +20,18 @@ const Index = () => {
     return <AdminSetup />;
   }
   
-  // Redirect AGENT to their dedicated interface
-  if (userRole === 'AGENT') {
+  // POSTULANT and CONSULTANT see their expert profile
+  if (userRole === 'POSTULANT' || userRole === 'CONSULTANT') {
     return <ExpertProfile />;
   }
   
-  // DG and FINANCE can access the Dashboard
-  if (userRole === 'DG' || userRole === 'FINANCE' || userRole === 'READONLY') {
+  // All other roles (DG, SI, DRH, RDRH, RH_ASSISTANT) can access Dashboard if they have permission
+  if (canViewDashboard) {
     return <SimpleDashboard />;
   }
   
-  // Fallback for any other case
-  return (
-    <RoleGuard requiredRole="FINANCE">
-      <SimpleDashboard />
-    </RoleGuard>
-  );
+  // Fallback: show expert profile
+  return <ExpertProfile />;
 };
 
 export default Index;
