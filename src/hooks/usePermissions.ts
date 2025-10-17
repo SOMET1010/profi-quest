@@ -22,6 +22,8 @@ export function usePermissions() {
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
+    // Définir une valeur par défaut pour éviter undefined
+    initialData: [],
   });
 }
 

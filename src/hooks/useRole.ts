@@ -25,10 +25,13 @@ export function useRole() {
         return null;
       }
 
-      return data?.role as AppRole | null;
+      // Retourner explicitement null si pas de rôle (pas undefined)
+      return data?.role ? (data.role as AppRole) : null;
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
+    // Définir une valeur par défaut pour éviter undefined
+    initialData: null,
   });
 }
 
