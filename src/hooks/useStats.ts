@@ -17,20 +17,16 @@ export const useStats = () => {
     queryKey: ["dashboard-stats"],
     queryFn: async (): Promise<DashboardStats> => {
       try {
-        // Optimized Supabase queries using existing profiles table
-        // Query specific columns only, avoid select("*")
-        const [profilesResult, qualifiedProfilesResult] = await Promise.all([
-          supabase
-            .from('profiles')
-            .select('id', { count: 'exact', head: true }),
-          supabase
-            .from('profiles')
-            .select('id', { count: 'exact', head: true })
-            .eq('is_active', true)
-        ]);
+        // Count total profiles
+        const { count: totalExperts } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
 
-        const totalExperts = profilesResult.count || 0;
-        const qualifiedProfiles = qualifiedProfilesResult.count || 0;
+        // Count qualified (active) profiles
+        const { count: qualifiedProfiles } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true);
         
         // Mock values for features not yet implemented in database
         const totalCampaigns = 0;
@@ -44,8 +40,8 @@ export const useStats = () => {
           : 0;
 
         return {
-          totalExperts,
-          qualifiedProfiles,
+          totalExperts: totalExperts || 0,
+          qualifiedProfiles: qualifiedProfiles || 0,
           responseRate,
           activeMissions: activeCampaigns,
           totalCampaigns,
