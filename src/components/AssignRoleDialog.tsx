@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, Users, User } from "lucide-react";
+import { Shield, Users, User, UserCheck, UserCog, Crown, Terminal } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -40,23 +40,51 @@ const roles: Array<{
   {
     value: 'DG',
     label: 'Directeur Général',
-    description: 'Accès complet à toutes les fonctionnalités, gestion des utilisateurs et paramètres système.',
-    icon: Shield,
+    description: 'Accès complet, gestion stratégique et validation finale.',
+    icon: Crown,
     color: 'text-destructive',
   },
   {
-    value: 'FINANCE',
-    label: 'Finance',
-    description: 'Gestion administrative, RH et coordination des projets.',
-    icon: Users,
+    value: 'SI',
+    label: 'Système d\'Information',
+    description: 'Accès technique complet, administration système.',
+    icon: Terminal,
+    color: 'text-info',
+  },
+  {
+    value: 'DRH',
+    label: 'Directeur RH',
+    description: 'Gestion complète RH, validation des recrutements.',
+    icon: Shield,
     color: 'text-primary',
   },
   {
-    value: 'AGENT',
-    label: 'Agent',
-    description: 'Accès aux opérations courantes et consultation des données.',
-    icon: User,
+    value: 'RDRH',
+    label: 'Responsable DRH',
+    description: 'Supervision RH, validation intermédiaire.',
+    icon: UserCog,
+    color: 'text-primary',
+  },
+  {
+    value: 'RH_ASSISTANT',
+    label: 'Assistant RH',
+    description: 'Traitement des candidatures, saisie.',
+    icon: UserCheck,
     color: 'text-accent-foreground',
+  },
+  {
+    value: 'CONSULTANT',
+    label: 'Consultant Expert',
+    description: 'Consultation du profil expert, missions.',
+    icon: Users,
+    color: 'text-accent-foreground',
+  },
+  {
+    value: 'POSTULANT',
+    label: 'Postulant',
+    description: 'Soumission candidature uniquement.',
+    icon: User,
+    color: 'text-muted-foreground',
   },
 ];
 
@@ -90,7 +118,7 @@ export function AssignRoleDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />

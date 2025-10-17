@@ -1,4 +1,4 @@
-import { UserPlus, Trash2, Shield, User, Users } from "lucide-react";
+import { UserPlus, Trash2, Shield, User, Users, Crown, Terminal, UserCheck, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -31,12 +31,18 @@ interface RoleManagementTableProps {
 const getRoleIcon = (role?: AppRole) => {
   switch (role) {
     case 'DG':
-      return <Shield className="h-4 w-4 text-destructive" />;
-    case 'FINANCE':
-      return <Users className="h-4 w-4 text-primary" />;
-    case 'AGENT':
-      return <User className="h-4 w-4 text-accent-foreground" />;
-    case 'READONLY':
+      return <Crown className="h-4 w-4 text-destructive" />;
+    case 'SI':
+      return <Terminal className="h-4 w-4 text-info" />;
+    case 'DRH':
+      return <Shield className="h-4 w-4 text-primary" />;
+    case 'RDRH':
+      return <UserCog className="h-4 w-4 text-primary" />;
+    case 'RH_ASSISTANT':
+      return <UserCheck className="h-4 w-4 text-accent-foreground" />;
+    case 'CONSULTANT':
+      return <Users className="h-4 w-4 text-accent-foreground" />;
+    case 'POSTULANT':
       return <User className="h-4 w-4 text-muted-foreground" />;
     default:
       return <User className="h-4 w-4 text-muted-foreground" />;
@@ -47,12 +53,18 @@ const getRoleBadge = (role?: AppRole) => {
   switch (role) {
     case 'DG':
       return <Badge variant="destructive">DG</Badge>;
-    case 'FINANCE':
-      return <Badge variant="default">Finance</Badge>;
-    case 'AGENT':
-      return <Badge variant="secondary">Agent</Badge>;
-    case 'READONLY':
-      return <Badge variant="outline">Lecture seule</Badge>;
+    case 'SI':
+      return <Badge className="bg-info text-info-foreground">SI</Badge>;
+    case 'DRH':
+      return <Badge variant="default">DRH</Badge>;
+    case 'RDRH':
+      return <Badge variant="default">RDRH</Badge>;
+    case 'RH_ASSISTANT':
+      return <Badge variant="secondary">RH Assistant</Badge>;
+    case 'CONSULTANT':
+      return <Badge variant="secondary">Consultant</Badge>;
+    case 'POSTULANT':
+      return <Badge variant="outline">Postulant</Badge>;
     default:
       return <Badge variant="outline">Aucun rôle</Badge>;
   }

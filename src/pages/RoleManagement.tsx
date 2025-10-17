@@ -114,9 +114,12 @@ export default function RoleManagement() {
   const roleStats = {
     total: users.length,
     dg: users.filter(u => u.role === 'DG').length,
-    finance: users.filter(u => u.role === 'FINANCE').length,
-    agent: users.filter(u => u.role === 'AGENT').length,
-    readonly: users.filter(u => u.role === 'READONLY').length,
+    si: users.filter(u => u.role === 'SI').length,
+    drh: users.filter(u => u.role === 'DRH').length,
+    rdrh: users.filter(u => u.role === 'RDRH').length,
+    assistant: users.filter(u => u.role === 'RH_ASSISTANT').length,
+    consultant: users.filter(u => u.role === 'CONSULTANT').length,
+    postulant: users.filter(u => u.role === 'POSTULANT').length,
     noRole: users.filter(u => !u.role).length,
   };
 
@@ -137,10 +140,10 @@ export default function RoleManagement() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Utilisateurs</CardTitle>
+              <CardTitle className="text-sm font-medium">Total</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -160,21 +163,21 @@ export default function RoleManagement() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Finance</CardTitle>
+              <CardTitle className="text-sm font-medium">DRH/RDRH</CardTitle>
               <UserPlus className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{roleStats.finance}</div>
+              <div className="text-2xl font-bold text-primary">{roleStats.drh + roleStats.rdrh}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Agents</CardTitle>
+              <CardTitle className="text-sm font-medium">Assistants</CardTitle>
               <Users className="h-4 w-4 text-accent-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-accent-foreground">{roleStats.agent}</div>
+              <div className="text-2xl font-bold text-accent-foreground">{roleStats.assistant}</div>
             </CardContent>
           </Card>
 
@@ -208,7 +211,7 @@ export default function RoleManagement() {
                   className="pl-10"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   variant={roleFilter === "all" ? "default" : "outline"}
                   onClick={() => setRoleFilter("all")}
@@ -222,16 +225,16 @@ export default function RoleManagement() {
                   DG
                 </Button>
                 <Button
-                  variant={roleFilter === "FINANCE" ? "default" : "outline"}
-                  onClick={() => setRoleFilter("FINANCE")}
+                  variant={roleFilter === "DRH" ? "default" : "outline"}
+                  onClick={() => setRoleFilter("DRH")}
                 >
-                  Finance
+                  DRH
                 </Button>
                 <Button
-                  variant={roleFilter === "AGENT" ? "default" : "outline"}
-                  onClick={() => setRoleFilter("AGENT")}
+                  variant={roleFilter === "RH_ASSISTANT" ? "default" : "outline"}
+                  onClick={() => setRoleFilter("RH_ASSISTANT")}
                 >
-                  Agent
+                  Assistants
                 </Button>
               </div>
             </div>

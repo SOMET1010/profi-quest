@@ -18,10 +18,10 @@ export function usePermissions() {
         return [];
       }
 
-      return (data || []).map((item: { permission_code: string }) => item.permission_code);
+      return (data || []).map((item: any) => item.permission_code);
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -30,15 +30,6 @@ export function useHasPermission(requiredPermission: string) {
 
   return {
     hasPermission: permissions?.includes(requiredPermission) || false,
-    isLoading,
-  };
-}
-
-export function useHasAnyPermission(requiredPermissions: string[]) {
-  const { data: permissions, isLoading } = usePermissions();
-
-  return {
-    hasPermission: requiredPermissions.some(perm => permissions?.includes(perm)) || false,
     isLoading,
   };
 }

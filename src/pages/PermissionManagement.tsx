@@ -28,7 +28,7 @@ interface UserPermission {
 interface UserWithRole {
   id: string;
   email: string;
-  role: string;
+  role: 'DG' | 'SI' | 'DRH' | 'RDRH' | 'RH_ASSISTANT' | 'CONSULTANT' | 'POSTULANT';
 }
 
 const PermissionManagement = () => {
@@ -55,11 +55,10 @@ const PermissionManagement = () => {
   const { data: users = [] } = useQuery({
     queryKey: ['users-with-roles'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_users_with_roles');
+      const { data, error } = await supabase.functions.invoke('get-users-with-roles');
       
       if (error) throw error;
-      return data as UserWithRole[];
+      return (data || []) as UserWithRole[];
     }
   });
 
@@ -89,7 +88,7 @@ const PermissionManagement = () => {
       const { data, error } = await supabase
         .from('role_default_permissions')
         .select('permission_code')
-        .eq('role_code', selectedUser.role);
+        .eq('role_code', selectedUser.role as any);
       
       if (error) throw error;
       return data.map(d => d.permission_code);

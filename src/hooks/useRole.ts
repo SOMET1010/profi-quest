@@ -16,7 +16,7 @@ export function useRole() {
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
-        .order('role', { ascending: true }) // admin first
+        .order('role', { ascending: true })
         .limit(1)
         .maybeSingle();
 

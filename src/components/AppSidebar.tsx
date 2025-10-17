@@ -9,7 +9,8 @@ import {
   UserCircle,
   LogOut,
   Menu,
-  Shield
+  Shield,
+  Settings
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,7 +50,7 @@ const mainNavigation: NavigationItem[] = [
     title: "Tableau de Bord",
     url: "/",
     icon: Home,
-    requiredRole: "FINANCE"
+    requiredRole: "RH_ASSISTANT"
   }
 ];
 
@@ -64,13 +65,13 @@ const managementNavigation: NavigationItem[] = [
     title: "Base de Données",
     url: "/database",
     icon: Users,
-    requiredRole: "FINANCE"
+    requiredRole: "RH_ASSISTANT"
   },
   {
     title: "Qualification",
     url: "/qualification",
     icon: UserCheck,
-    requiredRole: "FINANCE"
+    requiredRole: "RH_ASSISTANT"
   }
 ];
 
@@ -79,7 +80,7 @@ const campaignsNavigation: NavigationItem[] = [
     title: "Candidature",
     url: "/candidature",
     icon: UserCircle,
-    requiredRole: "AGENT"
+    requiredRole: "POSTULANT"
   }
 ];
 
@@ -98,6 +99,12 @@ const adminNavigation: NavigationItem[] = [
     url: "/admin/roles",
     icon: Shield,
     requiredRole: "DG"
+  },
+  {
+    title: "Gestion des Permissions",
+    url: "/admin/permissions",
+    icon: Settings,
+    requiredRole: "DG"
   }
 ];
 
@@ -106,14 +113,22 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { userRole } = useHasRole('READONLY');
+  const { userRole } = useHasRole('POSTULANT');
   
   const currentPath = location.pathname;
   
   const hasPermission = (requiredRole?: AppRole) => {
     if (!requiredRole || !userRole) return false;
     
-    const roleHierarchy = { DG: 4, FINANCE: 3, AGENT: 2, READONLY: 1 };
+    const roleHierarchy = { 
+      DG: 10, 
+      SI: 9, 
+      DRH: 8, 
+      RDRH: 7, 
+      RH_ASSISTANT: 5, 
+      CONSULTANT: 3, 
+      POSTULANT: 1 
+    };
     const userRoleLevel = roleHierarchy[userRole];
     const requiredRoleLevel = roleHierarchy[requiredRole];
     
@@ -142,9 +157,12 @@ export function AppSidebar() {
   const getRoleLabel = () => {
     const roleLabels = {
       DG: "Directeur Général",
-      FINANCE: "Finance", 
-      AGENT: "Agent",
-      READONLY: "Lecture seule"
+      SI: "Système d'Information",
+      DRH: "Directeur RH",
+      RDRH: "Responsable DRH",
+      RH_ASSISTANT: "Assistant RH",
+      CONSULTANT: "Consultant Expert",
+      POSTULANT: "Postulant"
     };
     return userRole ? roleLabels[userRole] : "Utilisateur";
   };

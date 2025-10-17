@@ -33,7 +33,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { hasRole: isDG, userRole } = useHasRole('DG');
-  const { hasRole: isFinance } = useHasRole('FINANCE');
+  const { hasRole: isDRH } = useHasRole('DRH');
   const { data: stats, isLoading: statsLoading } = useStats();
   const {
     preloadImportProfiles,
@@ -66,7 +66,7 @@ export default function Dashboard() {
       count: `${stats?.qualifiedProfiles || 0} validés`,
       color: "bg-gradient-primary",
       path: "/database",
-      requiredRole: "FINANCE" as const
+      requiredRole: "RH_ASSISTANT" as const
     },
     {
       icon: UserCheck,
@@ -76,7 +76,7 @@ export default function Dashboard() {
       count: `${stats?.pendingApplications || 0} en cours`,
       color: "bg-warning",
       path: "/qualification",
-      requiredRole: "FINANCE" as const
+      requiredRole: "RH_ASSISTANT" as const
     },
     {
       icon: BarChart3,
@@ -92,7 +92,15 @@ export default function Dashboard() {
 
   // Filter modules based on user role
   const modules = allModules.filter(module => {
-    const roleHierarchy = { DG: 4, FINANCE: 3, AGENT: 2, READONLY: 1 };
+    const roleHierarchy = { 
+      DG: 10, 
+      SI: 9, 
+      DRH: 8, 
+      RDRH: 7, 
+      RH_ASSISTANT: 5, 
+      CONSULTANT: 3, 
+      POSTULANT: 1 
+    };
     const userRoleLevel = userRole ? roleHierarchy[userRole] : 0;
     const requiredRoleLevel = roleHierarchy[module.requiredRole];
     return userRoleLevel >= requiredRoleLevel;
