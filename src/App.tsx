@@ -13,6 +13,7 @@ const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ImportProfiles = lazy(() => import("./pages/ImportProfiles"));
 const Database = lazy(() => import("./pages/Database"));
+const ExpertDetail = lazy(() => import("./pages/ExpertDetail"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Qualification = lazy(() => import("./pages/Qualification"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -81,6 +82,11 @@ const App = () => (
               <Route path="/database" element={
                 <ProtectedRoute>
                   <AppLayout><Database /></AppLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/expert/:id" element={
+                <ProtectedRoute>
+                  <AppLayout><ExpertDetail /></AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/qualification" element={

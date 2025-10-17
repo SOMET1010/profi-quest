@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { useProfiles } from "@/hooks/useProfiles";
 import { Users, Search, Filter, Plus, Mail, Phone, MapPin } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Database() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const { data: profiles, isLoading } = useProfiles();
 
@@ -144,14 +146,14 @@ export default function Database() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => window.open(`/expert/${profile.id}`, '_blank')}
+                          onClick={() => navigate(`/expert/${profile.id}`)}
                         >
                           Voir
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => window.location.href = `/candidature?profile=${profile.id}`}
+                          onClick={() => navigate(`/candidature?profile=${profile.id}`)}
                         >
                           Modifier
                         </Button>
