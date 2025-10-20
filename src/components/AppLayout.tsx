@@ -47,7 +47,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <a href="#main-content" className="skip-to-main">
         Aller au contenu principal
       </a>
