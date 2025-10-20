@@ -35,7 +35,7 @@ export default function ExpertProfile() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="space-y-6">
         {/* Welcome Message */}
         <Card className="mb-8">
           <CardHeader>
