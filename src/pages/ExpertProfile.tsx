@@ -160,11 +160,11 @@ export default function ExpertProfile() {
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>rh@ansut.ma</span>
+                <span>rh@ansut.ci</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>+212 5XX XX XX XX</span>
+                <span>+225 27 XX XX XX XX</span>
               </div>
             </div>
           </CardContent>
