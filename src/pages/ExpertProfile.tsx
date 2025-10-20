@@ -24,8 +24,7 @@ export default function ExpertProfile() {
   };
 
   return (
-    <div className="min-h-screen w-full">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className="min-h-screen w-full p-6 space-y-8">
         {/* Welcome Header - Compact version for sidebar layout */}
         <div className="bg-gradient-hero text-white rounded-xl p-8">
         <div className="flex justify-between items-center">
@@ -170,7 +169,6 @@ export default function ExpertProfile() {
             </div>
           </CardContent>
         </Card>
-      </div>
       </div>
     </div>
   );

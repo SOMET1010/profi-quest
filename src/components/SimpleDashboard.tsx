@@ -116,8 +116,7 @@ export default function SimpleDashboard() {
   ];
 
   return (
-    <main className="min-h-screen w-full" role="main" aria-label="Tableau de bord principal">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <main className="min-h-screen w-full p-6 space-y-8" role="main" aria-label="Tableau de bord principal">
         {/* Welcome Hero Section - Compact */}
         <section
         className="relative bg-gradient-hero text-white rounded-xl overflow-hidden"
@@ -320,7 +319,6 @@ export default function SimpleDashboard() {
           </CardContent>
         </Card>
       </section>
-      </div>
     </main>
   );
 }
