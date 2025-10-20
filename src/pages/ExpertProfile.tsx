@@ -24,18 +24,7 @@ export default function ExpertProfile() {
   };
 
   return (
-    <div className="min-h-screen w-full p-6 space-y-8">
-        {/* Welcome Header - Compact version for sidebar layout */}
-        <div className="bg-gradient-hero text-white rounded-xl p-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Espace Expert</h1>
-            <p className="text-white/90">QUALI-RH EXPERTS - ANSUT</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-6">
+    <div className="p-6 space-y-6">
         {/* Welcome Message */}
         <Card className="mb-8">
           <CardHeader>
@@ -169,7 +158,6 @@ export default function ExpertProfile() {
             </div>
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }
