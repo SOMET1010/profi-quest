@@ -1,180 +1,188 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form, FormField as RHFFormField } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle, Upload } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 import ansutLogo from "@/assets/ansut-logo-official.png";
-
-const formSchema = z.object({
-  firstName: z.string().trim().min(2, "Le prénom doit contenir au moins 2 caractères").max(100),
-  lastName: z.string().trim().min(2, "Le nom doit contenir au moins 2 caractères").max(100),
-  email: z.string().trim().email("Email invalide").max(255),
-  phone: z.string().trim().min(10, "Numéro invalide").max(20).optional().or(z.literal("")),
-  location: z.string().trim().max(200).optional().or(z.literal("")),
-  experienceYears: z.coerce.number().min(0).max(50).optional(),
-  technicalSkills: z.string().trim().max(1000).optional().or(z.literal("")),
-  behavioralSkills: z.string().trim().max(1000).optional().or(z.literal("")),
-  linkedin: z.string().trim().url("URL LinkedIn invalide").max(500).optional().or(z.literal("")),
-  github: z.string().trim().url("URL GitHub invalide").max(500).optional().or(z.literal("")),
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { useFormFields } from "@/hooks/useFormFields";
+import { useDynamicFormSchema } from "@/hooks/useDynamicFormSchema";
+import { DynamicFormField } from "@/components/DynamicFormField";
 
 const PublicCandidature = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [cvFile, setCvFile] = useState<File | null>(null);
-  const [motivationFile, setMotivationFile] = useState<File | null>(null);
-  const navigate = useNavigate();
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({});
 
-  const form = useForm<FormData>({
+  const { data: formFields = [], isLoading: isLoadingFields } = useFormFields(true);
+  const formSchema = useDynamicFormSchema(formFields);
+
+  // Generate default values from form fields
+  const defaultValues = useMemo(() => {
+    const values: Record<string, any> = {};
+    formFields.forEach((field) => {
+      if (field.field_type === 'number') {
+        values[field.field_key] = 0;
+      } else {
+        values[field.field_key] = '';
+      }
+    });
+    return values;
+  }, [formFields]);
+
+  const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      location: "",
-      experienceYears: 0,
-      technicalSkills: "",
-      behavioralSkills: "",
-      linkedin: "",
-      github: "",
-    },
+    defaultValues,
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'cv' | 'motivation') => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-        toast.error("Le fichier ne doit pas dépasser 5 MB");
-        return;
-      }
-      if (type === 'cv') {
-        setCvFile(file);
-      } else {
-        setMotivationFile(file);
-      }
+  const handleFileChange = (fieldKey: string, file: File | null) => {
+    if (!file) {
+      const newFiles = { ...uploadedFiles };
+      delete newFiles[fieldKey];
+      setUploadedFiles(newFiles);
+      return;
     }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast.error("Le fichier est trop volumineux (max 5MB)");
+      return;
+    }
+
+    if (!file.type.includes("pdf") && !file.type.includes("doc")) {
+      toast.error("Format de fichier non supporté. Utilisez PDF ou DOC");
+      return;
+    }
+
+    setUploadedFiles({ ...uploadedFiles, [fieldKey]: file });
   };
 
-  const uploadFile = async (file: File, folder: string): Promise<string | null> => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${crypto.randomUUID()}.${fileExt}`;
-    const filePath = `${folder}/${fileName}`;
+  const uploadFile = async (file: File, fieldKey: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from(folder === 'cv' ? 'diplomas' : 'motivation-letters')
-      .upload(filePath, file);
+      // Determine bucket based on field key
+      const bucket = fieldKey.toLowerCase().includes('cv') ? 'diplomas' : 
+                     fieldKey.toLowerCase().includes('motivation') ? 'motivation-letters' :
+                     'motivation-letters';
 
-    if (uploadError) {
-      console.error('Upload error:', uploadError);
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      return data.publicUrl;
+    } catch (error: any) {
+      toast.error(`Erreur lors de l'upload: ${error.message}`);
       return null;
     }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from(folder === 'cv' ? 'diplomas' : 'motivation-letters')
-      .getPublicUrl(filePath);
-
-    return publicUrl;
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: any) => {
     setIsSubmitting(true);
 
     try {
-      // Upload files if present
-      let cvUrl = null;
-      let motivationUrl = null;
+      const filesData: Record<string, string> = {};
 
-      if (cvFile) {
-        cvUrl = await uploadFile(cvFile, 'cv');
-        if (!cvUrl) {
-          toast.error("Erreur lors du téléchargement du CV");
+      // Upload all files
+      for (const [fieldKey, file] of Object.entries(uploadedFiles)) {
+        const url = await uploadFile(file, fieldKey);
+        if (!url) {
           setIsSubmitting(false);
           return;
         }
+        filesData[fieldKey] = url;
       }
 
-      if (motivationFile) {
-        motivationUrl = await uploadFile(motivationFile, 'motivation');
-        if (!motivationUrl) {
-          toast.error("Erreur lors du téléchargement de la lettre de motivation");
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
-      // Insert application
       const { error: insertError } = await supabase
-        .from('public_applications')
+        .from("form_submissions")
         .insert({
-          first_name: data.firstName,
-          last_name: data.lastName,
-          email: data.email,
-          phone: data.phone || null,
-          location: data.location || null,
-          experience_years: data.experienceYears || null,
-          technical_skills: data.technicalSkills || null,
-          behavioral_skills: data.behavioralSkills || null,
-          linkedin: data.linkedin || null,
-          github: data.github || null,
-          cv_url: cvUrl,
-          motivation_letter_url: motivationUrl,
-          status: 'new',
+          form_data: data,
+          files_data: filesData,
+          status: "new",
         });
 
-      if (insertError) {
-        console.error('Insert error:', insertError);
-        toast.error("Erreur lors de la soumission de votre candidature");
-        setIsSubmitting(false);
-        return;
-      }
+      if (insertError) throw insertError;
 
-      // Success
       setIsSuccess(true);
-      toast.success("Candidature envoyée avec succès !");
-      
-      // Redirect to success page or home after 3 seconds
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
-
-    } catch (error) {
-      console.error('Submission error:', error);
-      toast.error("Une erreur est survenue");
+      toast.success("Candidature soumise avec succès!");
+    } catch (error: any) {
+      console.error("Error submitting application:", error);
+      toast.error("Erreur lors de la soumission: " + error.message);
+    } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (isLoadingFields) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-accent/20 flex items-center justify-center p-4">
+        <Card className="max-w-4xl w-full">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <CardTitle>Chargement du formulaire...</CardTitle>
+            </div>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="p-8 text-center space-y-6">
-            <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-            <h2 className="text-2xl font-bold">Candidature envoyée !</h2>
-            <p className="text-muted-foreground">
-              Merci pour votre candidature. Notre équipe RH va examiner votre profil 
-              et vous contactera par email prochainement.
+      <div className="min-h-screen bg-gradient-to-b from-background to-accent/20 flex items-center justify-center p-4">
+        <Card className="max-w-2xl w-full text-center">
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <CardTitle className="text-2xl">Candidature soumise avec succès!</CardTitle>
+            <CardDescription className="text-base">
+              Nous avons bien reçu votre candidature. Notre équipe RH l'examinera dans les plus brefs délais.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Vous recevrez un email de confirmation à l'adresse que vous avez fournie.
             </p>
-            <Link to="/">
-              <Button className="w-full">Retour à l'accueil</Button>
-            </Link>
+            <div className="flex gap-4 justify-center">
+              <Link to="/">
+                <Button variant="outline">
+                  Retour à l'accueil
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>
     );
   }
+
+  // Group fields by section
+  const groupedFields = formFields.reduce((acc, field) => {
+    if (!acc[field.field_section]) {
+      acc[field.field_section] = [];
+    }
+    acc[field.field_section].push(field);
+    return acc;
+  }, {} as Record<string, typeof formFields>);
+
+  const sectionLabels: Record<string, string> = {
+    personal: 'Informations personnelles',
+    professional: 'Expérience professionnelle',
+    links: 'Profils en ligne',
+    documents: 'Documents',
+    custom: 'Informations complémentaires',
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted py-8">
@@ -203,229 +211,41 @@ const PublicCandidature = () => {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* Personal Information */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Informations personnelles</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Prénom *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Jean" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nom *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Kouassi" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email *</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="jean.kouassi@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Téléphone</FormLabel>
-                          <FormControl>
-                            <Input placeholder="+225 XX XX XX XX" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="location"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Localisation</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Abidjan, Côte d'Ivoire" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                {/* Professional Information */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Expérience professionnelle</h3>
-                  
-                  <FormField
-                    control={form.control}
-                    name="experienceYears"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Années d'expérience</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="0" max="50" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="technicalSkills"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Compétences techniques</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Ex: Gestion de projet, transformation digitale, analyse de données..."
-                            className="min-h-[100px]"
-                            {...field}
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                {Object.entries(groupedFields).map(([section, fields]) => (
+                  <div key={section} className="space-y-4">
+                    <h3 className="text-lg font-semibold border-b pb-2">
+                      {sectionLabels[section] || section}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {fields.map((field) => (
+                        <div key={field.field_key} className={field.field_type === 'textarea' ? 'md:col-span-2' : ''}>
+                          <RHFFormField
+                            control={form.control}
+                            name={field.field_key}
+                            render={({ field: formField }) => (
+                              <DynamicFormField
+                                field={field}
+                                formField={formField}
+                                onFileChange={handleFileChange}
+                              />
+                            )}
                           />
-                        </FormControl>
-                        <FormDescription>
-                          Décrivez vos compétences techniques principales
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="behavioralSkills"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Compétences comportementales</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Ex: Leadership, communication, travail d'équipe..."
-                            className="min-h-[100px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Décrivez vos soft skills
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Links */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Profils professionnels</h3>
-                  
-                  <FormField
-                    control={form.control}
-                    name="linkedin"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>LinkedIn</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://linkedin.com/in/votre-profil" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="github"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>GitHub</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://github.com/votre-profil" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* File Uploads */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Documents</h3>
-                  
-                  <div className="space-y-2">
-                    <FormLabel>CV (optionnel)</FormLabel>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        onChange={(e) => handleFileChange(e, 'cv')}
-                        className="flex-1"
-                      />
-                      {cvFile && (
-                        <span className="text-sm text-muted-foreground flex items-center gap-2">
-                          <Upload className="h-4 w-4" />
-                          {cvFile.name}
-                        </span>
-                      )}
+                        </div>
+                      ))}
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Formats acceptés: PDF, DOC, DOCX (max 5 MB)
-                    </p>
                   </div>
-
-                  <div className="space-y-2">
-                    <FormLabel>Lettre de motivation (optionnel)</FormLabel>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        onChange={(e) => handleFileChange(e, 'motivation')}
-                        className="flex-1"
-                      />
-                      {motivationFile && (
-                        <span className="text-sm text-muted-foreground flex items-center gap-2">
-                          <Upload className="h-4 w-4" />
-                          {motivationFile.name}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Formats acceptés: PDF, DOC, DOCX (max 5 MB)
-                    </p>
-                  </div>
-                </div>
+                ))}
 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? "Envoi en cours..." : "Envoyer ma candidature"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Envoi en cours...
+                    </>
+                  ) : (
+                    "Envoyer ma candidature"
+                  )}
                 </Button>
 
                 <p className="text-sm text-center text-muted-foreground">

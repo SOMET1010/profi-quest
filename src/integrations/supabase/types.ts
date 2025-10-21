@@ -642,6 +642,96 @@ export type Database = {
         }
         Relationships: []
       }
+      form_fields_config: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number
+          field_key: string
+          field_section: string
+          field_type: Database["public"]["Enums"]["field_type"]
+          id: string
+          is_active: boolean | null
+          is_required: boolean | null
+          label_en: string | null
+          label_fr: string
+          options: Json | null
+          placeholder: string | null
+          updated_at: string | null
+          validation_rules: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order: number
+          field_key: string
+          field_section: string
+          field_type: Database["public"]["Enums"]["field_type"]
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          label_en?: string | null
+          label_fr: string
+          options?: Json | null
+          placeholder?: string | null
+          updated_at?: string | null
+          validation_rules?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          field_key?: string
+          field_section?: string
+          field_type?: Database["public"]["Enums"]["field_type"]
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          label_en?: string | null
+          label_fr?: string
+          options?: Json | null
+          placeholder?: string | null
+          updated_at?: string | null
+          validation_rules?: Json | null
+        }
+        Relationships: []
+      }
+      form_submissions: {
+        Row: {
+          created_at: string | null
+          files_data: Json | null
+          form_data: Json
+          id: string
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          files_data?: Json | null
+          form_data?: Json
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          files_data?: Json | null
+          form_data?: Json
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           contract_type: string | null
@@ -1413,6 +1503,16 @@ export type Database = {
         | "CONSULTANT"
         | "POSTULANT"
       audit_action: "INSERT" | "UPDATE" | "DELETE"
+      field_type:
+        | "text"
+        | "number"
+        | "email"
+        | "tel"
+        | "textarea"
+        | "select"
+        | "file"
+        | "url"
+        | "date"
       kyc_status: "not_started" | "in_progress" | "completed" | "rejected"
       project_axe: "Infra" | "Services" | "Compétences" | "Gouvernance"
       project_status: "Planifié" | "En cours" | "Suspendu" | "Clôturé"
@@ -1554,6 +1654,17 @@ export const Constants = {
         "POSTULANT",
       ],
       audit_action: ["INSERT", "UPDATE", "DELETE"],
+      field_type: [
+        "text",
+        "number",
+        "email",
+        "tel",
+        "textarea",
+        "select",
+        "file",
+        "url",
+        "date",
+      ],
       kyc_status: ["not_started", "in_progress", "completed", "rejected"],
       project_axe: ["Infra", "Services", "Compétences", "Gouvernance"],
       project_status: ["Planifié", "En cours", "Suspendu", "Clôturé"],

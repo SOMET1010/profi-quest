@@ -22,6 +22,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Candidature = lazy(() => import("./pages/Candidature"));
 const RoleManagement = lazy(() => import("./pages/RoleManagement"));
 const PermissionManagement = lazy(() => import("./pages/PermissionManagement"));
+const FormBuilder = lazy(() => import("./pages/FormBuilder"));
 
 // Optimized React Query configuration
 const queryClient = new QueryClient({
@@ -114,6 +115,11 @@ const App = () => (
               <Route path="/admin/permissions" element={
                 <ProtectedRoute>
                   <AppLayout><PermissionManagement /></AppLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/form-builder" element={
+                <ProtectedRoute>
+                  <FormBuilder />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
