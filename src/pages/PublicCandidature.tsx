@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Upload } from "lucide-react";
-import ansutLogo from "@/assets/ansut-logo.webp";
+import ansutLogo from "@/assets/ansut-logo-official.png";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(2, "Le prénom doit contenir au moins 2 caractères").max(100),

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Users, Target, Award, TrendingUp } from "lucide-react";
-import ansutLogo from "@/assets/ansut-logo.webp";
+import ansutLogo from "@/assets/ansut-logo-official.png";
 
 const Home = () => {
   return (
