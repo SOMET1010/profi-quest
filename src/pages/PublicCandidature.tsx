@@ -1,22 +1,28 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormField as RHFFormField } from "@/components/ui/form";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, Loader2, Save } from "lucide-react";
 import ansutLogo from "@/assets/ansut-logo-official.png";
 import { useFormFields } from "@/hooks/useFormFields";
 import { useDynamicFormSchema } from "@/hooks/useDynamicFormSchema";
 import { DynamicFormField } from "@/components/DynamicFormField";
 
+const DRAFT_KEY = 'candidature_draft';
+const LAST_SAVE_KEY = 'candidature_last_save';
+
 const PublicCandidature = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({});
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [lastSave, setLastSave] = useState<Date | null>(null);
 
   const { data: formFields = [], isLoading: isLoadingFields } = useFormFields(true);
   const formSchema = useDynamicFormSchema(formFields);
@@ -39,6 +45,59 @@ const PublicCandidature = () => {
     defaultValues,
   });
 
+  // Load draft on mount
+  useEffect(() => {
+    const draft = localStorage.getItem(DRAFT_KEY);
+    const lastSaveTime = localStorage.getItem(LAST_SAVE_KEY);
+    
+    if (draft) {
+      try {
+        const parsedDraft = JSON.parse(draft);
+        Object.keys(parsedDraft).forEach(key => {
+          form.setValue(key, parsedDraft[key]);
+        });
+        
+        if (lastSaveTime) {
+          setLastSave(new Date(lastSaveTime));
+          toast.info('Brouillon restauré');
+        }
+      } catch (error) {
+        console.error('Error loading draft:', error);
+      }
+    }
+  }, [form]);
+
+  // Auto-save every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const values = form.getValues();
+      if (Object.keys(values).length > 0) {
+        saveDraft(values);
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [form]);
+
+  const saveDraft = (values: any) => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(values));
+      const now = new Date();
+      localStorage.setItem(LAST_SAVE_KEY, now.toISOString());
+      setLastSave(now);
+      toast.success('Brouillon sauvegardé', { duration: 2000 });
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      toast.error('Erreur lors de la sauvegarde');
+    }
+  };
+
+  const clearDraft = () => {
+    localStorage.removeItem(DRAFT_KEY);
+    localStorage.removeItem(LAST_SAVE_KEY);
+    setLastSave(null);
+  };
+
   const handleFileChange = (fieldKey: string, file: File | null) => {
     if (!file) {
       const newFiles = { ...uploadedFiles };
@@ -47,18 +106,26 @@ const PublicCandidature = () => {
       return;
     }
 
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      toast.error("Le fichier est trop volumineux (max 5MB)");
+      toast.error(`Le fichier "${file.name}" est trop volumineux. Taille maximale: 5MB`, {
+        description: `Taille actuelle: ${(file.size / 1024 / 1024).toFixed(2)}MB`
+      });
       return;
     }
 
-    if (!file.type.includes("pdf") && !file.type.includes("doc")) {
-      toast.error("Format de fichier non supporté. Utilisez PDF ou DOC");
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(`Format de fichier non supporté pour "${file.name}"`, {
+        description: 'Formats acceptés: PDF, DOC, DOCX'
+      });
       return;
     }
 
     setUploadedFiles({ ...uploadedFiles, [fieldKey]: file });
+    toast.success(`Fichier "${file.name}" ajouté`);
   };
 
   const uploadFile = async (file: File, fieldKey: string): Promise<string | null> => {
@@ -88,20 +155,51 @@ const PublicCandidature = () => {
 
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
+    setUploadProgress(0);
 
     try {
-      const filesData: Record<string, string> = {};
+      // Validate required fields
+      const missingFields = formFields
+        .filter(f => f.is_required && !data[f.field_key])
+        .map(f => f.label_fr);
 
-      // Upload all files
+      if (missingFields.length > 0) {
+        toast.error('Champs obligatoires manquants', {
+          description: missingFields.join(', ')
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const filesData: Record<string, string> = {};
+      const totalFiles = Object.keys(uploadedFiles).length;
+      let uploadedCount = 0;
+
+      // Upload all files with progress
       for (const [fieldKey, file] of Object.entries(uploadedFiles)) {
-        const url = await uploadFile(file, fieldKey);
-        if (!url) {
+        try {
+          const url = await uploadFile(file, fieldKey);
+          if (!url) {
+            toast.error(`Échec de l'upload: ${file.name}`, {
+              description: 'Vérifiez les permissions de stockage'
+            });
+            setIsSubmitting(false);
+            return;
+          }
+          filesData[fieldKey] = url;
+          uploadedCount++;
+          setUploadProgress(Math.round((uploadedCount / totalFiles) * 100));
+        } catch (uploadError: any) {
+          console.error('Upload error:', uploadError);
+          toast.error(`Erreur lors de l'upload de ${file.name}`, {
+            description: uploadError.message || 'Erreur réseau'
+          });
           setIsSubmitting(false);
           return;
         }
-        filesData[fieldKey] = url;
       }
 
+      // Insert submission
       const { error: insertError } = await supabase
         .from("form_submissions")
         .insert({
@@ -110,7 +208,24 @@ const PublicCandidature = () => {
           status: "new",
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        
+        if (insertError.code === '23505') {
+          toast.error('Cette candidature existe déjà');
+        } else if (insertError.code === '42501') {
+          toast.error('Erreur de permission', {
+            description: 'Contactez l\'administrateur'
+          });
+        } else {
+          toast.error('Erreur lors de la soumission', {
+            description: insertError.message
+          });
+        }
+        
+        setIsSubmitting(false);
+        return;
+      }
 
       // Send confirmation email
       try {
@@ -127,13 +242,24 @@ const PublicCandidature = () => {
         // Don't block submission if email fails
       }
 
+      clearDraft();
       setIsSuccess(true);
       toast.success("Candidature soumise avec succès!");
     } catch (error: any) {
       console.error("Error submitting application:", error);
-      toast.error("Erreur lors de la soumission: " + error.message);
+      
+      if (error.message?.includes('network')) {
+        toast.error('Erreur de connexion', {
+          description: 'Vérifiez votre connexion internet'
+        });
+      } else {
+        toast.error('Erreur lors de la soumission', {
+          description: error.message || 'Erreur inconnue'
+        });
+      }
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -218,11 +344,20 @@ const PublicCandidature = () => {
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         <Card>
           <CardHeader>
-            <CardTitle>Formulaire de candidature</CardTitle>
-            <CardDescription>
-              Remplissez ce formulaire pour rejoindre notre réseau d'experts. 
-              Les champs marqués d'un astérisque (*) sont obligatoires.
-            </CardDescription>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>Formulaire de candidature</CardTitle>
+                <CardDescription>
+                  Remplissez ce formulaire pour rejoindre notre réseau d'experts. 
+                  Les champs marqués d'un astérisque (*) sont obligatoires.
+                </CardDescription>
+              </div>
+              {lastSave && (
+                <p className="text-xs text-muted-foreground">
+                  Dernière sauvegarde: {lastSave.toLocaleTimeString()}
+                </p>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -252,16 +387,36 @@ const PublicCandidature = () => {
                   </div>
                 ))}
 
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Envoi en cours...
-                    </>
-                  ) : (
-                    "Envoyer ma candidature"
-                  )}
-                </Button>
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Upload des fichiers en cours...</p>
+                    <Progress value={uploadProgress} />
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => saveDraft(form.getValues())}
+                    disabled={isSubmitting}
+                  >
+                    <Save className="mr-2 h-4 w-4" />
+                    Sauvegarder le brouillon
+                  </Button>
+                  
+                  <Button type="submit" className="flex-1" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Envoi en cours...
+                      </>
+                    ) : (
+                      "Envoyer ma candidature"
+                    )}
+                  </Button>
+                </div>
 
                 <p className="text-sm text-center text-muted-foreground">
                   Vous avez déjà un compte ?{" "}

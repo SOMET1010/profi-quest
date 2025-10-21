@@ -1,16 +1,18 @@
-import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { Eye, EyeOff, UserPlus, LogIn } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, LogIn, AlertCircle, Clock } from 'lucide-react';
 
 const Auth = () => {
-  const { user, signUp, signIn, resetPassword } = useAuth();
+  const { user, signUp, signIn, resetPassword, resendConfirmationEmail } = useAuth();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,6 +20,30 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [signUpCooldown, setSignUpCooldown] = useState(0);
+  const [lastSignUpEmail, setLastSignUpEmail] = useState('');
+  const [otpError, setOtpError] = useState(false);
+
+  // Check for OTP errors in URL
+  useEffect(() => {
+    const errorCode = searchParams.get('error_code');
+    const errorDescription = searchParams.get('error_description');
+    
+    if (errorCode === 'otp_expired') {
+      setOtpError(true);
+      toast.error('Le lien de confirmation a expiré. Demandez-en un nouveau.');
+    } else if (errorDescription) {
+      toast.error(`Erreur d'authentification: ${errorDescription}`);
+    }
+  }, [searchParams]);
+
+  // Countdown timer for signup cooldown
+  useEffect(() => {
+    if (signUpCooldown > 0) {
+      const timer = setTimeout(() => setSignUpCooldown(signUpCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [signUpCooldown]);
 
   // Redirect if already authenticated
   if (user) {
@@ -49,6 +75,27 @@ const Auth = () => {
       }
     } else {
       toast.success('Inscription réussie ! Vérifiez votre email pour confirmer votre compte.');
+      setLastSignUpEmail(email);
+      setSignUpCooldown(60); // 60 seconds cooldown
+      setOtpError(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!lastSignUpEmail) {
+      toast.error('Aucune adresse email trouvée');
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await resendConfirmationEmail(lastSignUpEmail);
+    setLoading(false);
+
+    if (error) {
+      toast.error('Erreur lors du renvoi: ' + error.message);
+    } else {
+      toast.success('Email de confirmation renvoyé !');
+      setSignUpCooldown(60); // Reset cooldown
     }
   };
 
@@ -119,6 +166,25 @@ const Auth = () => {
           </CardHeader>
           
           <CardContent className="space-y-6">
+            {otpError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="flex flex-col gap-2">
+                  <span>Le lien de confirmation a expiré.</span>
+                  {lastSignUpEmail && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleResendConfirmation}
+                      disabled={loading || signUpCooldown > 0}
+                    >
+                      {loading ? 'Envoi...' : signUpCooldown > 0 ? `Attendre ${signUpCooldown}s` : 'Renvoyer l\'email'}
+                    </Button>
+                  )}
+                </AlertDescription>
+              </Alert>
+            )}
+            
             {forgotPasswordMode ? (
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="space-y-2">
@@ -283,9 +349,36 @@ const Auth = () => {
                       />
                     </div>
                     
-                    <Button type="submit" className="w-full h-11" disabled={loading}>
-                      {loading ? 'Inscription...' : 'Créer un compte'}
+                    <Button 
+                      type="submit" 
+                      className="w-full h-11" 
+                      disabled={loading || signUpCooldown > 0}
+                    >
+                      {loading ? 'Inscription...' : signUpCooldown > 0 ? (
+                        <span className="flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          Attendre {signUpCooldown}s
+                        </span>
+                      ) : 'Créer un compte'}
                     </Button>
+
+                    {signUpCooldown > 0 && lastSignUpEmail && (
+                      <p className="text-sm text-center text-muted-foreground">
+                        Vous n'avez pas reçu l'email ? Vous pourrez en demander un nouveau dans {signUpCooldown} secondes.
+                      </p>
+                    )}
+
+                    {signUpCooldown === 0 && lastSignUpEmail && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleResendConfirmation}
+                        disabled={loading}
+                      >
+                        {loading ? 'Envoi...' : 'Renvoyer l\'email de confirmation'}
+                      </Button>
+                    )}
                   </form>
                 </TabsContent>
               </Tabs>

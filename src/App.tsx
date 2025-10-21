@@ -1,9 +1,10 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, useSearchParams } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
@@ -55,6 +56,24 @@ const PageFallback = () => (
   </div>
 );
 
+// Error handler component
+const ErrorHandler = () => {
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const error = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
+
+    if (error || errorDescription) {
+      toast.error('Erreur d\'authentification', {
+        description: errorDescription || error || 'Une erreur est survenue'
+      });
+    }
+  }, [searchParams]);
+
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -64,6 +83,7 @@ const App = () => (
           v7_startTransition: true,
           v7_relativeSplatPath: true,
         }}>
+          <ErrorHandler />
           <Suspense fallback={<PageFallback />}>
             <Routes>
               {/* Public Routes */}
