@@ -9,6 +9,8 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 
 // Lazy load pages for code splitting
+const Home = lazy(() => import("./pages/Home"));
+const PublicCandidature = lazy(() => import("./pages/PublicCandidature"));
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ImportProfiles = lazy(() => import("./pages/ImportProfiles"));
@@ -63,8 +65,13 @@ const App = () => (
         }}>
           <Suspense fallback={<PageFallback />}>
             <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/postuler" element={<PublicCandidature />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={
+              
+              {/* Protected Routes - Dashboard */}
+              <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <AppLayout><Index /></AppLayout>
                 </ProtectedRoute>

@@ -1023,6 +1023,83 @@ export type Database = {
           },
         ]
       }
+      public_applications: {
+        Row: {
+          behavioral_skills: string | null
+          converted_to_profile_id: string | null
+          created_at: string | null
+          cv_url: string | null
+          email: string
+          experience_years: number | null
+          first_name: string
+          github: string | null
+          id: string
+          last_name: string
+          linkedin: string | null
+          location: string | null
+          motivation_letter_url: string | null
+          notes: string | null
+          phone: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          technical_skills: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          behavioral_skills?: string | null
+          converted_to_profile_id?: string | null
+          created_at?: string | null
+          cv_url?: string | null
+          email: string
+          experience_years?: number | null
+          first_name: string
+          github?: string | null
+          id?: string
+          last_name: string
+          linkedin?: string | null
+          location?: string | null
+          motivation_letter_url?: string | null
+          notes?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          technical_skills?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          behavioral_skills?: string | null
+          converted_to_profile_id?: string | null
+          created_at?: string | null
+          cv_url?: string | null
+          email?: string
+          experience_years?: number | null
+          first_name?: string
+          github?: string | null
+          id?: string
+          last_name?: string
+          linkedin?: string | null
+          location?: string | null
+          motivation_letter_url?: string | null
+          notes?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          technical_skills?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_applications_converted_to_profile_id_fkey"
+            columns: ["converted_to_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_default_permissions: {
         Row: {
           created_at: string | null

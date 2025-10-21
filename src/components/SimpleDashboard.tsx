@@ -21,6 +21,8 @@ import { useStats } from "@/hooks/useStats";
 import { useNavigate } from "react-router-dom";
 import { useNavigationPreload } from "@/hooks/useNavigationPreload";
 import { useHasRole } from "@/hooks/useRole";
+import { useHasPermission } from "@/hooks/usePermissions";
+import { PublicApplicationsSection } from "./PublicApplicationsSection";
 
 // Lazy load the charts component
 const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
@@ -28,6 +30,7 @@ const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
 export default function SimpleDashboard() {
   const navigate = useNavigate();
   const { userRole } = useHasRole('DG');
+  const { hasPermission: canViewApplications } = useHasPermission('view_all_applications');
   const { data: stats, isLoading: statsLoading } = useStats();
   const {
     preloadImportProfiles,
@@ -206,6 +209,13 @@ export default function SimpleDashboard() {
       }>
         <DashboardCharts isLoading={statsLoading} stats={stats} />
       </Suspense>
+
+      {/* Public Applications Section - Only for RH */}
+      {canViewApplications && (
+        <section aria-labelledby="public-applications-heading" className="mt-8">
+          <PublicApplicationsSection />
+        </section>
+      )}
 
       {/* Module Cards */}
       <section aria-labelledby="modules-heading">
