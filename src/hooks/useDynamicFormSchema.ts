@@ -56,7 +56,19 @@ export function useDynamicFormSchema(fields: FormField[]) {
 
       // Make field optional if not required
       if (!field.is_required) {
-        validator = validator.optional().or(z.literal(''));
+        if (field.field_type === 'email' || field.field_type === 'url') {
+          // For email/url: either empty or valid format
+          validator = z.union([
+            z.literal(''),
+            validator
+          ]).optional();
+        } else if (field.field_type === 'number') {
+          // For number: can be undefined
+          validator = validator.optional();
+        } else {
+          // For text: can be empty or undefined
+          validator = validator.optional().or(z.literal(''));
+        }
       }
 
       schemaObject[field.field_key] = validator;
