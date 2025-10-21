@@ -1,4 +1,7 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,7 +15,6 @@ interface ApplicationConfirmationRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -20,86 +22,75 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { firstName, lastName, email }: ApplicationConfirmationRequest = await req.json();
 
-    console.log('Sending application confirmation email to:', email);
+    console.log('Sending confirmation email to:', email);
 
-    // Note: This is a placeholder implementation
-    // In production, you would integrate with Resend or another email service
-    // For now, we'll just log the confirmation
-    
-    const confirmationMessage = {
-      to: email,
-      subject: "Candidature reçue - ANSUT Programme d'Experts",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #2563eb;">ANSUT - Programme d'Experts RH</h1>
-          
-          <p>Bonjour ${firstName} ${lastName},</p>
-          
-          <p>Nous avons bien reçu votre candidature pour rejoindre notre réseau d'experts.</p>
-          
-          <p>Notre équipe RH va examiner votre profil et vous contactera prochainement par email pour la suite du processus de sélection.</p>
-          
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0;">Prochaines étapes :</h3>
-            <ol>
-              <li>Examen de votre candidature par notre équipe RH (2-3 jours ouvrés)</li>
-              <li>Entretien de pré-qualification si votre profil correspond</li>
-              <li>Évaluation technique et comportementale</li>
-              <li>Intégration au réseau d'experts ANSUT</li>
-            </ol>
+    const emailSubject = `Confirmation de votre candidature - ANSUT`;
+    const emailBody = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+          .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+          .button { background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Confirmation de candidature</h1>
           </div>
-          
-          <p>Vous pouvez créer un compte sur notre plateforme pour suivre l'évolution de votre candidature et compléter votre profil :</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="https://quali-rh-experts.lovable.app/auth" 
-               style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-              Créer mon compte
-            </a>
+          <div class="content">
+            <h2>Bonjour ${firstName} ${lastName},</h2>
+            <p>Nous avons bien reçu votre candidature et nous vous en remercions.</p>
+            <p>Notre équipe des ressources humaines l'examinera dans les plus brefs délais.</p>
+            <p><strong>Prochaines étapes :</strong></p>
+            <ul>
+              <li>Votre dossier sera examiné par notre équipe</li>
+              <li>Vous recevrez une notification dès qu'il y aura une mise à jour</li>
+              <li>Si votre profil correspond, nous vous contacterons pour un entretien</li>
+            </ul>
+            <p>En attendant, n'hésitez pas à consulter notre site web pour en savoir plus sur l'ANSUT.</p>
           </div>
-          
-          <p>Nous vous remercions de votre intérêt pour l'ANSUT.</p>
-          
-          <p>Cordialement,<br>
-          <strong>L'équipe RH ANSUT</strong></p>
-          
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-          
-          <p style="font-size: 12px; color: #6b7280;">
-            ANSUT - Agence Nationale du Service Universel des Télécommunications<br>
-            Programme de Transformation Numérique de la Côte d'Ivoire
-          </p>
+          <div class="footer">
+            <p>Agence Nationale du Service Universel des Télécommunications/TIC</p>
+            <p>Abidjan, Côte d'Ivoire</p>
+          </div>
         </div>
-      `,
-    };
+      </body>
+      </html>
+    `;
 
-    console.log('Email confirmation prepared:', confirmationMessage);
+    const emailResponse = await resend.emails.send({
+      from: "ANSUT Recrutement <onboarding@resend.dev>",
+      to: [email],
+      subject: emailSubject,
+      html: emailBody,
+    });
 
-    // TODO: Integrate with Resend or another email service
-    // const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-    // await resend.emails.send(confirmationMessage);
+    console.log('Email sent successfully:', emailResponse);
 
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        message: 'Confirmation email logged (email service not configured yet)',
-        data: confirmationMessage 
+        success: true,
+        message: 'Confirmation email sent',
+        emailId: emailResponse.id
       }),
       {
         status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   } catch (error: any) {
-    console.error('Error in send-application-confirmation function:', error);
+    console.error('Error sending confirmation email:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   }

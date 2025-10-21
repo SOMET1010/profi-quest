@@ -112,6 +112,21 @@ const PublicCandidature = () => {
 
       if (insertError) throw insertError;
 
+      // Send confirmation email
+      try {
+        await supabase.functions.invoke('send-application-confirmation', {
+          body: {
+            firstName: data.firstName || data.first_name || 'Candidat',
+            lastName: data.lastName || data.last_name || '',
+            email: data.email || '',
+          }
+        });
+        console.log("Confirmation email sent");
+      } catch (emailError) {
+        console.error("Error sending confirmation email:", emailError);
+        // Don't block submission if email fails
+      }
+
       setIsSuccess(true);
       toast.success("Candidature soumise avec succès!");
     } catch (error: any) {

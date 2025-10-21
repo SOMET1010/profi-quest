@@ -1,12 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Eye } from "lucide-react";
+import { ExternalLink, Eye, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 interface FormSubmission {
   id: string;
@@ -35,6 +39,9 @@ const statusLabels: Record<string, string> = {
 
 export function FormSubmissionsSection() {
   const [selectedSubmission, setSelectedSubmission] = useState<FormSubmission | null>(null);
+  const [editedStatus, setEditedStatus] = useState<string>("");
+  const [editedNotes, setEditedNotes] = useState<string>("");
+  const queryClient = useQueryClient();
 
   const { data: submissions = [], isLoading } = useQuery({
     queryKey: ["form-submissions"],
@@ -48,6 +55,67 @@ export function FormSubmissionsSection() {
       return data as FormSubmission[];
     },
   });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status, notes }: { id: string; status: string; notes: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from("form_submissions")
+        .update({
+          status,
+          notes,
+          reviewed_by: user?.id,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Send email notification
+      if (status !== 'new' && selectedSubmission?.form_data) {
+        const formData = selectedSubmission.form_data;
+        try {
+          await supabase.functions.invoke('send-status-update-email', {
+            body: {
+              firstName: formData.firstName || formData.first_name || 'Candidat',
+              lastName: formData.lastName || formData.last_name || '',
+              email: formData.email || '',
+              status,
+              notes,
+            }
+          });
+        } catch (emailError) {
+          console.error("Error sending status email:", emailError);
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["form-submissions"] });
+      toast.success("Statut mis à jour avec succès");
+      setSelectedSubmission(null);
+    },
+    onError: (error) => {
+      console.error("Error updating status:", error);
+      toast.error("Erreur lors de la mise à jour du statut");
+    },
+  });
+
+  const handleViewSubmission = (submission: FormSubmission) => {
+    setSelectedSubmission(submission);
+    setEditedStatus(submission.status);
+    setEditedNotes(submission.notes || "");
+  };
+
+  const handleSaveStatus = () => {
+    if (!selectedSubmission) return;
+    
+    updateStatusMutation.mutate({
+      id: selectedSubmission.id,
+      status: editedStatus,
+      notes: editedNotes,
+    });
+  };
 
   if (isLoading) {
     return (
@@ -121,7 +189,7 @@ export function FormSubmissionsSection() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => setSelectedSubmission(submission)}
+                            onClick={() => handleViewSubmission(submission)}
                           >
                             <Eye className="h-4 w-4 mr-1" />
                             Voir
@@ -160,9 +228,63 @@ export function FormSubmissionsSection() {
           {selectedSubmission && (
             <ScrollArea className="h-full max-h-[60vh] pr-4">
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                {/* Status Management Card */}
+                <Card className="bg-muted/50">
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="status">Statut de la candidature</Label>
+                      <Select value={editedStatus} onValueChange={setEditedStatus}>
+                        <SelectTrigger id="status">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="new">
+                            <Badge variant="secondary">Nouveau</Badge>
+                          </SelectItem>
+                          <SelectItem value="reviewed">
+                            <Badge className="bg-blue-500">En révision</Badge>
+                          </SelectItem>
+                          <SelectItem value="accepted">
+                            <Badge className="bg-green-500">Accepté</Badge>
+                          </SelectItem>
+                          <SelectItem value="rejected">
+                            <Badge variant="destructive">Rejeté</Badge>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="notes">Notes internes</Label>
+                      <Textarea
+                        id="notes"
+                        placeholder="Ajouter des notes sur cette candidature..."
+                        value={editedNotes}
+                        onChange={(e) => setEditedNotes(e.target.value)}
+                        rows={4}
+                      />
+                    </div>
+
+                    <Button 
+                      onClick={handleSaveStatus}
+                      disabled={updateStatusMutation.isPending}
+                      className="w-full"
+                    >
+                      {updateStatusMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Enregistrement...
+                        </>
+                      ) : (
+                        'Enregistrer les modifications'
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                   <div>
-                    <h4 className="font-medium text-sm text-muted-foreground mb-1">Statut</h4>
+                    <h4 className="font-medium text-sm text-muted-foreground mb-1">Statut actuel</h4>
                     <Badge className={statusColors[selectedSubmission.status]}>
                       {statusLabels[selectedSubmission.status]}
                     </Badge>
