@@ -10,13 +10,9 @@ const Home = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={ansutLogo} alt="ANSUT" className="h-12 w-auto" />
-            <div>
-              <h1 className="text-xl font-bold">ANSUT</h1>
-              <p className="text-sm text-muted-foreground">Programme d'Experts RH</p>
-            </div>
-          </div>
+          <Link to="/" className="flex items-center">
+            <img src={ansutLogo} alt="ANSUT - Agence Nationale du Service Universel des Télécommunications" className="h-16 w-auto" />
+          </Link>
           <Link to="/auth">
             <Button variant="outline">Se connecter</Button>
           </Link>
