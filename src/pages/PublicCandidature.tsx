@@ -160,10 +160,24 @@ const PublicCandidature = () => {
     try {
       // Validate required fields
       const missingFields = formFields
-        .filter(f => f.is_required && !data[f.field_key])
+        .filter(f => {
+          if (!f.is_required) return false;
+          
+          // Pour les champs fichiers, vérifier uploadedFiles
+          if (f.field_type === 'file') {
+            return !uploadedFiles[f.field_key];
+          }
+          
+          // Pour les autres champs, vérifier data
+          return !data[f.field_key];
+        })
         .map(f => f.label_fr);
 
       if (missingFields.length > 0) {
+        console.error('[Validation] Champs manquants:', missingFields);
+        console.error('[Validation] Fichiers uploadés:', Object.keys(uploadedFiles));
+        console.error('[Validation] Données du formulaire:', data);
+        
         toast.error('Champs obligatoires manquants', {
           description: missingFields.join(', ')
         });
