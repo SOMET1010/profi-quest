@@ -8,16 +8,19 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { ArrowLeft, CheckCircle, Loader2, Save } from "lucide-react";
+import { ArrowLeft, CheckCircle, Loader2, Save, User, Briefcase, FileText } from "lucide-react";
 import ansutLogo from "@/assets/ansut-logo-official.png";
 import { useFormFields } from "@/hooks/useFormFields";
 import { useDynamicFormSchema } from "@/hooks/useDynamicFormSchema";
 import { DynamicFormField } from "@/components/DynamicFormField";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DRAFT_KEY = 'candidature_draft';
 const LAST_SAVE_KEY = 'candidature_last_save';
 
 const PublicCandidature = () => {
+  const { user } = useAuth();
+  const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({});
@@ -45,27 +48,52 @@ const PublicCandidature = () => {
     defaultValues,
   });
 
-  // Load draft on mount
+  // Load draft or user profile on mount
   useEffect(() => {
-    const draft = localStorage.getItem(DRAFT_KEY);
-    const lastSaveTime = localStorage.getItem(LAST_SAVE_KEY);
-    
-    if (draft) {
-      try {
-        const parsedDraft = JSON.parse(draft);
-        Object.keys(parsedDraft).forEach(key => {
-          form.setValue(key, parsedDraft[key]);
-        });
-        
-        if (lastSaveTime) {
-          setLastSave(new Date(lastSaveTime));
-          toast.info('Brouillon restauré');
+    const loadData = async () => {
+      // If user is authenticated, try to load their profile data
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (data) {
+          // Pre-fill form with profile data
+          Object.keys(defaultValues).forEach(key => {
+            if (data[key]) {
+              form.setValue(key, data[key]);
+            }
+          });
+          toast.info('Données du profil chargées');
+          return;
         }
-      } catch (error) {
-        console.error('Error loading draft:', error);
       }
-    }
-  }, [form]);
+
+      // Otherwise, load draft
+      const draft = localStorage.getItem(DRAFT_KEY);
+      const lastSaveTime = localStorage.getItem(LAST_SAVE_KEY);
+      
+      if (draft) {
+        try {
+          const parsedDraft = JSON.parse(draft);
+          Object.keys(parsedDraft).forEach(key => {
+            form.setValue(key, parsedDraft[key]);
+          });
+          
+          if (lastSaveTime) {
+            setLastSave(new Date(lastSaveTime));
+            toast.info('Brouillon restauré');
+          }
+        } catch (error) {
+          console.error('Error loading draft:', error);
+        }
+      }
+    };
+
+    loadData();
+  }, [user, form, defaultValues]);
 
   // Auto-save every 30 seconds
   useEffect(() => {
@@ -153,6 +181,30 @@ const PublicCandidature = () => {
     }
   };
 
+  // Group fields by section for wizard steps
+  const stepFields = useMemo(() => {
+    const step1 = formFields.filter(f => f.field_section === 'personal');
+    const step2 = formFields.filter(f => f.field_section === 'professional');
+    const step3 = formFields.filter(f => ['documents', 'links'].includes(f.field_section) || (!['personal', 'professional'].includes(f.field_section)));
+    
+    return { step1, step2, step3 };
+  }, [formFields]);
+
+  // Check if current step can be completed
+  const canProceedFromStep = (step: number): boolean => {
+    const currentStepFields = step === 1 ? stepFields.step1 : step === 2 ? stepFields.step2 : stepFields.step3;
+    const values = form.getValues();
+    
+    return currentStepFields
+      .filter(f => f.is_required)
+      .every(field => {
+        if (field.field_type === 'file') {
+          return !!uploadedFiles[field.field_key];
+        }
+        return !!values[field.field_key];
+      });
+  };
+
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     setUploadProgress(0);
@@ -174,10 +226,6 @@ const PublicCandidature = () => {
         .map(f => f.label_fr);
 
       if (missingFields.length > 0) {
-        console.error('[Validation] Champs manquants:', missingFields);
-        console.error('[Validation] Fichiers uploadés:', Object.keys(uploadedFiles));
-        console.error('[Validation] Données du formulaire:', data);
-        
         toast.error('Champs obligatoires manquants', {
           description: missingFields.join(', ')
         });
@@ -250,10 +298,8 @@ const PublicCandidature = () => {
             email: data.email || '',
           }
         });
-        console.log("Confirmation email sent");
       } catch (emailError) {
         console.error("Error sending confirmation email:", emailError);
-        // Don't block submission if email fails
       }
 
       clearDraft();
@@ -322,22 +368,15 @@ const PublicCandidature = () => {
     );
   }
 
-  // Group fields by section
-  const groupedFields = formFields.reduce((acc, field) => {
-    if (!acc[field.field_section]) {
-      acc[field.field_section] = [];
-    }
-    acc[field.field_section].push(field);
-    return acc;
-  }, {} as Record<string, typeof formFields>);
+  const steps = [
+    { number: 1, title: 'Informations personnelles', icon: User, completed: canProceedFromStep(1) },
+    { number: 2, title: 'Expérience & Compétences', icon: Briefcase, completed: canProceedFromStep(2) },
+    { number: 3, title: 'Documents', icon: FileText, completed: canProceedFromStep(3) },
+  ];
 
-  const sectionLabels: Record<string, string> = {
-    personal: 'Informations personnelles',
-    professional: 'Expérience professionnelle',
-    links: 'Profils en ligne',
-    documents: 'Documents',
-    custom: 'Informations complémentaires',
-  };
+  const currentStepFields = currentStep === 1 ? stepFields.step1 : 
+                           currentStep === 2 ? stepFields.step2 : 
+                           stepFields.step3;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted py-8">
@@ -374,32 +413,63 @@ const PublicCandidature = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {Object.entries(groupedFields).map(([section, fields]) => (
-                  <div key={section} className="space-y-4">
-                    <h3 className="text-lg font-semibold border-b pb-2">
-                      {sectionLabels[section] || section}
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {fields.map((field) => (
-                        <div key={field.field_key} className={field.field_type === 'textarea' ? 'md:col-span-2' : ''}>
-                          <RHFFormField
-                            control={form.control}
-                            name={field.field_key}
-                            render={({ field: formField }) => (
-                              <DynamicFormField
-                                field={field}
-                                formField={formField}
-                                onFileChange={handleFileChange}
-                              />
-                            )}
-                          />
-                        </div>
-                      ))}
-                    </div>
+            {/* Step indicators */}
+            <div className="flex justify-center mb-8">
+              <div className="flex items-center space-x-4">
+                {steps.map((step, index) => (
+                  <div key={step.number} className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(step.number)}
+                      className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-colors ${
+                        currentStep === step.number
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : step.completed
+                          ? 'border-green-500 bg-green-500 text-white'
+                          : 'border-muted-foreground bg-background text-muted-foreground'
+                      }`}
+                    >
+                      {step.completed && currentStep !== step.number ? (
+                        <CheckCircle className="w-6 h-6" />
+                      ) : (
+                        <step.icon className="w-6 h-6" />
+                      )}
+                    </button>
+                    {index < steps.length - 1 && (
+                      <div className={`w-16 h-0.5 mx-4 ${
+                        step.completed ? 'bg-green-500' : 'bg-muted'
+                      }`} />
+                    )}
                   </div>
                 ))}
+              </div>
+            </div>
+
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Step title */}
+                <h3 className="text-xl font-semibold">
+                  {steps[currentStep - 1].title}
+                </h3>
+
+                {/* Current step fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {currentStepFields.map((field) => (
+                    <div key={field.field_key} className={field.field_type === 'textarea' ? 'md:col-span-2' : ''}>
+                      <RHFFormField
+                        control={form.control}
+                        name={field.field_key}
+                        render={({ field: formField }) => (
+                          <DynamicFormField
+                            field={field}
+                            formField={formField}
+                            onFileChange={handleFileChange}
+                          />
+                        )}
+                      />
+                    </div>
+                  ))}
+                </div>
 
                 {uploadProgress > 0 && uploadProgress < 100 && (
                   <div className="space-y-2">
@@ -408,28 +478,55 @@ const PublicCandidature = () => {
                   </div>
                 )}
 
-                <div className="flex gap-3">
+                {/* Navigation buttons */}
+                <div className="flex justify-between pt-6 border-t">
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1"
-                    onClick={() => saveDraft(form.getValues())}
-                    disabled={isSubmitting}
+                    onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                    disabled={currentStep === 1 || isSubmitting}
                   >
-                    <Save className="mr-2 h-4 w-4" />
-                    Sauvegarder le brouillon
+                    Précédent
                   </Button>
-                  
-                  <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Envoi en cours...
-                      </>
+
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => saveDraft(form.getValues())}
+                      disabled={isSubmitting}
+                    >
+                      <Save className="mr-2 h-4 w-4" />
+                      Sauvegarder
+                    </Button>
+
+                    {currentStep < 3 ? (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          if (canProceedFromStep(currentStep)) {
+                            setCurrentStep(currentStep + 1);
+                          } else {
+                            toast.error('Veuillez remplir tous les champs obligatoires');
+                          }
+                        }}
+                        disabled={isSubmitting}
+                      >
+                        Suivant
+                      </Button>
                     ) : (
-                      "Envoyer ma candidature"
+                      <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Envoi en cours...
+                          </>
+                        ) : (
+                          "Envoyer ma candidature"
+                        )}
+                      </Button>
                     )}
-                  </Button>
+                  </div>
                 </div>
 
                 <p className="text-sm text-center text-muted-foreground">

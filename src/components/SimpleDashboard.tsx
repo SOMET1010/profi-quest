@@ -37,7 +37,7 @@ export default function SimpleDashboard() {
     preloadDatabase,
     preloadAnalytics,
     preloadQualification,
-    preloadCandidature,
+    preloadPublicCandidature,
   } = useNavigationPreload();
 
   const allModules = [
@@ -147,7 +147,7 @@ export default function SimpleDashboard() {
               variant="secondary" 
               className="bg-white text-primary hover:bg-white/90"
               onClick={() => navigate('/candidature')}
-              onMouseEnter={preloadCandidature}
+              onMouseEnter={preloadPublicCandidature}
               aria-label="Commencer ma candidature en tant qu'expert"
             >
               <UserCircle className="mr-2 h-5 w-5" aria-hidden="true" />

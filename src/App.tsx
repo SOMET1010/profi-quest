@@ -20,7 +20,6 @@ const ExpertDetail = lazy(() => import("./pages/ExpertDetail"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Qualification = lazy(() => import("./pages/Qualification"));
 const Auth = lazy(() => import("./pages/Auth"));
-const Candidature = lazy(() => import("./pages/Candidature"));
 const RoleManagement = lazy(() => import("./pages/RoleManagement"));
 const PermissionManagement = lazy(() => import("./pages/PermissionManagement"));
 const FormBuilder = lazy(() => import("./pages/FormBuilder"));
@@ -97,11 +96,8 @@ const App = () => (
                   <AppLayout><Index /></AppLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/candidature" element={
-                <ProtectedRoute>
-                  <AppLayout><Candidature /></AppLayout>
-                </ProtectedRoute>
-              } />
+              {/* Redirect /candidature to /postuler */}
+              <Route path="/candidature" element={<PublicCandidature />} />
               <Route path="/import" element={
                 <ProtectedRoute>
                   <AppLayout><ImportProfiles /></AppLayout>

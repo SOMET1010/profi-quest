@@ -40,7 +40,7 @@ export default function Dashboard() {
     preloadDatabase,
     preloadAnalytics,
     preloadQualification,
-    preloadCandidature,
+    preloadPublicCandidature,
   } = useNavigationPreload();
 
   const handleSignOut = async () => {
@@ -181,8 +181,8 @@ export default function Dashboard() {
                   variant="secondary" 
                   className="bg-white text-primary hover:bg-white/90"
                   onClick={() => navigate('/candidature')}
-                  onMouseEnter={preloadCandidature}
-                  onFocus={preloadCandidature}
+                  onMouseEnter={preloadPublicCandidature}
+                  onFocus={preloadPublicCandidature}
                 >
                   <UserCircle className="mr-2 h-5 w-5" />
                   Commencer ma candidature

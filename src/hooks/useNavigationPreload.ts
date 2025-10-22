@@ -17,8 +17,8 @@ export const useNavigationPreload = () => {
     import("@/pages/Qualification");
   }, []);
 
-  const preloadCandidature = useCallback(() => {
-    import("@/pages/Candidature");
+  const preloadPublicCandidature = useCallback(() => {
+    import("@/pages/PublicCandidature");
   }, []);
 
   return {
@@ -26,6 +26,6 @@ export const useNavigationPreload = () => {
     preloadDatabase,
     preloadAnalytics,
     preloadQualification,
-    preloadCandidature,
+    preloadPublicCandidature,
   };
 };
