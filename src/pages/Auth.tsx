@@ -24,23 +24,38 @@ const Auth = () => {
   const [lastSignUpEmail, setLastSignUpEmail] = useState('');
   const [otpError, setOtpError] = useState(false);
 
-  // Restore cooldown from localStorage on mount
+  // Restore cooldown from localStorage on mount with robust validation
   useEffect(() => {
     const storedTimestamp = localStorage.getItem('signUpTimestamp');
     const storedEmail = localStorage.getItem('lastSignUpEmail');
     
     if (storedTimestamp && storedEmail) {
-      const elapsed = Math.floor((Date.now() - parseInt(storedTimestamp)) / 1000);
+      const timestamp = parseInt(storedTimestamp);
+      const elapsed = Math.floor((Date.now() - timestamp) / 1000);
       const remaining = Math.max(0, 60 - elapsed);
+      
+      console.log('[Cooldown Debug]', { timestamp, elapsed, remaining }); // Debug
+      
+      // Si le timestamp est trop ancien (>2 minutes), on le supprime
+      if (elapsed > 120) {
+        localStorage.removeItem('signUpTimestamp');
+        localStorage.removeItem('lastSignUpEmail');
+        console.log('[Cooldown] Données expirées supprimées (>2min)');
+        return;
+      }
       
       if (remaining > 0) {
         setSignUpCooldown(remaining);
         setLastSignUpEmail(storedEmail);
+        console.log('[Cooldown] Restauré:', remaining, 'secondes restantes');
       } else {
         // Cleanup expired data
         localStorage.removeItem('signUpTimestamp');
         localStorage.removeItem('lastSignUpEmail');
+        console.log('[Cooldown] Nettoyage des données expirées');
       }
+    } else {
+      console.log('[Cooldown] Aucun cooldown actif');
     }
   }, []);
 
@@ -392,6 +407,25 @@ const Auth = () => {
                         </span>
                       ) : 'Créer un compte'}
                     </Button>
+
+                    {/* Debug button - Development only */}
+                    {import.meta.env.DEV && signUpCooldown > 0 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-xs text-muted-foreground"
+                        onClick={() => {
+                          localStorage.removeItem('signUpTimestamp');
+                          localStorage.removeItem('lastSignUpEmail');
+                          setSignUpCooldown(0);
+                          setLastSignUpEmail('');
+                          toast.info('Cooldown réinitialisé');
+                        }}
+                      >
+                        [DEV] Réinitialiser le cooldown
+                      </Button>
+                    )}
 
                     {signUpCooldown > 0 && lastSignUpEmail && (
                       <p className="text-sm text-center text-muted-foreground">
