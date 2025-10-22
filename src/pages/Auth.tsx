@@ -34,7 +34,7 @@ const Auth = () => {
       const elapsed = Math.floor((Date.now() - timestamp) / 1000);
       const remaining = Math.max(0, 60 - elapsed);
       
-      console.log('[Cooldown Debug]', { timestamp, elapsed, remaining }); // Debug
+      console.log('[Cooldown Debug]', { timestamp, elapsed, remaining });
       
       // Si le timestamp est trop ancien (>2 minutes), on le supprime
       if (elapsed > 120) {
@@ -84,6 +84,19 @@ const Auth = () => {
     }
   }, [signUpCooldown, lastSignUpEmail]);
 
+  // 🔥 NOUVEAU : Protection contre l'état loading bloqué
+  useEffect(() => {
+    // Reset loading après 30 secondes si bloqué
+    if (loading) {
+      const timeout = setTimeout(() => {
+        console.warn('[Auth] Loading state stuck, forcing reset');
+        setLoading(false);
+        toast.error('La requête a pris trop de temps. Veuillez réessayer.');
+      }, 30000);
+      return () => clearTimeout(timeout);
+    }
+  }, [loading]);
+
   // Redirect if already authenticated
   if (user) {
     return <Navigate to="/" replace />;
@@ -103,24 +116,32 @@ const Auth = () => {
     }
 
     setLoading(true);
-    const { error } = await signUp(email, password);
-    setLoading(false);
+    
+    try {
+      const { error } = await signUp(email, password);
 
-    if (error) {
-      if (error.message.includes('already registered')) {
-        toast.error('Cette adresse email est déjà utilisée');
+      if (error) {
+        if (error.message.includes('already registered')) {
+          toast.error('Cette adresse email est déjà utilisée');
+        } else {
+          toast.error('Erreur lors de l\'inscription: ' + error.message);
+        }
       } else {
-        toast.error('Erreur lors de l\'inscription: ' + error.message);
+        toast.success('Inscription réussie ! Vérifiez votre email pour confirmer votre compte.');
+        setLastSignUpEmail(email);
+        setSignUpCooldown(60); // 60 seconds cooldown
+        setOtpError(false);
+        
+        // Persist cooldown in localStorage
+        localStorage.setItem('signUpTimestamp', Date.now().toString());
+        localStorage.setItem('lastSignUpEmail', email);
       }
-    } else {
-      toast.success('Inscription réussie ! Vérifiez votre email pour confirmer votre compte.');
-      setLastSignUpEmail(email);
-      setSignUpCooldown(60); // 60 seconds cooldown
-      setOtpError(false);
-      
-      // Persist cooldown in localStorage
-      localStorage.setItem('signUpTimestamp', Date.now().toString());
-      localStorage.setItem('lastSignUpEmail', email);
+    } catch (err) {
+      console.error('[SignUp Error]', err);
+      toast.error('Une erreur inattendue s\'est produite');
+    } finally {
+      // 🔥 AMÉLIORATION : Toujours désactiver loading
+      setLoading(false);
     }
   };
 
@@ -131,50 +152,84 @@ const Auth = () => {
     }
 
     setLoading(true);
-    const { error } = await resendConfirmationEmail(lastSignUpEmail);
-    setLoading(false);
+    
+    try {
+      const { error } = await resendConfirmationEmail(lastSignUpEmail);
 
-    if (error) {
-      toast.error('Erreur lors du renvoi: ' + error.message);
-    } else {
-      toast.success('Email de confirmation renvoyé !');
-      setSignUpCooldown(60); // Reset cooldown
-      
-      // Update localStorage timestamp
-      localStorage.setItem('signUpTimestamp', Date.now().toString());
+      if (error) {
+        toast.error('Erreur lors du renvoi: ' + error.message);
+      } else {
+        toast.success('Email de confirmation renvoyé !');
+        setSignUpCooldown(60); // Reset cooldown
+        
+        // Update localStorage timestamp
+        localStorage.setItem('signUpTimestamp', Date.now().toString());
+      }
+    } catch (err) {
+      console.error('[Resend Error]', err);
+      toast.error('Une erreur inattendue s\'est produite');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
-    setLoading(false);
+    
+    try {
+      const { error } = await signIn(email, password);
 
-    if (error) {
-      if (error.message.includes('Invalid login credentials')) {
-        toast.error('Email ou mot de passe incorrect');
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error('Email ou mot de passe incorrect');
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error('Veuillez confirmer votre email avant de vous connecter');
+        } else {
+          toast.error('Erreur lors de la connexion: ' + error.message);
+        }
       } else {
-        toast.error('Erreur lors de la connexion: ' + error.message);
+        toast.success('Connexion réussie !');
       }
-    } else {
-      toast.success('Connexion réussie !');
+    } catch (err) {
+      console.error('[SignIn Error]', err);
+      toast.error('Une erreur inattendue s\'est produite');
+    } finally {
+      // 🔥 AMÉLIORATION : Toujours désactiver loading
+      setLoading(false);
     }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await resetPassword(resetEmail);
-    setLoading(false);
+    
+    try {
+      const { error } = await resetPassword(resetEmail);
 
-    if (error) {
-      toast.error('Erreur lors de l\'envoi de l\'email: ' + error.message);
-    } else {
-      toast.success('Email de réinitialisation envoyé ! Vérifiez votre boîte de réception.');
-      setForgotPasswordMode(false);
-      setResetEmail('');
+      if (error) {
+        toast.error('Erreur lors de l\'envoi de l\'email: ' + error.message);
+      } else {
+        toast.success('Email de réinitialisation envoyé ! Vérifiez votre boîte de réception.');
+        setForgotPasswordMode(false);
+        setResetEmail('');
+      }
+    } catch (err) {
+      console.error('[Reset Password Error]', err);
+      toast.error('Une erreur inattendue s\'est produite');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // 🔥 NOUVEAU : Fonction pour forcer le reset des états bloqués
+  const forceResetStates = () => {
+    setLoading(false);
+    setSignUpCooldown(0);
+    setLastSignUpEmail('');
+    localStorage.removeItem('signUpTimestamp');
+    localStorage.removeItem('lastSignUpEmail');
+    toast.info('États réinitialisés');
   };
 
   return (
@@ -194,76 +249,60 @@ const Auth = () => {
           </div>
           <h1 className="text-2xl font-bold text-primary mb-2">QUALI-RH EXPERTS</h1>
           <p className="text-muted-foreground text-sm">
-            Plateforme de gestion d'experts thématiques
+            Système de gestion des évaluations du personnel
           </p>
         </div>
 
-        <Card className="shadow-elegant border-0 bg-gradient-card">
-          <CardHeader className="text-center pb-4">
-            <CardTitle className="text-xl font-semibold">
-              {forgotPasswordMode ? 'Réinitialiser le mot de passe' : 'Accès à la plateforme'}
-            </CardTitle>
-            <CardDescription>
-              {forgotPasswordMode 
-                ? 'Saisissez votre email pour recevoir un lien de réinitialisation'
-                : 'Connectez-vous pour accéder à vos données d\'experts'
-              }
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
+        <Card className="backdrop-blur-sm bg-white/80 shadow-elegant border-0">
+          <CardContent className="pt-6">
             {otpError && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="flex flex-col gap-2">
-                  <span>Le lien de confirmation a expiré.</span>
-                  {lastSignUpEmail && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleResendConfirmation}
-                      disabled={loading || signUpCooldown > 0}
-                    >
-                      {loading ? 'Envoi...' : signUpCooldown > 0 ? `Attendre ${signUpCooldown}s` : 'Renvoyer l\'email'}
-                    </Button>
-                  )}
+              <Alert className="mb-4 bg-destructive/10 border-destructive/20">
+                <AlertCircle className="h-4 w-4 text-destructive" />
+                <AlertDescription className="text-destructive">
+                  Le lien de confirmation a expiré. Demandez un nouveau lien ci-dessous.
                 </AlertDescription>
               </Alert>
             )}
-            
+
             {forgotPasswordMode ? (
-              <form onSubmit={handleResetPassword} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="reset-email">Adresse email</Label>
-                  <Input
-                    id="reset-email"
-                    type="email"
-                    placeholder="votre.email@ansut.ci"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    required
-                    className="bg-white/50"
-                  />
+              <div className="space-y-4">
+                <div className="text-center mb-4">
+                  <h2 className="text-xl font-semibold text-primary">Réinitialiser le mot de passe</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Entrez votre adresse email pour recevoir un lien de réinitialisation
+                  </p>
                 </div>
                 
-                <div className="space-y-3">
-                  <Button type="submit" className="w-full h-11" disabled={loading}>
-                    {loading ? 'Envoi en cours...' : 'Envoyer le lien de réinitialisation'}
-                  </Button>
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email">Adresse email</Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="votre.email@ansut.ci"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                      className="bg-white/50"
+                    />
+                  </div>
                   
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    className="w-full"
-                    onClick={() => {
-                      setForgotPasswordMode(false);
-                      setResetEmail('');
-                    }}
-                  >
-                    Retour à la connexion
-                  </Button>
-                </div>
-              </form>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setForgotPasswordMode(false)}
+                      className="flex-1"
+                      disabled={loading}
+                    >
+                      Annuler
+                    </Button>
+                    <Button type="submit" className="flex-1" disabled={loading}>
+                      {loading ? 'Envoi...' : 'Envoyer'}
+                    </Button>
+                  </div>
+                </form>
+              </div>
             ) : (
               <Tabs defaultValue="signin" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 bg-white/50">
@@ -288,6 +327,7 @@ const Auth = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        disabled={loading}
                         className="bg-white/50"
                       />
                     </div>
@@ -298,7 +338,8 @@ const Auth = () => {
                         <button
                           type="button"
                           onClick={() => setForgotPasswordMode(true)}
-                          className="text-sm text-primary hover:text-primary/80 transition-colors"
+                          disabled={loading}
+                          className="text-sm text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
                         >
                           Mot de passe oublié ?
                         </button>
@@ -311,7 +352,8 @@ const Auth = () => {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="bg-white/50"
+                          disabled={loading}
+                          className="bg-white/50 pr-10"
                         />
                         <Button
                           type="button"
@@ -319,6 +361,7 @@ const Auth = () => {
                           size="sm"
                           className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                           onClick={() => setShowPassword(!showPassword)}
+                          disabled={loading}
                           aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                         >
                           {showPassword ? (
@@ -331,7 +374,14 @@ const Auth = () => {
                     </div>
                     
                     <Button type="submit" className="w-full h-11" disabled={loading}>
-                      {loading ? 'Connexion...' : 'Se connecter'}
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Connexion...
+                        </span>
+                      ) : (
+                        'Se connecter'
+                      )}
                     </Button>
                   </form>
                 </TabsContent>
@@ -347,6 +397,7 @@ const Auth = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        disabled={loading || signUpCooldown > 0}
                         className="bg-white/50"
                       />
                     </div>
@@ -362,7 +413,8 @@ const Auth = () => {
                           onChange={(e) => setPassword(e.target.value)}
                           required
                           minLength={6}
-                          className="bg-white/50"
+                          disabled={loading || signUpCooldown > 0}
+                          className="bg-white/50 pr-10"
                         />
                         <Button
                           type="button"
@@ -370,6 +422,7 @@ const Auth = () => {
                           size="sm"
                           className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                           onClick={() => setShowPassword(!showPassword)}
+                          disabled={loading || signUpCooldown > 0}
                           aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                         >
                           {showPassword ? (
@@ -391,6 +444,7 @@ const Auth = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                         minLength={6}
+                        disabled={loading || signUpCooldown > 0}
                         className="bg-white/50"
                       />
                     </div>
@@ -400,13 +454,33 @@ const Auth = () => {
                       className="w-full h-11" 
                       disabled={loading || signUpCooldown > 0}
                     >
-                      {loading ? 'Inscription...' : signUpCooldown > 0 ? (
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Inscription...
+                        </span>
+                      ) : signUpCooldown > 0 ? (
                         <span className="flex items-center gap-2">
                           <Clock className="h-4 w-4" />
                           Attendre {signUpCooldown}s
                         </span>
-                      ) : 'Créer un compte'}
+                      ) : (
+                        'Créer un compte'
+                      )}
                     </Button>
+
+                    {/* 🔥 NOUVEAU : Bouton de reset visible en cas de problème */}
+                    {(loading || signUpCooldown > 30) && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-xs text-muted-foreground"
+                        onClick={forceResetStates}
+                      >
+                        Boutons bloqués ? Cliquez ici pour réinitialiser
+                      </Button>
+                    )}
 
                     {/* Debug button - Development only */}
                     {import.meta.env.DEV && signUpCooldown > 0 && (
@@ -414,13 +488,13 @@ const Auth = () => {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="w-full text-xs text-muted-foreground"
+                        className="w-full text-xs text-amber-600"
                         onClick={() => {
                           localStorage.removeItem('signUpTimestamp');
                           localStorage.removeItem('lastSignUpEmail');
                           setSignUpCooldown(0);
                           setLastSignUpEmail('');
-                          toast.info('Cooldown réinitialisé');
+                          toast.info('Cooldown réinitialisé (mode développement)');
                         }}
                       >
                         [DEV] Réinitialiser le cooldown
