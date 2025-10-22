@@ -642,6 +642,39 @@ export type Database = {
         }
         Relationships: []
       }
+      file_upload_config: {
+        Row: {
+          allowed_extensions: string[] | null
+          allowed_mime_types: string[] | null
+          bucket_name: string
+          created_at: string | null
+          field_key: string
+          id: string
+          max_size_mb: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          allowed_extensions?: string[] | null
+          allowed_mime_types?: string[] | null
+          bucket_name: string
+          created_at?: string | null
+          field_key: string
+          id?: string
+          max_size_mb?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          allowed_extensions?: string[] | null
+          allowed_mime_types?: string[] | null
+          bucket_name?: string
+          created_at?: string | null
+          field_key?: string
+          id?: string
+          max_size_mb?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       form_fields_config: {
         Row: {
           created_at: string | null

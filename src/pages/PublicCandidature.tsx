@@ -14,6 +14,7 @@ import { useFormFields } from "@/hooks/useFormFields";
 import { useDynamicFormSchema } from "@/hooks/useDynamicFormSchema";
 import { DynamicFormField } from "@/components/DynamicFormField";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 const DRAFT_KEY = 'candidature_draft';
 const LAST_SAVE_KEY = 'candidature_last_save';
@@ -23,12 +24,21 @@ const PublicCandidature = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({});
   const [uploadProgress, setUploadProgress] = useState(0);
   const [lastSave, setLastSave] = useState<Date | null>(null);
 
   const { data: formFields = [], isLoading: isLoadingFields } = useFormFields(true);
   const formSchema = useDynamicFormSchema(formFields);
+  
+  const {
+    uploadedFiles,
+    addFile,
+    removeFile,
+    uploadAllFiles,
+    rollbackAllUploads,
+    reset: resetFiles,
+    getFileStatus,
+  } = useFileUpload();
 
   // Generate default values from form fields
   const defaultValues = useMemo(() => {
@@ -128,57 +138,10 @@ const PublicCandidature = () => {
 
   const handleFileChange = (fieldKey: string, file: File | null) => {
     if (!file) {
-      const newFiles = { ...uploadedFiles };
-      delete newFiles[fieldKey];
-      setUploadedFiles(newFiles);
+      removeFile(fieldKey);
       return;
     }
-
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      toast.error(`Le fichier "${file.name}" est trop volumineux. Taille maximale: 5MB`, {
-        description: `Taille actuelle: ${(file.size / 1024 / 1024).toFixed(2)}MB`
-      });
-      return;
-    }
-
-    // Validate file type
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error(`Format de fichier non supporté pour "${file.name}"`, {
-        description: 'Formats acceptés: PDF, DOC, DOCX'
-      });
-      return;
-    }
-
-    setUploadedFiles({ ...uploadedFiles, [fieldKey]: file });
-    toast.success(`Fichier "${file.name}" ajouté`);
-  };
-
-  const uploadFile = async (file: File, fieldKey: string): Promise<string | null> => {
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}_${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      // Determine bucket based on field key
-      const bucket = fieldKey.toLowerCase().includes('cv') ? 'diplomas' : 
-                     fieldKey.toLowerCase().includes('motivation') ? 'motivation-letters' :
-                     'motivation-letters';
-
-      const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
-      return data.publicUrl;
-    } catch (error: any) {
-      toast.error(`Erreur lors de l'upload: ${error.message}`);
-      return null;
-    }
+    addFile(fieldKey, file);
   };
 
   // Group fields by section for wizard steps
@@ -199,7 +162,8 @@ const PublicCandidature = () => {
       .filter(f => f.is_required)
       .every(field => {
         if (field.field_type === 'file') {
-          return !!uploadedFiles[field.field_key];
+          const fileState = getFileStatus(field.field_key);
+          return fileState && fileState.status !== 'error';
         }
         return !!values[field.field_key];
       });
@@ -217,7 +181,8 @@ const PublicCandidature = () => {
           
           // Pour les champs fichiers, vérifier uploadedFiles
           if (f.field_type === 'file') {
-            return !uploadedFiles[f.field_key];
+            const fileState = getFileStatus(f.field_key);
+            return !fileState || fileState.status === 'error';
           }
           
           // Pour les autres champs, vérifier data
@@ -233,58 +198,59 @@ const PublicCandidature = () => {
         return;
       }
 
-      const filesData: Record<string, string> = {};
-      const totalFiles = Object.keys(uploadedFiles).length;
+      // Upload all files with progress tracking
+      const totalFiles = uploadedFiles.size;
       let uploadedCount = 0;
 
-      // Upload all files with progress
-      for (const [fieldKey, file] of Object.entries(uploadedFiles)) {
-        try {
-          const url = await uploadFile(file, fieldKey);
-          if (!url) {
-            toast.error(`Échec de l'upload: ${file.name}`, {
-              description: 'Vérifiez les permissions de stockage'
-            });
-            setIsSubmitting(false);
-            return;
-          }
-          filesData[fieldKey] = url;
-          uploadedCount++;
-          setUploadProgress(Math.round((uploadedCount / totalFiles) * 100));
-        } catch (uploadError: any) {
-          console.error('Upload error:', uploadError);
-          toast.error(`Erreur lors de l'upload de ${file.name}`, {
-            description: uploadError.message || 'Erreur réseau'
+      const updateProgress = () => {
+        uploadedCount++;
+        setUploadProgress(Math.round((uploadedCount / totalFiles) * 100));
+      };
+
+      // Simulate progress for user feedback
+      const progressInterval = totalFiles > 0 ? setInterval(updateProgress, 300) : null;
+
+      try {
+        const filesData = await uploadAllFiles();
+        
+        if (progressInterval) clearInterval(progressInterval);
+        setUploadProgress(100);
+
+        // Insert submission
+        const { error: insertError } = await supabase
+          .from("form_submissions")
+          .insert({
+            form_data: data,
+            files_data: filesData,
+            status: "new",
           });
+
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          
+          // Rollback uploaded files
+          await rollbackAllUploads();
+          
+          if (insertError.code === '23505') {
+            toast.error('Cette candidature existe déjà');
+          } else if (insertError.code === '42501') {
+            toast.error('Erreur de permission', {
+              description: 'Contactez l\'administrateur'
+            });
+          } else {
+            toast.error('Erreur lors de la soumission', {
+              description: insertError.message
+            });
+          }
+          
           setIsSubmitting(false);
           return;
         }
-      }
-
-      // Insert submission
-      const { error: insertError } = await supabase
-        .from("form_submissions")
-        .insert({
-          form_data: data,
-          files_data: filesData,
-          status: "new",
+      } catch (uploadError: any) {
+        console.error('Upload error:', uploadError);
+        toast.error('Erreur lors de l\'upload des fichiers', {
+          description: uploadError.message
         });
-
-      if (insertError) {
-        console.error('Insert error:', insertError);
-        
-        if (insertError.code === '23505') {
-          toast.error('Cette candidature existe déjà');
-        } else if (insertError.code === '42501') {
-          toast.error('Erreur de permission', {
-            description: 'Contactez l\'administrateur'
-          });
-        } else {
-          toast.error('Erreur lors de la soumission', {
-            description: insertError.message
-          });
-        }
-        
         setIsSubmitting(false);
         return;
       }
@@ -303,6 +269,7 @@ const PublicCandidature = () => {
       }
 
       clearDraft();
+      resetFiles();
       setIsSuccess(true);
       toast.success("Candidature soumise avec succès!");
     } catch (error: any) {
