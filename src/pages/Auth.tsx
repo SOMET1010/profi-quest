@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect, memo } from 'react';
+import { Navigate, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,8 +10,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { Eye, EyeOff, UserPlus, LogIn, AlertCircle, Clock } from 'lucide-react';
 
-const Auth = () => {
-  const { user, signUp, signIn, resetPassword, resendConfirmationEmail } = useAuth();
+const Auth = memo(() => {
+  const { user, loading: authLoading, signUp, signIn, resetPassword, resendConfirmationEmail } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,6 +27,11 @@ const Auth = () => {
 
   // Restore cooldown from localStorage on mount with robust validation
   useEffect(() => {
+    let executed = false;
+    
+    if (executed) return;
+    executed = true;
+
     const storedTimestamp = localStorage.getItem('signUpTimestamp');
     const storedEmail = localStorage.getItem('lastSignUpEmail');
     
@@ -34,7 +40,7 @@ const Auth = () => {
       const elapsed = Math.floor((Date.now() - timestamp) / 1000);
       const remaining = Math.max(0, 60 - elapsed);
       
-      console.log('[Cooldown Debug]', { timestamp, elapsed, remaining });
+      console.log('[Cooldown Debug - ONCE]', { timestamp, elapsed, remaining });
       
       // Si le timestamp est trop ancien (>2 minutes), on le supprime
       if (elapsed > 120) {
@@ -98,9 +104,11 @@ const Auth = () => {
   }, [loading]);
 
   // Redirect if already authenticated
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
+  useEffect(() => {
+    if (user && !authLoading) {
+      navigate('/', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -533,6 +541,6 @@ const Auth = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Auth;
