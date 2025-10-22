@@ -24,6 +24,26 @@ const Auth = () => {
   const [lastSignUpEmail, setLastSignUpEmail] = useState('');
   const [otpError, setOtpError] = useState(false);
 
+  // Restore cooldown from localStorage on mount
+  useEffect(() => {
+    const storedTimestamp = localStorage.getItem('signUpTimestamp');
+    const storedEmail = localStorage.getItem('lastSignUpEmail');
+    
+    if (storedTimestamp && storedEmail) {
+      const elapsed = Math.floor((Date.now() - parseInt(storedTimestamp)) / 1000);
+      const remaining = Math.max(0, 60 - elapsed);
+      
+      if (remaining > 0) {
+        setSignUpCooldown(remaining);
+        setLastSignUpEmail(storedEmail);
+      } else {
+        // Cleanup expired data
+        localStorage.removeItem('signUpTimestamp');
+        localStorage.removeItem('lastSignUpEmail');
+      }
+    }
+  }, []);
+
   // Check for OTP errors in URL
   useEffect(() => {
     const errorCode = searchParams.get('error_code');
@@ -42,8 +62,12 @@ const Auth = () => {
     if (signUpCooldown > 0) {
       const timer = setTimeout(() => setSignUpCooldown(signUpCooldown - 1), 1000);
       return () => clearTimeout(timer);
+    } else if (signUpCooldown === 0 && lastSignUpEmail) {
+      // Cleanup localStorage when cooldown ends
+      localStorage.removeItem('signUpTimestamp');
+      localStorage.removeItem('lastSignUpEmail');
     }
-  }, [signUpCooldown]);
+  }, [signUpCooldown, lastSignUpEmail]);
 
   // Redirect if already authenticated
   if (user) {
@@ -78,6 +102,10 @@ const Auth = () => {
       setLastSignUpEmail(email);
       setSignUpCooldown(60); // 60 seconds cooldown
       setOtpError(false);
+      
+      // Persist cooldown in localStorage
+      localStorage.setItem('signUpTimestamp', Date.now().toString());
+      localStorage.setItem('lastSignUpEmail', email);
     }
   };
 
@@ -96,6 +124,9 @@ const Auth = () => {
     } else {
       toast.success('Email de confirmation renvoyé !');
       setSignUpCooldown(60); // Reset cooldown
+      
+      // Update localStorage timestamp
+      localStorage.setItem('signUpTimestamp', Date.now().toString());
     }
   };
 
