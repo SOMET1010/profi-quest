@@ -39,7 +39,7 @@ export default function MyApplications() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/profile")}
+          onClick={() => navigate("/mon-profil")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -154,7 +154,7 @@ export default function MyApplications() {
             <p className="text-muted-foreground text-center mb-4">
               Vous n'avez pas encore soumis de candidature.
             </p>
-          <Button onClick={() => navigate("/profile")}>
+          <Button onClick={() => navigate("/mon-profil")}>
             Compléter mon profil
           </Button>
           </CardContent>

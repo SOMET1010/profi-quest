@@ -64,7 +64,7 @@ const PublicCandidature = () => {
   useEffect(() => {
     if (user) {
       toast.info('Vous êtes déjà connecté. Gérez votre profil depuis votre espace.');
-      navigate('/profile', { replace: true });
+      navigate('/mon-profil', { replace: true });
     }
   }, [user, navigate]);
 

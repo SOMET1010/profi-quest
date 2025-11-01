@@ -114,6 +114,18 @@ const Auth = memo(() => {
     if (user && !authLoading) {
       const checkProfileAndRedirect = async () => {
         try {
+          // Check user role first
+          const { data: userRoleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', user.id)
+            .limit(1)
+            .maybeSingle();
+          
+          const isApplicant = userRoleData?.role === 'POSTULANT' || userRoleData?.role === 'CONSULTANT';
+          const defaultRoute = isApplicant ? '/' : '/dashboard';
+          const profileRoute = isApplicant ? '/mon-profil' : '/dashboard';
+
           // Check if user has a complete profile
           const { data: profile } = await supabase
             .from('profiles')
@@ -131,20 +143,20 @@ const Auth = memo(() => {
           // Intelligent redirection logic
           if (!profile || !profile.first_name || !profile.last_name) {
             // New user or incomplete profile -> redirect to profile page
-            navigate('/profile?firstTime=true', { replace: true });
-          } else if (!applications || applications.length === 0) {
-            // Existing profile but no applications -> redirect to profile
-            navigate('/profile', { replace: true });
+            navigate(`${profileRoute}?firstTime=true`, { replace: true });
+          } else if (isApplicant && (!applications || applications.length === 0)) {
+            // Applicant with profile but no applications -> redirect to profile
+            navigate(profileRoute, { replace: true });
           } else {
             // User with profile and applications -> use default routing
-            const from = (location.state as any)?.from || '/dashboard';
+            const from = (location.state as any)?.from || defaultRoute;
             navigate(from, { replace: true });
           }
         } catch (error) {
           console.error('[Auth] Error checking profile:', error);
-          toast.error('Erreur lors de la vérification du profil. Redirection vers votre profil.');
-          // Redirect to profile instead of dashboard on error
-          navigate('/profile', { replace: true });
+          toast.error('Erreur lors de la vérification du profil.');
+          // Redirect to default page
+          navigate('/', { replace: true });
         }
       };
 
