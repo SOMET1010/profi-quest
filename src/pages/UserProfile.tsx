@@ -49,8 +49,8 @@ const UserProfile = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate("/postuler")}>
-              Soumettre une candidature
+            <Button onClick={() => navigate("/profile")}>
+              Créer mon profil
             </Button>
           </CardContent>
         </Card>
@@ -265,7 +265,7 @@ const UserProfile = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-4">
-          <Button onClick={() => navigate("/postuler")} className="flex-1">
+          <Button onClick={() => navigate("/profile")} className="flex-1">
             Mettre à jour mon profil
           </Button>
           <Button variant="outline" onClick={() => navigate("/mes-candidatures")} className="flex-1">

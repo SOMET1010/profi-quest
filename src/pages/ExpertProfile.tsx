@@ -102,12 +102,24 @@ export default function ExpertProfile() {
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Aucune candidature</AlertTitle>
                     <AlertDescription>
-                      Complétez votre profil pour soumettre votre première candidature.
+                      <p className="mb-3">Complétez votre profil pour soumettre votre première candidature.</p>
                       {missingFields.length > 0 && completionPercentage < 100 && (
-                        <p className="mt-2 text-sm font-medium">
-                          Complétez encore {100 - completionPercentage}% de votre profil
-                        </p>
+                        <>
+                          <p className="text-sm font-medium mb-2">
+                            Complétez encore {100 - completionPercentage}% de votre profil
+                          </p>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            Champs prioritaires : {missingFields.slice(0, 5).join(', ')}
+                          </p>
+                        </>
                       )}
+                      <Button 
+                        size="sm" 
+                        onClick={() => navigate('/profile')}
+                        className="mt-2"
+                      >
+                        Compléter mon profil maintenant
+                      </Button>
                     </AlertDescription>
                   </Alert>
                 )}

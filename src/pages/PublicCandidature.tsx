@@ -7,7 +7,7 @@ import { Form, FormField as RHFFormField } from "@/components/ui/form";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Loader2, Save, User, Briefcase, FileText } from "lucide-react";
 import ansutLogo from "@/assets/ansut-logo-official.png";
 import { useFormFields } from "@/hooks/useFormFields";
@@ -21,6 +21,7 @@ const LAST_SAVE_KEY = 'candidature_last_save';
 
 const PublicCandidature = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -59,28 +60,18 @@ const PublicCandidature = () => {
     defaultValues,
   });
 
-  // Load draft or user profile on mount
+  // Block authenticated users from accessing public form
+  useEffect(() => {
+    if (user) {
+      toast.info('Vous êtes déjà connecté. Gérez votre profil depuis votre espace.');
+      navigate('/profile', { replace: true });
+    }
+  }, [user, navigate]);
+
+  // Load draft on mount (only for non-authenticated users)
   useEffect(() => {
     const loadData = async () => {
-      // If user is authenticated, try to load their profile data
-      if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (data) {
-          // Pre-fill form with profile data
-          Object.keys(defaultValues).forEach(key => {
-            if (data[key]) {
-              form.setValue(key, data[key]);
-            }
-          });
-          toast.info('Données du profil chargées');
-          return;
-        }
-      }
+      if (user) return; // Skip if user is authenticated
 
       // Otherwise, load draft
       const draft = localStorage.getItem(DRAFT_KEY);

@@ -138,9 +138,9 @@ const Auth = memo(() => {
           }
         } catch (error) {
           console.error('[Auth] Error checking profile:', error);
-          // Fallback to dashboard on error
-          const from = (location.state as any)?.from || '/dashboard';
-          navigate(from, { replace: true });
+          toast.error('Erreur lors de la vérification du profil. Redirection vers votre profil.');
+          // Redirect to profile instead of dashboard on error
+          navigate('/profile', { replace: true });
         }
       };
 
