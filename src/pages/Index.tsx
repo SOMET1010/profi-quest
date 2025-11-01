@@ -14,17 +14,23 @@ const Index = () => {
     return <div>Chargement...</div>;
   }
   
+  // SUPERADMIN and admin roles (DG, SI, DRH, RDRH, RH_ASSISTANT) always see Dashboard
+  if (userRole === 'SUPERADMIN' || userRole === 'DG' || userRole === 'SI' || 
+      userRole === 'DRH' || userRole === 'RDRH' || userRole === 'RH_ASSISTANT') {
+    return <SimpleDashboard />;
+  }
+  
   // POSTULANT and CONSULTANT see their expert profile
   if (userRole === 'POSTULANT' || userRole === 'CONSULTANT') {
     return <ExpertProfile />;
   }
   
-  // All other roles (DG, SI, DRH, RDRH, RH_ASSISTANT) can access Dashboard if they have permission
+  // Fallback for users with view_dashboard permission
   if (canViewDashboard) {
     return <SimpleDashboard />;
   }
   
-  // Fallback: show expert profile
+  // Default fallback: show expert profile
   return <ExpertProfile />;
 };
 
