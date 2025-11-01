@@ -1,10 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Users, Target, Award, TrendingUp } from "lucide-react";
 import ansutLogo from "@/assets/ansut-logo-official.png";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Home = () => {
+  const { user, loading } = useAuth();
+
+  // Rediriger les utilisateurs connectés vers le dashboard
+  if (loading) {
+    return null; // Ou un loader si souhaité
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
       {/* Header */}

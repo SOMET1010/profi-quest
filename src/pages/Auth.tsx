@@ -1,5 +1,5 @@
 import { useState, useEffect, memo } from 'react';
-import { Navigate, useSearchParams, useNavigate } from 'react-router-dom';
+import { Navigate, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { Eye, EyeOff, UserPlus, LogIn, AlertCircle, Clock } from 'lucide-react';
 const Auth = memo(() => {
   const { user, loading: authLoading, signUp, signIn, resetPassword, resendConfirmationEmail } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -106,9 +107,10 @@ const Auth = memo(() => {
   // Redirect if already authenticated
   useEffect(() => {
     if (user && !authLoading) {
-      navigate('/', { replace: true });
+      const from = (location.state as any)?.from || '/dashboard';
+      navigate(from, { replace: true });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, location]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,7 +215,9 @@ const Auth = memo(() => {
       } else {
         console.log('[Auth] Connexion réussie !');
         toast.success('Connexion réussie !');
-        // Ne pas désactiver loading ici - la redirection va se faire
+        // Rediriger vers la page d'origine ou le dashboard
+        const from = (location.state as any)?.from || '/dashboard';
+        navigate(from);
       }
     } catch (err) {
       console.error('[Auth] Exception capturée:', err);
