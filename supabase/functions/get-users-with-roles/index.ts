@@ -42,12 +42,12 @@ serve(async (req) => {
       });
     }
 
-    // Check if user has admin role
+    // Check if user has SUPERADMIN or admin role
     const { data: userRole, error: roleError } = await authClient
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
-      .eq('role', 'admin')
+      .in('role', ['SUPERADMIN', 'DG', 'SI', 'DRH'])
       .maybeSingle();
 
     if (roleError || !userRole) {
@@ -69,11 +69,11 @@ serve(async (req) => {
     });
 
     // Get all users from auth.users
-    const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+    const { data: authUsers, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
     
-    if (authError) {
-      console.error('Error fetching auth users:', authError);
-      throw authError;
+    if (usersError) {
+      console.error('Error fetching auth users:', usersError);
+      throw usersError;
     }
 
     // Get all user roles
