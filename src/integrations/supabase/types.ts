@@ -1168,7 +1168,7 @@ export type Database = {
           status: string | null
           technical_skills: string | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           behavioral_skills?: string | null
@@ -1191,7 +1191,7 @@ export type Database = {
           status?: string | null
           technical_skills?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           behavioral_skills?: string | null
@@ -1214,7 +1214,7 @@ export type Database = {
           status?: string | null
           technical_skills?: string | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
