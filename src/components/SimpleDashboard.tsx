@@ -59,7 +59,7 @@ export default function SimpleDashboard() {
       count: `${stats?.qualifiedProfiles || 0} validés`,
       color: "bg-gradient-primary",
       path: "/database",
-      requiredRole: "FINANCE" as const
+      requiredRole: "RDRH" as const
     },
     {
       icon: UserCheck,
@@ -69,7 +69,7 @@ export default function SimpleDashboard() {
       count: `${stats?.pendingApplications || 0} en cours`,
       color: "bg-warning",
       path: "/qualification",
-      requiredRole: "FINANCE" as const
+      requiredRole: "RDRH" as const
     },
     {
       icon: BarChart3,
@@ -85,7 +85,19 @@ export default function SimpleDashboard() {
 
   // Filter modules based on user role
   const modules = allModules.filter(module => {
-    const roleHierarchy = { DG: 4, FINANCE: 3, AGENT: 2, READONLY: 1 };
+    // SUPERADMIN has access to everything
+    if (userRole === 'SUPERADMIN') return true;
+    
+    const roleHierarchy = { 
+      SUPERADMIN: 15,
+      DG: 10, 
+      SI: 9, 
+      DRH: 8, 
+      RDRH: 7, 
+      RH_ASSISTANT: 5, 
+      CONSULTANT: 3, 
+      POSTULANT: 1 
+    };
     const userRoleLevel = userRole ? roleHierarchy[userRole] : 0;
     const requiredRoleLevel = roleHierarchy[module.requiredRole];
     return userRoleLevel >= requiredRoleLevel;
