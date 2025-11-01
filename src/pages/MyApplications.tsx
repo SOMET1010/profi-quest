@@ -154,9 +154,9 @@ export default function MyApplications() {
             <p className="text-muted-foreground text-center mb-4">
               Vous n'avez pas encore soumis de candidature.
             </p>
-            <Button onClick={() => navigate("/postuler")}>
-              Soumettre une candidature
-            </Button>
+          <Button onClick={() => navigate("/profile")}>
+            Compléter mon profil
+          </Button>
           </CardContent>
         </Card>
       )}

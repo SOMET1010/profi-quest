@@ -49,7 +49,7 @@ export default function ExpertProfile() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Profile Management */}
           <Card className="cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => navigate('/candidature')}>
+                onClick={() => navigate('/profile')}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
@@ -135,7 +135,7 @@ export default function ExpertProfile() {
                 <Button 
                   variant="outline" 
                   className="h-16 flex-col gap-2"
-                  onClick={() => navigate('/candidature')}
+                  onClick={() => navigate('/profile')}
                 >
                   <FileText className="h-5 w-5" />
                   <span className="text-sm">Compléter profil</span>

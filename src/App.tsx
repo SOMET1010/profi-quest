@@ -25,6 +25,7 @@ const PermissionManagement = lazy(() => import("./pages/PermissionManagement"));
 const FormBuilder = lazy(() => import("./pages/FormBuilder"));
 const ExpertProfile = lazy(() => import("./pages/ExpertProfile"));
 const MyApplications = lazy(() => import("./pages/MyApplications"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
 
 // Optimized React Query configuration
 const queryClient = new QueryClient({
@@ -98,11 +99,9 @@ const App = () => (
                   <AppLayout><Index /></AppLayout>
                 </ProtectedRoute>
               } />
-              {/* Redirect /candidature to /postuler */}
-              <Route path="/candidature" element={<PublicCandidature />} />
               <Route path="/profile" element={
                 <ProtectedRoute>
-                  <AppLayout><ExpertProfile /></AppLayout>
+                  <AppLayout><UserProfile /></AppLayout>
                 </ProtectedRoute>
               } />
               <Route path="/mes-candidatures" element={
