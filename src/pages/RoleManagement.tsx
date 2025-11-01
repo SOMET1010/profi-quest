@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { RoleManagementTable } from "@/components/RoleManagementTable";
 import { AssignRoleDialog } from "@/components/AssignRoleDialog";
+import { RoleStatsCards } from "@/components/RoleStatsCards";
 import { toast } from "sonner";
-import { AppRole } from "@/hooks/useRole";
+import { AppRole } from "@/hooks/useUnifiedRole";
 
 interface UserWithRole {
   id: string;
@@ -113,6 +114,7 @@ export default function RoleManagement() {
 
   const roleStats = {
     total: users.length,
+    superadmin: users.filter(u => u.role === 'SUPERADMIN').length,
     dg: users.filter(u => u.role === 'DG').length,
     si: users.filter(u => u.role === 'SI').length,
     drh: users.filter(u => u.role === 'DRH').length,
@@ -140,57 +142,7 @@ export default function RoleManagement() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{roleStats.total}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">DG</CardTitle>
-              <Shield className="h-4 w-4 text-destructive" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-destructive">{roleStats.dg}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">DRH/RDRH</CardTitle>
-              <UserPlus className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">{roleStats.drh + roleStats.rdrh}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Assistants</CardTitle>
-              <Users className="h-4 w-4 text-accent-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-accent-foreground">{roleStats.assistant}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Sans Rôle</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-muted-foreground">{roleStats.noRole}</div>
-            </CardContent>
-          </Card>
-        </div>
+        <RoleStatsCards stats={roleStats} />
 
         {/* Filters */}
         <Card>
@@ -214,28 +166,49 @@ export default function RoleManagement() {
               <div className="flex gap-2 flex-wrap">
                 <Button
                   variant={roleFilter === "all" ? "default" : "outline"}
+                  size="sm"
                   onClick={() => setRoleFilter("all")}
                 >
-                  Tous
+                  Tous ({roleStats.total})
+                </Button>
+                <Button
+                  variant={roleFilter === "SUPERADMIN" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setRoleFilter("SUPERADMIN")}
+                >
+                  SUPERADMIN ({roleStats.superadmin})
                 </Button>
                 <Button
                   variant={roleFilter === "DG" ? "default" : "outline"}
+                  size="sm"
                   onClick={() => setRoleFilter("DG")}
                 >
-                  DG
+                  DG ({roleStats.dg})
                 </Button>
                 <Button
                   variant={roleFilter === "DRH" ? "default" : "outline"}
+                  size="sm"
                   onClick={() => setRoleFilter("DRH")}
                 >
-                  DRH
+                  DRH ({roleStats.drh})
                 </Button>
                 <Button
                   variant={roleFilter === "RH_ASSISTANT" ? "default" : "outline"}
+                  size="sm"
                   onClick={() => setRoleFilter("RH_ASSISTANT")}
                 >
-                  Assistants
+                  Assistants ({roleStats.assistant})
                 </Button>
+                {roleStats.noRole > 0 && (
+                  <Button
+                    variant={roleFilter === "all" ? "outline" : "outline"}
+                    size="sm"
+                    onClick={() => setSearchTerm("")}
+                    className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  >
+                    Sans rôle ({roleStats.noRole})
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>

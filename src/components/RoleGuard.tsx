@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { useHasRole, AppRole } from '@/hooks/useRole';
+import { useUnifiedRole, AppRole } from '@/hooks/useUnifiedRole';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield, AlertTriangle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,7 +17,7 @@ export function RoleGuard({
   fallback,
   showMessage = true 
 }: RoleGuardProps) {
-  const { hasRole, isLoading, userRole } = useHasRole(requiredRole);
+  const { hasMinimumRole, role: userRole, isLoading } = useUnifiedRole();
 
   if (isLoading) {
     return (
@@ -32,7 +32,7 @@ export function RoleGuard({
     );
   }
 
-  if (!hasRole) {
+  if (!hasMinimumRole(requiredRole)) {
     if (fallback) return <>{fallback}</>;
     
     if (!showMessage) return null;

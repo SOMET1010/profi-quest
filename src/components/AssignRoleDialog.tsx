@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, Users, User, UserCheck, UserCog, Crown, Terminal } from "lucide-react";
+import { Shield, Users, User, UserCheck, UserCog, Crown, Terminal, Settings, UserPlus, Briefcase } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { AppRole } from "@/hooks/useRole";
+import { AppRole } from "@/hooks/useUnifiedRole";
 
 interface UserWithRole {
   id: string;
@@ -38,53 +38,60 @@ const roles: Array<{
   color: string;
 }> = [
   {
+    value: 'SUPERADMIN',
+    label: 'Super Administrateur',
+    description: 'Accès complet au système sans restriction. Gère tous les aspects de la plateforme.',
+    icon: Crown,
+    color: 'text-yellow-600 dark:text-yellow-400',
+  },
+  {
     value: 'DG',
     label: 'Directeur Général',
     description: 'Accès complet, gestion stratégique et validation finale.',
-    icon: Crown,
-    color: 'text-destructive',
+    icon: Shield,
+    color: 'text-purple-600 dark:text-purple-400',
   },
   {
     value: 'SI',
     label: 'Système d\'Information',
     description: 'Accès technique complet, administration système.',
-    icon: Terminal,
-    color: 'text-info',
+    icon: Settings,
+    color: 'text-blue-600 dark:text-blue-400',
   },
   {
     value: 'DRH',
     label: 'Directeur RH',
     description: 'Gestion complète RH, validation des recrutements.',
-    icon: Shield,
-    color: 'text-primary',
+    icon: Users,
+    color: 'text-green-600 dark:text-green-400',
   },
   {
     value: 'RDRH',
     label: 'Responsable DRH',
     description: 'Supervision RH, validation intermédiaire.',
-    icon: UserCog,
-    color: 'text-primary',
+    icon: UserCheck,
+    color: 'text-teal-600 dark:text-teal-400',
   },
   {
     value: 'RH_ASSISTANT',
     label: 'Assistant RH',
     description: 'Traitement des candidatures, saisie.',
-    icon: UserCheck,
-    color: 'text-accent-foreground',
+    icon: UserPlus,
+    color: 'text-cyan-600 dark:text-cyan-400',
   },
   {
     value: 'CONSULTANT',
     label: 'Consultant Expert',
     description: 'Consultation du profil expert, missions.',
-    icon: Users,
-    color: 'text-accent-foreground',
+    icon: Briefcase,
+    color: 'text-orange-600 dark:text-orange-400',
   },
   {
     value: 'POSTULANT',
     label: 'Postulant',
     description: 'Soumission candidature uniquement.',
     icon: User,
-    color: 'text-muted-foreground',
+    color: 'text-gray-600 dark:text-gray-400',
   },
 ];
 
@@ -125,30 +132,32 @@ export function AssignRoleDialog({
             Gestion du rôle utilisateur
           </DialogTitle>
           <DialogDescription>
-            Sélectionnez le rôle à attribuer à cet utilisateur.
+            Sélectionnez le rôle à attribuer à cet utilisateur. Le rôle détermine les permissions et l'accès aux fonctionnalités.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* User Info */}
-          <Card>
+          <Card className="border-2">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-muted text-muted-foreground">
+                  <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                     {getUserInitials(user.email)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <p className="font-medium text-foreground">{user.email}</p>
+                  <p className="font-semibold text-foreground">{user.email}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <p className="text-sm text-muted-foreground">
                       Rôle actuel:
                     </p>
                     {user.role ? (
-                      <Badge variant="secondary">{user.role}</Badge>
+                      <Badge variant="secondary" className="font-medium">{user.role}</Badge>
                     ) : (
-                      <Badge variant="outline">Aucun rôle</Badge>
+                      <Badge variant="outline" className="text-destructive border-destructive">
+                        Aucun rôle
+                      </Badge>
                     )}
                   </div>
                 </div>
@@ -158,7 +167,8 @@ export function AssignRoleDialog({
 
           {/* Role Selection */}
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-foreground">
+            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Shield className="h-4 w-4" />
               Sélectionner un rôle :
             </h4>
             <div className="grid gap-3">
@@ -169,24 +179,26 @@ export function AssignRoleDialog({
                 return (
                   <Card
                     key={role.value}
-                    className={`cursor-pointer transition-all duration-200 ${
+                    className={`cursor-pointer transition-all duration-200 border-2 ${
                       isSelected 
-                        ? 'ring-2 ring-primary bg-primary/5' 
-                        : 'hover:bg-muted/50'
+                        ? 'ring-2 ring-primary ring-offset-2 bg-primary/5 border-primary' 
+                        : 'hover:bg-muted/50 hover:border-primary/30'
                     }`}
                     onClick={() => setSelectedRole(role.value)}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
-                        <Icon className={`h-5 w-5 mt-0.5 ${role.color}`} />
+                        <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary/10' : 'bg-muted'}`}>
+                          <Icon className={`h-5 w-5 ${isSelected ? role.color : 'text-muted-foreground'}`} />
+                        </div>
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
-                            <h5 className="font-medium text-foreground">
+                            <h5 className="font-semibold text-foreground">
                               {role.label}
                             </h5>
                             {isSelected && (
                               <Badge variant="default" className="text-xs">
-                                Sélectionné
+                                ✓ Sélectionné
                               </Badge>
                             )}
                           </div>
@@ -203,7 +215,7 @@ export function AssignRoleDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -214,7 +226,7 @@ export function AssignRoleDialog({
           <Button
             onClick={handleAssignRole}
             disabled={!selectedRole || isLoading}
-            className="min-w-[120px]"
+            className="min-w-[140px]"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
@@ -222,7 +234,10 @@ export function AssignRoleDialog({
                 Attribution...
               </div>
             ) : (
-              'Attribuer le rôle'
+              <>
+                <Shield className="h-4 w-4 mr-2" />
+                Attribuer le rôle
+              </>
             )}
           </Button>
         </DialogFooter>

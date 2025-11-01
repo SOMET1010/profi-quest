@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useHasRole, AppRole } from "@/hooks/useRole";
+import { useUnifiedRole, AppRole } from "@/hooks/useUnifiedRole";
 import {
   Sidebar,
   SidebarContent,
@@ -113,26 +113,19 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { userRole } = useHasRole('POSTULANT');
+  const { role: userRole, hasMinimumRole, isSuperAdmin } = useUnifiedRole();
   
   const currentPath = location.pathname;
   
   const hasPermission = (requiredRole?: AppRole) => {
-    if (!requiredRole || !userRole) return false;
+    if (!requiredRole) return true;
+    if (!userRole) return false;
     
-    const roleHierarchy = { 
-      DG: 10, 
-      SI: 9, 
-      DRH: 8, 
-      RDRH: 7, 
-      RH_ASSISTANT: 5, 
-      CONSULTANT: 3, 
-      POSTULANT: 1 
-    };
-    const userRoleLevel = roleHierarchy[userRole];
-    const requiredRoleLevel = roleHierarchy[requiredRole];
+    // SUPERADMIN a accès à tout
+    if (isSuperAdmin) return true;
     
-    return userRoleLevel >= requiredRoleLevel;
+    // Utiliser hasMinimumRole du hook unifié
+    return hasMinimumRole(requiredRole);
   };
 
   const filterNavigation = (items: NavigationItem[]) => 
@@ -156,6 +149,7 @@ export function AppSidebar() {
 
   const getRoleLabel = () => {
     const roleLabels = {
+      SUPERADMIN: "Super Administrateur",
       DG: "Directeur Général",
       SI: "Système d'Information",
       DRH: "Directeur RH",
