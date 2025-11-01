@@ -137,7 +137,15 @@ export type Database = {
           role?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ansut_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "unified_user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ansut_roles: {
         Row: {
@@ -284,6 +292,13 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_workflow_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "unified_user_roles"
             referencedColumns: ["id"]
           },
         ]
@@ -610,6 +625,13 @@ export type Database = {
             referencedRelation: "applications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "unified_user_roles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       events_ledger: {
@@ -763,7 +785,15 @@ export type Database = {
           status?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "form_submissions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "unified_user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       jobs: {
         Row: {
@@ -817,7 +847,15 @@ export type Database = {
           title?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "jobs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "unified_user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       kpi_data: {
         Row: {
@@ -1224,6 +1262,20 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "public_applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "unified_user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "unified_user_roles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       role_default_permissions: {
@@ -1254,6 +1306,39 @@ export type Database = {
             referencedColumns: ["code"]
           },
         ]
+      }
+      role_migration_audit: {
+        Row: {
+          id: string
+          migrated_at: string | null
+          migration_notes: string | null
+          migration_strategy: string | null
+          new_app_role: Database["public"]["Enums"]["app_role"] | null
+          old_ansut_role: string | null
+          old_profile_role: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          migrated_at?: string | null
+          migration_notes?: string | null
+          migration_strategy?: string | null
+          new_app_role?: Database["public"]["Enums"]["app_role"] | null
+          old_ansut_role?: string | null
+          old_profile_role?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          migrated_at?: string | null
+          migration_notes?: string | null
+          migration_strategy?: string | null
+          new_app_role?: Database["public"]["Enums"]["app_role"] | null
+          old_ansut_role?: string | null
+          old_profile_role?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       skills: {
         Row: {
@@ -1309,11 +1394,25 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "user_permissions_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "unified_user_roles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_permissions_permission_code_fkey"
             columns: ["permission_code"]
             isOneToOne: false
             referencedRelation: "permissions"
             referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "user_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "unified_user_roles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1339,7 +1438,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "unified_user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vectors: {
         Row: {
@@ -1367,6 +1474,17 @@ export type Database = {
       }
     }
     Views: {
+      unified_user_roles: {
+        Row: {
+          current_role: Database["public"]["Enums"]["app_role"] | null
+          email: string | null
+          id: string | null
+          legacy_ansut_role: string | null
+          legacy_profile_role: string | null
+          role_source: string | null
+        }
+        Relationships: []
+      }
       user_activity_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"] | null
@@ -1407,6 +1525,14 @@ export type Database = {
         Returns: number
       }
       check_admin_role: { Args: { _user_id: string }; Returns: boolean }
+      check_role_system_health: {
+        Args: never
+        Returns: {
+          count: number
+          metric: string
+          status: string
+        }[]
+      }
       get_ansut_user_role: { Args: never; Returns: string }
       get_current_user_role: { Args: never; Returns: string }
       get_user_permissions: {
@@ -1425,6 +1551,14 @@ export type Database = {
         Returns: boolean
       }
       is_superadmin: { Args: { _user_id: string }; Returns: boolean }
+      map_legacy_role_to_app_role: {
+        Args: {
+          ansut_role: string
+          existing_app_role: Database["public"]["Enums"]["app_role"]
+          profile_role: string
+        }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
     }
     Enums: {
       app_role:
