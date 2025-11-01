@@ -257,6 +257,28 @@ export function useFileUpload() {
     return uploadedFiles.get(fieldKey);
   }, [uploadedFiles]);
 
+  // Restaurer des fichiers depuis le brouillon
+  const restoreUploadedFiles = useCallback((filesData: Array<{
+    fieldKey: string;
+    url: string;
+    path: string;
+    fileName: string;
+  }>) => {
+    const newFiles = new Map<string, UploadedFileState>();
+    
+    filesData.forEach(({ fieldKey, url, path, fileName }) => {
+      // Créer un fichier vide pour référence
+      newFiles.set(fieldKey, {
+        file: new File([], fileName),
+        url,
+        path,
+        status: 'success'
+      });
+    });
+    
+    setUploadedFiles(newFiles);
+  }, []);
+
   return {
     uploadedFiles,
     configs,
@@ -269,5 +291,6 @@ export function useFileUpload() {
     rollbackAllUploads,
     reset,
     getFileStatus,
+    restoreUploadedFiles,
   };
 }

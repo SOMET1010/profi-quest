@@ -4,7 +4,9 @@ import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormFieldEditor } from '@/components/FormFieldEditor';
+import { FileConfigManager } from '@/components/FileConfigManager';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Pencil, Trash2, GripVertical, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
@@ -82,20 +84,28 @@ export default function FormBuilder() {
   return (
     <AppLayout>
       <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Constructeur de formulaire</h1>
-            <p className="text-muted-foreground">
-              Configurez les champs du formulaire de candidature
-            </p>
-          </div>
-          <Button onClick={handleCreateNew}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nouveau champ
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Constructeur de formulaire</h1>
+          <p className="text-muted-foreground">
+            Configurez les champs et fichiers du formulaire de candidature
+          </p>
         </div>
 
-        {Object.entries(groupedFields).map(([section, sectionFields]) => (
+        <Tabs defaultValue="fields" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="fields">Champs du formulaire</TabsTrigger>
+            <TabsTrigger value="files">Configuration fichiers</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="fields" className="space-y-6">
+            <div className="flex items-center justify-end">
+              <Button onClick={handleCreateNew}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nouveau champ
+              </Button>
+            </div>
+
+            {Object.entries(groupedFields).map(([section, sectionFields]) => (
           <Card key={section}>
             <CardHeader>
               <CardTitle>{sectionLabels[section] || section}</CardTitle>
@@ -173,6 +183,12 @@ export default function FormBuilder() {
             </CardContent>
           </Card>
         ))}
+          </TabsContent>
+
+          <TabsContent value="files">
+            <FileConfigManager />
+          </TabsContent>
+        </Tabs>
 
         <FormFieldEditor
           field={editingField}

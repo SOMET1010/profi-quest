@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { FileText, Upload, X } from 'lucide-react';
+import { FileText, Upload, X, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -12,6 +12,8 @@ interface FileUploadZoneProps {
   maxSize?: number;
   disabled?: boolean;
   currentFile?: File | null;
+  fileStatus?: 'pending' | 'uploading' | 'success' | 'error';
+  errorMessage?: string;
 }
 
 export function FileUploadZone({
@@ -21,6 +23,8 @@ export function FileUploadZone({
   maxSize = 5 * 1024 * 1024, // 5MB
   disabled,
   currentFile,
+  fileStatus,
+  errorMessage,
 }: FileUploadZoneProps) {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -69,23 +73,46 @@ export function FileUploadZone({
         <input {...getInputProps()} />
         
         {currentFile ? (
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <FileText className="h-8 w-8 text-primary" />
-              <div className="text-left">
-                <p className="font-medium">{currentFile.name}</p>
-                <p className="text-sm text-muted-foreground">{formatFileSize(currentFile.size)}</p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <FileText className="h-8 w-8 text-primary" />
+                <div className="text-left">
+                  <p className="font-medium">{currentFile.name}</p>
+                  <p className="text-sm text-muted-foreground">{formatFileSize(currentFile.size)}</p>
+                </div>
               </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleRemove}
+                disabled={disabled || fileStatus === 'uploading'}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={handleRemove}
-              disabled={disabled}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            
+            {fileStatus === 'uploading' && (
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Upload en cours...</span>
+              </div>
+            )}
+
+            {fileStatus === 'success' && (
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm">Fichier uploadé avec succès</span>
+              </div>
+            )}
+
+            {fileStatus === 'error' && (
+              <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                <XCircle className="h-4 w-4" />
+                <span className="text-sm">{errorMessage || 'Erreur lors de l\'upload'}</span>
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-2">

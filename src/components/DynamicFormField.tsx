@@ -15,9 +15,10 @@ interface DynamicFormFieldProps {
   field: FormField;
   formField: ControllerRenderProps<any, any>;
   onFileChange?: (fieldKey: string, file: File | null) => void;
+  getFileStatus?: (fieldKey: string) => { status: 'pending' | 'uploading' | 'success' | 'error'; error?: string } | undefined;
 }
 
-export function DynamicFormField({ field, formField, onFileChange }: DynamicFormFieldProps) {
+export function DynamicFormField({ field, formField, onFileChange, getFileStatus }: DynamicFormFieldProps) {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
 
   const renderInput = () => {
@@ -68,6 +69,8 @@ export function DynamicFormField({ field, formField, onFileChange }: DynamicForm
 
     // Handle file uploads
     if (field.field_type === 'file') {
+      const fileStatus = getFileStatus?.(field.field_key);
+      
       return (
         <FileUploadZone
           currentFile={currentFile}
@@ -80,6 +83,8 @@ export function DynamicFormField({ field, formField, onFileChange }: DynamicForm
           onBlur={formField.onBlur}
           accept=".pdf,.doc,.docx"
           maxSize={5 * 1024 * 1024}
+          fileStatus={fileStatus?.status}
+          errorMessage={fileStatus?.error}
         />
       );
     }

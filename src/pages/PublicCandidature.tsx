@@ -38,6 +38,7 @@ const PublicCandidature = () => {
     rollbackAllUploads,
     reset: resetFiles,
     getFileStatus,
+    restoreUploadedFiles,
   } = useFileUpload();
 
   // Generate default values from form fields
@@ -96,6 +97,18 @@ const PublicCandidature = () => {
             setLastSave(new Date(lastSaveTime));
             toast.info('Brouillon restauré');
           }
+
+          // Restaurer les fichiers uploadés
+          const filesDraft = localStorage.getItem('candidature_files_draft');
+          if (filesDraft) {
+            try {
+              const filesData = JSON.parse(filesDraft);
+              restoreUploadedFiles(filesData);
+              toast.info(`${filesData.length} fichier(s) restauré(s)`);
+            } catch (error) {
+              console.error('Error restoring files:', error);
+            }
+          }
         } catch (error) {
           console.error('Error loading draft:', error);
         }
@@ -103,7 +116,7 @@ const PublicCandidature = () => {
     };
 
     loadData();
-  }, [user, form, defaultValues]);
+  }, [user, form, defaultValues, restoreUploadedFiles]);
 
   // Auto-save every 30 seconds
   useEffect(() => {
@@ -119,7 +132,23 @@ const PublicCandidature = () => {
 
   const saveDraft = (values: any) => {
     try {
+      // Sauvegarder les données du formulaire
       localStorage.setItem(DRAFT_KEY, JSON.stringify(values));
+      
+      // Sauvegarder les métadonnées des fichiers uploadés avec succès
+      const uploadedFilesData = Array.from(uploadedFiles.entries())
+        .filter(([, state]) => state.status === 'success')
+        .map(([key, state]) => ({
+          fieldKey: key,
+          url: state.url,
+          path: state.path,
+          fileName: state.file.name
+        }));
+      
+      if (uploadedFilesData.length > 0) {
+        localStorage.setItem('candidature_files_draft', JSON.stringify(uploadedFilesData));
+      }
+      
       const now = new Date();
       localStorage.setItem(LAST_SAVE_KEY, now.toISOString());
       setLastSave(now);
@@ -133,6 +162,7 @@ const PublicCandidature = () => {
   const clearDraft = () => {
     localStorage.removeItem(DRAFT_KEY);
     localStorage.removeItem(LAST_SAVE_KEY);
+    localStorage.removeItem('candidature_files_draft');
     setLastSave(null);
   };
 
@@ -427,11 +457,12 @@ const PublicCandidature = () => {
                         control={form.control}
                         name={field.field_key}
                         render={({ field: formField }) => (
-                          <DynamicFormField
-                            field={field}
-                            formField={formField}
-                            onFileChange={handleFileChange}
-                          />
+                  <DynamicFormField
+                    field={field}
+                    formField={formField}
+                    onFileChange={handleFileChange}
+                    getFileStatus={getFileStatus}
+                  />
                         )}
                       />
                     </div>
