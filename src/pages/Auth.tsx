@@ -395,138 +395,165 @@ const Auth = memo(() => {
                 </TabsContent>
 
                 <TabsContent value="signup" className="space-y-4 mt-6">
-                  <form onSubmit={handleSignUp} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email">Adresse email</Label>
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="votre.email@ansut.ci"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={loading || signUpCooldown > 0}
-                        className="bg-white/50"
-                      />
+                  {signUpCooldown > 0 && lastSignUpEmail ? (
+                    <div className="space-y-4">
+                      <Alert className="bg-primary/10 border-primary/20">
+                        <AlertCircle className="h-4 w-4 text-primary" />
+                        <AlertDescription className="text-sm space-y-2">
+                          <p className="font-medium text-primary">
+                            📧 Email de confirmation envoyé à :
+                          </p>
+                          <p className="font-mono text-xs bg-white/80 p-2 rounded border">
+                            {lastSignUpEmail}
+                          </p>
+                          <div className="text-muted-foreground space-y-1 pt-2">
+                            <p>✓ Vérifiez votre boîte de réception</p>
+                            <p>✓ Consultez également le dossier <strong>spam/courrier indésirable</strong></p>
+                            <p>✓ Le lien de confirmation est valide pendant 24 heures</p>
+                          </div>
+                        </AlertDescription>
+                      </Alert>
+
+                      <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          <span>
+                            Vous pourrez renvoyer l'email dans <strong className="text-primary">{signUpCooldown}</strong> seconde{signUpCooldown > 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        
+                        <Button
+                          onClick={handleResendConfirmation}
+                          disabled={signUpCooldown > 0 || loading}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          {loading ? (
+                            <span className="flex items-center gap-2">
+                              <span className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                              Envoi en cours...
+                            </span>
+                          ) : signUpCooldown > 0 ? (
+                            `Renvoyer l'email (${signUpCooldown}s)`
+                          ) : (
+                            "Renvoyer l'email de confirmation"
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSignUpCooldown(0);
+                            setLastSignUpEmail('');
+                            localStorage.removeItem('signUpTimestamp');
+                            localStorage.removeItem('lastSignUpEmail');
+                          }}
+                          className="text-sm text-muted-foreground hover:text-primary transition-colors underline"
+                        >
+                          Essayer avec une autre adresse email
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password">Mot de passe</Label>
-                      <div className="relative">
+                  ) : (
+                    <form onSubmit={handleSignUp} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-email">Adresse email</Label>
                         <Input
-                          id="signup-password"
+                          id="signup-email"
+                          type="email"
+                          placeholder="votre.email@ansut.ci"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          disabled={loading}
+                          className="bg-white/50"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-password">Mot de passe</Label>
+                        <div className="relative">
+                          <Input
+                            id="signup-password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Minimum 6 caractères"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            minLength={6}
+                            disabled={loading}
+                            className="bg-white/50 pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                            disabled={loading}
+                            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+                        <Input
+                          id="confirm-password"
                           type={showPassword ? 'text' : 'password'}
-                          placeholder="Minimum 6 caractères"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Répétez votre mot de passe"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
                           required
                           minLength={6}
-                          disabled={loading || signUpCooldown > 0}
-                          className="bg-white/50 pr-10"
+                          disabled={loading}
+                          className="bg-white/50"
                         />
+                      </div>
+                      
+                      <Button 
+                        type="submit" 
+                        className="w-full h-11" 
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <span className="flex items-center gap-2">
+                            <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Inscription...
+                          </span>
+                        ) : (
+                          'Créer un compte'
+                        )}
+                      </Button>
+
+                      {/* Debug button - Development only */}
+                      {import.meta.env.DEV && signUpCooldown > 0 && (
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                          onClick={() => setShowPassword(!showPassword)}
-                          disabled={loading || signUpCooldown > 0}
-                          aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                          className="w-full text-xs text-amber-600"
+                          onClick={() => {
+                            localStorage.removeItem('signUpTimestamp');
+                            localStorage.removeItem('lastSignUpEmail');
+                            setSignUpCooldown(0);
+                            setLastSignUpEmail('');
+                            toast.info('Cooldown réinitialisé (mode développement)');
+                          }}
                         >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-muted-foreground" />
-                          )}
+                          [DEV] Réinitialiser le cooldown
                         </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
-                      <Input
-                        id="confirm-password"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Répétez votre mot de passe"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                        minLength={6}
-                        disabled={loading || signUpCooldown > 0}
-                        className="bg-white/50"
-                      />
-                    </div>
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full h-11" 
-                      disabled={loading || signUpCooldown > 0}
-                    >
-                      {loading ? (
-                        <span className="flex items-center gap-2">
-                          <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Inscription...
-                        </span>
-                      ) : signUpCooldown > 0 ? (
-                        <span className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          Attendre {signUpCooldown}s
-                        </span>
-                      ) : (
-                        'Créer un compte'
                       )}
-                    </Button>
-
-                    {/* 🔥 NOUVEAU : Bouton de reset visible en cas de problème */}
-                    {(loading || signUpCooldown > 30) && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="w-full text-xs text-muted-foreground"
-                        onClick={forceResetStates}
-                      >
-                        Boutons bloqués ? Cliquez ici pour réinitialiser
-                      </Button>
-                    )}
-
-                    {/* Debug button - Development only */}
-                    {import.meta.env.DEV && signUpCooldown > 0 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="w-full text-xs text-amber-600"
-                        onClick={() => {
-                          localStorage.removeItem('signUpTimestamp');
-                          localStorage.removeItem('lastSignUpEmail');
-                          setSignUpCooldown(0);
-                          setLastSignUpEmail('');
-                          toast.info('Cooldown réinitialisé (mode développement)');
-                        }}
-                      >
-                        [DEV] Réinitialiser le cooldown
-                      </Button>
-                    )}
-
-                    {signUpCooldown > 0 && lastSignUpEmail && (
-                      <p className="text-sm text-center text-muted-foreground">
-                        Vous n'avez pas reçu l'email ? Vous pourrez en demander un nouveau dans {signUpCooldown} secondes.
-                      </p>
-                    )}
-
-                    {signUpCooldown === 0 && lastSignUpEmail && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full"
-                        onClick={handleResendConfirmation}
-                        disabled={loading}
-                      >
-                        {loading ? 'Envoi...' : 'Renvoyer l\'email de confirmation'}
-                      </Button>
-                    )}
-                  </form>
+                    </form>
+                  )}
                 </TabsContent>
               </Tabs>
             )}
