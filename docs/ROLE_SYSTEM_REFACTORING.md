@@ -325,18 +325,49 @@ USE_UNIFIED_ROLES: false
    has_permission(auth.uid(), 'manage_users')
    ```
 
+## ✅ Éléments Supprimés (2025-01-17)
+
+### Hooks Frontend Obsolètes
+- ❌ `src/hooks/useRole.ts` - **SUPPRIMÉ**
+  - `useRole()` → ✅ Utiliser `useUnifiedRole()`
+  - `useHasRole()` → ✅ Utiliser `useUnifiedRole().hasMinimumRole()`
+
+### Composants Frontend Obsolètes
+- ❌ `src/components/Dashboard.tsx` - **SUPPRIMÉ** (non utilisé)
+  - Remplacé par `SimpleDashboard.tsx` utilisant `useUnifiedRole`
+
+### Fonctions SQL Obsolètes
+- ❌ `public.get_ansut_user_role()` - **SUPPRIMÉE**
+  - Utiliser `user_roles` directement
+- ❌ `public.handle_new_ansut_user()` - **SUPPRIMÉE**
+  - Remplacé par `handle_new_user()` qui insère dans `user_roles`
+
+### Fonctions SQL Dépréciées (Avec Warnings)
+- ⚠️ `public.has_ansut_role(text)` - **DÉPRÉCIÉ**
+  - Wrapper de compatibilité, utiliser `has_permission()` ou `user_roles`
+- ⚠️ `public.has_ansut_permission(text[])` - **DÉPRÉCIÉ**
+  - Wrapper de compatibilité, utiliser `has_permission()`
+
+### Tables Archivées
+- 📦 `public.ansut_profiles` - **ARCHIVÉE** (read-only)
+  - Marquée comme DEPRECATED dans les commentaires DB
+  - Utiliser `user_roles` pour les rôles actuels
+  - Conservée pour l'historique uniquement
+
+### Nouvelles Vues de Monitoring
+- ✅ `public.role_system_audit` - Vue sécurisée pour surveiller les incohérences
+  - Utilise `security_invoker = true`
+  - N'expose pas directement `auth.users`
+  - RLS via les tables sous-jacentes
+
 ## ⚠️ Problèmes Connus
 
 ### 1. Warning: Function Search Path Mutable
 - **Niveau**: WARN (non bloquant)
 - **Impact**: Faible
-- **Solution**: Ajouter `SET search_path = public` aux fonctions
-- **Statut**: À corriger en maintenance
-
-### 2. RoleGuard utilise toujours useRole (deprecated)
-- **Impact**: Moyen
-- **Solution**: Créer `UnifiedRoleGuard` utilisant `useUnifiedRole`
-- **Statut**: Planifié
+- **Solution**: Ajouter `SET search_path = public` aux fonctions concernées
+- **Statut**: Non critique - Les fonctions importantes ont déjà le search_path défini
+- **Référence**: https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable
 
 ## 📞 Support
 
