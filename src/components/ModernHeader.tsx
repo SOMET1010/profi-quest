@@ -104,7 +104,7 @@ const getContextualMenu = (role: AppRole | null) => {
 
   if (isApplicant) {
     userMenu.push(
-      { title: "Mon Profil Candidat", href: "/profile", icon: User },
+      { title: "Mon Profil", href: "/mon-profil", icon: User },
       { title: "Mes Candidatures", href: "/mes-candidatures", icon: FileText }
     );
   } else {
