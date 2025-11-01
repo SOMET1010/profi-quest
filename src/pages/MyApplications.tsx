@@ -1,10 +1,10 @@
+import { useUserApplications } from "@/hooks/useUserApplications";
+import { useAppNavigation } from "@/hooks/useAppNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useUserApplications } from "@/hooks/useUserApplications";
-import { ArrowLeft, FileText, Mail, Phone, MapPin, Calendar, ExternalLink } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Mail, Phone, MapPin, FileText, Calendar, ExternalLink } from "lucide-react";
 
 const statusConfig = {
   new: { label: "Nouveau", variant: "default" as const },
@@ -16,7 +16,7 @@ const statusConfig = {
 };
 
 export default function MyApplications() {
-  const navigate = useNavigate();
+  const { navigateToProfile, navigateToHome } = useAppNavigation();
   const { data: applications, isLoading } = useUserApplications();
 
   if (isLoading) {
@@ -39,7 +39,7 @@ export default function MyApplications() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/mon-profil")}
+          onClick={navigateToHome}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -154,7 +154,7 @@ export default function MyApplications() {
             <p className="text-muted-foreground text-center mb-4">
               Vous n'avez pas encore soumis de candidature.
             </p>
-          <Button onClick={() => navigate("/mon-profil")}>
+          <Button onClick={navigateToProfile}>
             Compléter mon profil
           </Button>
           </CardContent>

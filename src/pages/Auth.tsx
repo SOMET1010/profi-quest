@@ -1,7 +1,8 @@
 import { useState, useEffect, memo } from 'react';
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,7 +15,7 @@ import { useRateLimiter } from '@/hooks/useRateLimiter';
 
 const Auth = memo(() => {
   const { user, loading: authLoading, signUp, signIn, resetPassword, resendConfirmationEmail } = useAuth();
-  const navigate = useNavigate();
+  const { getHomeRoute, getProfileRoute, navigate } = useAppNavigation();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
@@ -114,55 +115,33 @@ const Auth = memo(() => {
     if (user && !authLoading) {
       const checkProfileAndRedirect = async () => {
         try {
-          // Check user role first
-          const { data: userRoleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', user.id)
-            .limit(1)
-            .maybeSingle();
-          
-          const isApplicant = userRoleData?.role === 'POSTULANT' || userRoleData?.role === 'CONSULTANT';
-          const defaultRoute = isApplicant ? '/' : '/dashboard';
-          const profileRoute = isApplicant ? '/mon-profil' : '/dashboard';
-
           // Check if user has a complete profile
           const { data: profile } = await supabase
             .from('profiles')
-            .select('id, application_submitted_at, first_name, last_name')
+            .select('first_name, last_name')
             .eq('id', user.id)
             .maybeSingle();
 
-          // Check if user has any applications
-          const { data: applications } = await supabase
-            .from('public_applications')
-            .select('id')
-            .eq('user_id', user.id)
-            .limit(1);
-
-          // Intelligent redirection logic
-          if (!profile || !profile.first_name || !profile.last_name) {
-            // New user or incomplete profile -> redirect to profile page
-            navigate(`${profileRoute}?firstTime=true`, { replace: true });
-          } else if (isApplicant && (!applications || applications.length === 0)) {
-            // Applicant with profile but no applications -> redirect to profile
-            navigate(profileRoute, { replace: true });
+          // Simple redirection logic using centralized hook
+          if (!profile?.first_name || !profile?.last_name) {
+            // Incomplete profile -> go to profile page
+            navigate(`${getProfileRoute()}?firstTime=true`, { replace: true });
           } else {
-            // User with profile and applications -> use default routing
-            const from = (location.state as any)?.from || defaultRoute;
+            // Complete profile -> go to home or saved location
+            const from = (location.state as any)?.from || getHomeRoute();
             navigate(from, { replace: true });
           }
         } catch (error) {
           console.error('[Auth] Error checking profile:', error);
           toast.error('Erreur lors de la vérification du profil.');
-          // Redirect to default page
-          navigate('/', { replace: true });
+          // Redirect to home on error
+          navigate(getHomeRoute(), { replace: true });
         }
       };
 
       checkProfileAndRedirect();
     }
-  }, [user, authLoading, navigate, location]);
+  }, [user, authLoading, navigate, location, getHomeRoute, getProfileRoute]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -7,7 +7,7 @@ import { Form, FormField as RHFFormField } from "@/components/ui/form";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Loader2, Save, User, Briefcase, FileText } from "lucide-react";
 import ansutLogo from "@/assets/ansut-logo-official.png";
 import { useFormFields } from "@/hooks/useFormFields";
@@ -15,13 +15,14 @@ import { useDynamicFormSchema } from "@/hooks/useDynamicFormSchema";
 import { DynamicFormField } from "@/components/DynamicFormField";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useAppNavigation } from "@/hooks/useAppNavigation";
 
 const DRAFT_KEY = 'candidature_draft';
 const LAST_SAVE_KEY = 'candidature_last_save';
 
 const PublicCandidature = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { navigateToProfile } = useAppNavigation();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -64,9 +65,9 @@ const PublicCandidature = () => {
   useEffect(() => {
     if (user) {
       toast.info('Vous êtes déjà connecté. Gérez votre profil depuis votre espace.');
-      navigate('/mon-profil', { replace: true });
+      navigateToProfile();
     }
-  }, [user, navigate]);
+  }, [user, navigateToProfile, toast]);
 
   // Load draft on mount (only for non-authenticated users)
   useEffect(() => {

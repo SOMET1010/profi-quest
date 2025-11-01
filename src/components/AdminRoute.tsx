@@ -1,24 +1,22 @@
 import { ReactNode, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUnifiedRole } from '@/hooks/useUnifiedRole';
+import { useAppNavigation } from '@/hooks/useAppNavigation';
 
 interface AdminRouteProps {
   children: ReactNode;
 }
 
 export function AdminRoute({ children }: AdminRouteProps) {
-  const { role, isLoading } = useUnifiedRole();
-  const navigate = useNavigate();
+  const { isApplicant, navigateToHome, isLoading } = useAppNavigation();
 
   useEffect(() => {
     // Don't redirect while loading
     if (isLoading) return;
     
     // Redirect applicants to their home dashboard
-    if (role && ['POSTULANT', 'CONSULTANT'].includes(role)) {
-      navigate('/', { replace: true });
+    if (isApplicant) {
+      navigateToHome();
     }
-  }, [role, isLoading, navigate]);
+  }, [isApplicant, isLoading, navigateToHome]);
 
   // Show loading state while checking role
   if (isLoading) {
@@ -35,7 +33,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
   }
   
   // Only render children for admins/HR
-  if (role && !['POSTULANT', 'CONSULTANT'].includes(role)) {
+  if (!isApplicant) {
     return <>{children}</>;
   }
 

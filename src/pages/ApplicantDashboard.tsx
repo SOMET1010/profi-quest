@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAppNavigation } from "@/hooks/useAppNavigation";
 import { useUserApplications } from "@/hooks/useUserApplications";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
@@ -32,7 +32,7 @@ const statusConfig = {
 
 export default function ApplicantDashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { navigateToProfile, navigateToApplications, navigate, ROUTES } = useAppNavigation();
   const { data: applications, isLoading: isLoadingApplications } = useUserApplications();
   const { data: profile } = useUserProfile();
   const { percentage: completionPercentage, missingFields } = useProfileCompletion(profile);
@@ -79,7 +79,7 @@ export default function ApplicantDashboard() {
             )}
 
             <Button 
-              onClick={() => navigate("/mon-profil")}
+              onClick={navigateToProfile}
               className="w-full"
             >
               {completionPercentage === 100 ? "Modifier mon profil" : "Compléter mon profil"}
@@ -97,7 +97,7 @@ export default function ApplicantDashboard() {
             <Button 
               variant="outline" 
               className="w-full justify-start"
-              onClick={() => navigate("/postuler")}
+              onClick={() => navigate(ROUTES.PUBLIC_SIGNUP)}
             >
               <FileText className="mr-2 h-4 w-4" />
               Nouvelle candidature
@@ -105,7 +105,7 @@ export default function ApplicantDashboard() {
             <Button 
               variant="outline" 
               className="w-full justify-start"
-              onClick={() => navigate("/mes-candidatures")}
+              onClick={navigateToApplications}
             >
               <Clock className="mr-2 h-4 w-4" />
               Mes candidatures
@@ -113,7 +113,7 @@ export default function ApplicantDashboard() {
             <Button 
               variant="outline" 
               className="w-full justify-start"
-              onClick={() => navigate("/mon-profil")}
+              onClick={navigateToProfile}
             >
               <User className="mr-2 h-4 w-4" />
               Modifier mon profil
@@ -138,7 +138,7 @@ export default function ApplicantDashboard() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => navigate("/mes-candidatures")}
+                  onClick={navigateToApplications}
                 >
                   Voir tout
                 </Button>
@@ -159,7 +159,7 @@ export default function ApplicantDashboard() {
                       ⚠️ Complétez d'abord votre profil ({completionPercentage}% complété) pour maximiser vos chances.
                     </p>
                   )}
-                  <Button onClick={() => navigate("/postuler")}>
+                  <Button onClick={() => navigate(ROUTES.PUBLIC_SIGNUP)}>
                     Soumettre une candidature
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -188,7 +188,7 @@ export default function ApplicantDashboard() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate("/mes-candidatures")}
+                        onClick={navigateToApplications}
                       >
                         Détails
                         <ArrowRight className="ml-2 h-4 w-4" />
