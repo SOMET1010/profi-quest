@@ -72,11 +72,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-    return { error };
+    try {
+      console.log('[AuthContext] Tentative de connexion pour:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        console.error('[AuthContext] Erreur de connexion:', error);
+        return { error };
+      }
+      
+      console.log('[AuthContext] Connexion réussie:', data.user?.email);
+      return { error: null };
+    } catch (err) {
+      console.error('[AuthContext] Exception lors de la connexion:', err);
+      return { error: err as any };
+    }
   };
 
   const resetPassword = async (email: string) => {

@@ -183,27 +183,41 @@ const Auth = memo(() => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('[Auth] Début de la connexion');
+    console.log('[Auth] Email:', email);
+    console.log('[Auth] Loading avant:', loading);
+    
     setLoading(true);
     
     try {
+      console.log('[Auth] Appel de signIn...');
       const { error } = await signIn(email, password);
+      console.log('[Auth] Réponse de signIn:', { error });
 
       if (error) {
+        console.error('[Auth] Erreur détectée:', error);
+        
         if (error.message.includes('Invalid login credentials')) {
           toast.error('Email ou mot de passe incorrect');
         } else if (error.message.includes('Email not confirmed')) {
           toast.error('Veuillez confirmer votre email avant de vous connecter');
+        } else if (error.message.includes('requested path is invalid')) {
+          toast.error('Configuration Supabase incorrecte. Vérifiez les URLs de redirection.');
+          console.error('[Auth] Erreur de configuration Supabase - vérifiez Site URL et Redirect URLs');
         } else {
           toast.error('Erreur lors de la connexion: ' + error.message);
         }
+        
+        setLoading(false);
       } else {
+        console.log('[Auth] Connexion réussie !');
         toast.success('Connexion réussie !');
+        // Ne pas désactiver loading ici - la redirection va se faire
       }
     } catch (err) {
-      console.error('[SignIn Error]', err);
+      console.error('[Auth] Exception capturée:', err);
       toast.error('Une erreur inattendue s\'est produite');
-    } finally {
-      // 🔥 AMÉLIORATION : Toujours désactiver loading
       setLoading(false);
     }
   };
