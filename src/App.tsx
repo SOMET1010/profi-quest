@@ -23,6 +23,8 @@ const Auth = lazy(() => import("./pages/Auth"));
 const RoleManagement = lazy(() => import("./pages/RoleManagement"));
 const PermissionManagement = lazy(() => import("./pages/PermissionManagement"));
 const FormBuilder = lazy(() => import("./pages/FormBuilder"));
+const ExpertProfile = lazy(() => import("./pages/ExpertProfile"));
+const MyApplications = lazy(() => import("./pages/MyApplications"));
 
 // Optimized React Query configuration
 const queryClient = new QueryClient({
@@ -98,6 +100,16 @@ const App = () => (
               } />
               {/* Redirect /candidature to /postuler */}
               <Route path="/candidature" element={<PublicCandidature />} />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <AppLayout><ExpertProfile /></AppLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/mes-candidatures" element={
+                <ProtectedRoute>
+                  <AppLayout><MyApplications /></AppLayout>
+                </ProtectedRoute>
+              } />
               <Route path="/import" element={
                 <ProtectedRoute>
                   <AppLayout><ImportProfiles /></AppLayout>

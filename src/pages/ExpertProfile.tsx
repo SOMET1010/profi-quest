@@ -13,11 +13,13 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useUserApplications } from "@/hooks/useUserApplications";
 import ansutLogo from "/lovable-uploads/eebdb674-f051-486d-bb7c-acc1f973cde9.png";
 
 export default function ExpertProfile() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { data: applications, isLoading } = useUserApplications();
 
   const handleSignOut = async () => {
     await signOut();
@@ -83,14 +85,37 @@ export default function ExpertProfile() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Mission Télécoms</p>
-                    <p className="text-xs text-muted-foreground">Candidature envoyée</p>
+                {isLoading ? (
+                  <div className="text-sm text-muted-foreground">Chargement...</div>
+                ) : applications && applications.length > 0 ? (
+                  <>
+                    {applications.slice(0, 2).map((app) => (
+                      <div key={app.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div>
+                          <p className="font-medium text-sm">{app.first_name} {app.last_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(app.created_at).toLocaleDateString('fr-FR')}
+                          </p>
+                        </div>
+                        <Badge variant={app.status === 'new' ? 'default' : 'secondary'}>
+                          {app.status === 'new' ? 'Nouveau' : 
+                           app.status === 'reviewed' ? 'En révision' :
+                           app.status === 'converted' ? 'Converti' : app.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <div className="text-sm text-muted-foreground text-center py-4">
+                    Aucune candidature pour le moment
                   </div>
-                  <Badge variant="secondary">En cours</Badge>
-                </div>
-                <Button variant="outline" className="w-full">
+                )}
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => navigate('/mes-candidatures')}
+                  disabled={!applications || applications.length === 0}
+                >
                   Voir toutes les candidatures
                 </Button>
               </div>
