@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ModernLayout } from "@/components/ModernLayout";
+import { ApplicantRoute } from "@/components/ApplicantRoute";
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -26,6 +27,7 @@ const FormBuilder = lazy(() => import("./pages/FormBuilder"));
 const ExpertProfile = lazy(() => import("./pages/ExpertProfile"));
 const MyApplications = lazy(() => import("./pages/MyApplications"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
+const Account = lazy(() => import("./pages/Account"));
 
 // Optimized React Query configuration
 const queryClient = new QueryClient({
@@ -101,12 +103,24 @@ const App = () => (
               } />
               <Route path="/profile" element={
                 <ProtectedRoute>
+                  <ModernLayout><ExpertProfile /></ModernLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/user-profile" element={
+                <ProtectedRoute>
                   <ModernLayout><UserProfile /></ModernLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/account" element={
+                <ProtectedRoute>
+                  <ModernLayout><Account /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/mes-candidatures" element={
                 <ProtectedRoute>
-                  <ModernLayout><MyApplications /></ModernLayout>
+                  <ApplicantRoute>
+                    <ModernLayout><MyApplications /></ModernLayout>
+                  </ApplicantRoute>
                 </ProtectedRoute>
               } />
               <Route path="/import" element={

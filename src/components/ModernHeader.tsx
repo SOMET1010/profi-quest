@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, ChevronDown, LogOut, User, Settings } from "lucide-react";
+import { Menu, ChevronDown, LogOut, User, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -20,21 +20,98 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUnifiedRole } from "@/hooks/useUnifiedRole";
+import { useUnifiedRole, type AppRole } from "@/hooks/useUnifiedRole";
 import ansutLogo from "@/assets/ansut-logo-official.png";
 
-const getRoleLabel = (role: string | null): string => {
-  const labels: Record<string, string> = {
-    SUPERADMIN: "Super Administrateur",
-    DG: "Directeur Général",
-    SI: "Système d'Information",
-    DRH: "Directeur RH",
-    RDRH: "Responsable DRH",
-    RH_ASSISTANT: "Assistant RH",
-    CONSULTANT: "Consultant",
-    POSTULANT: "Postulant",
+// Helper function to get role label
+const getRoleLabel = (role: AppRole | null): string => {
+  if (!role) return 'Aucun rôle';
+  
+  const labels: Record<AppRole, string> = {
+    SUPERADMIN: 'Super Administrateur',
+    DG: 'Directeur Général',
+    SI: 'Service Informatique',
+    DRH: 'Directeur RH',
+    RDRH: 'Responsable DRH',
+    RH_ASSISTANT: 'Assistant RH',
+    CONSULTANT: 'Consultant',
+    POSTULANT: 'Candidat',
   };
-  return role ? labels[role] || role : "Aucun rôle";
+  
+  return labels[role];
+};
+
+// Contextual navigation based on role
+const getContextualMenu = (role: AppRole | null) => {
+  if (!role) return { mainNav: [], userMenu: [] };
+
+  const isApplicant = ['POSTULANT', 'CONSULTANT'].includes(role);
+  const isHR = ['DRH', 'RDRH', 'RH_ASSISTANT'].includes(role);
+  const isAdmin = ['SUPERADMIN', 'DG', 'SI'].includes(role);
+
+  const mainNav: NavGroup[] = [];
+
+  // Navigation for applicants
+  if (isApplicant) {
+    mainNav.push({
+      label: "Candidat",
+      items: [
+        { title: "Accueil", href: "/" },
+        { title: "Postuler", href: "/postuler" },
+        { title: "Mes Candidatures", href: "/mes-candidatures" },
+      ],
+    });
+  }
+
+  // Navigation for HR and Admins
+  if (isHR || isAdmin) {
+    mainNav.push(
+      { 
+        label: "Dashboard", 
+        items: [{ title: "Tableau de Bord", href: "/dashboard" }] 
+      },
+      {
+        label: "Gestion",
+        items: [
+          { title: "Import de Profils", href: "/import", requiredRole: ['DRH', 'RDRH', 'DG', 'SI', 'SUPERADMIN'] },
+          { title: "Base de Données", href: "/database", requiredRole: ['DRH', 'RDRH', 'DG', 'SI', 'SUPERADMIN'] },
+          { title: "Qualification", href: "/qualification", requiredRole: ['DRH', 'RDRH', 'RH_ASSISTANT', 'DG', 'SI', 'SUPERADMIN'] },
+        ],
+      }
+    );
+  }
+
+  // Admin-only sections
+  if (isAdmin) {
+    mainNav.push(
+      {
+        label: "Analytics",
+        items: [{ title: "Analytics", href: "/analytics", requiredRole: ['DRH', 'DG', 'SI', 'SUPERADMIN'] }],
+      },
+      {
+        label: "Administration",
+        items: [
+          { title: "Gestion des Rôles", href: "/admin/roles", requiredRole: ['SUPERADMIN'] },
+          { title: "Permissions", href: "/admin/permissions", requiredRole: ['SUPERADMIN'] },
+          { title: "Form Builder", href: "/admin/form-builder", requiredRole: ['SUPERADMIN'] },
+        ],
+      }
+    );
+  }
+
+  // User menu (dropdown avatar)
+  const userMenu: { title: string; href: string; icon: any }[] = [];
+
+  if (isApplicant) {
+    userMenu.push(
+      { title: "Mon Profil Candidat", href: "/profile", icon: User },
+      { title: "Mes Candidatures", href: "/mes-candidatures", icon: FileText }
+    );
+  } else {
+    userMenu.push({ title: "Mon Compte", href: "/account", icon: User });
+  }
+
+  return { mainNav, userMenu };
 };
 
 interface NavItem {
@@ -56,44 +133,14 @@ export function ModernHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   
   const roleLabel = getRoleLabel(role);
-
-  const navGroups: NavGroup[] = [
-    {
-      label: "Dashboard",
-      items: [{ title: "Tableau de Bord", href: "/dashboard" }],
-    },
-    {
-      label: "Gestion",
-      items: [
-        { title: "Import de Profils", href: "/import", requiredRole: ["SUPERADMIN", "DG", "SI", "DRH", "RDRH"] },
-        { title: "Base de Données", href: "/database", requiredRole: ["SUPERADMIN", "DG", "SI", "DRH", "RDRH"] },
-        { title: "Qualification", href: "/qualification", requiredRole: ["SUPERADMIN", "DG", "SI", "DRH", "RDRH", "RH_ASSISTANT"] },
-      ],
-      requiredRole: ["SUPERADMIN", "DG", "SI", "DRH", "RDRH", "RH_ASSISTANT"],
-    },
-    {
-      label: "Analytics",
-      items: [{ title: "Analytics", href: "/analytics", requiredRole: ["SUPERADMIN", "DG", "SI", "DRH"] }],
-      requiredRole: ["SUPERADMIN", "DG", "SI", "DRH"],
-    },
-    {
-      label: "Administration",
-      items: [
-        { title: "Gestion des Rôles", href: "/admin/roles", requiredRole: ["SUPERADMIN"] },
-        { title: "Permissions", href: "/admin/permissions", requiredRole: ["SUPERADMIN"] },
-        { title: "Form Builder", href: "/admin/form-builder", requiredRole: ["SUPERADMIN"] },
-      ],
-      requiredRole: ["SUPERADMIN"],
-    },
-  ];
+  const { mainNav, userMenu } = getContextualMenu(role);
 
   const hasPermission = (requiredRoles?: string[]) => {
     if (!requiredRoles || requiredRoles.length === 0) return true;
     return role ? requiredRoles.includes(role) : false;
   };
 
-  const filteredNavGroups = navGroups
-    .filter(group => hasPermission(group.requiredRole))
+  const filteredNavGroups = mainNav
     .map(group => ({
       ...group,
       items: group.items.filter(item => hasPermission(item.requiredRole)),
@@ -201,18 +248,16 @@ export function ModernHeader() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/profile" className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  Mon Profil
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/mes-candidatures" className="cursor-pointer">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Mes Candidatures
-                </Link>
-              </DropdownMenuItem>
+              
+              {userMenu.map((item) => (
+                <DropdownMenuItem key={item.href} asChild>
+                  <Link to={item.href} className="cursor-pointer">
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.title}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+              
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
