@@ -13,7 +13,11 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-  UserCircle
+  UserCircle,
+  Shield,
+  Lock,
+  Settings,
+  ListChecks
 } from "lucide-react";
 import { lazy, Suspense } from "react";
 import heroImage from "@/assets/ansut-cote-divoire-background.webp";
@@ -80,6 +84,46 @@ export default function SimpleDashboard() {
       color: "bg-info",
       path: "/analytics",
       requiredRole: "DG" as const
+    },
+    {
+      icon: Shield,
+      title: "Gestion des Rôles",
+      description: "Assignez et gérez les rôles des utilisateurs du système",
+      status: "active",
+      count: "Administration",
+      color: "bg-destructive",
+      path: "/admin/roles",
+      requiredRole: "DG" as const
+    },
+    {
+      icon: Lock,
+      title: "Gestion des Permissions",
+      description: "Configurez les permissions granulaires par utilisateur",
+      status: "active",
+      count: "Sécurité",
+      color: "bg-destructive",
+      path: "/admin/permissions",
+      requiredRole: "DG" as const
+    },
+    {
+      icon: Settings,
+      title: "Constructeur de Formulaires",
+      description: "Créez et personnalisez les formulaires de candidature",
+      status: "active",
+      count: "Configuration",
+      color: "bg-info",
+      path: "/admin/form-builder",
+      requiredRole: "DRH" as const
+    },
+    {
+      icon: ListChecks,
+      title: "Candidatures Publiques",
+      description: "Gérez les candidatures spontanées reçues via le formulaire public",
+      status: "active",
+      count: `${stats?.pendingApplications || 0} nouvelles`,
+      color: "bg-success",
+      path: "/database",
+      requiredRole: "RDRH" as const
     }
   ];
 
