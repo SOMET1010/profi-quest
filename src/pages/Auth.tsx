@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { Eye, EyeOff, UserPlus, LogIn, AlertCircle, Clock } from 'lucide-react';
+import { useRateLimiter } from '@/hooks/useRateLimiter';
 
 const Auth = memo(() => {
   const { user, loading: authLoading, signUp, signIn, resetPassword, resendConfirmationEmail } = useAuth();
@@ -26,6 +27,9 @@ const Auth = memo(() => {
   const [signUpCooldown, setSignUpCooldown] = useState(0);
   const [lastSignUpEmail, setLastSignUpEmail] = useState('');
   const [otpError, setOtpError] = useState(false);
+  
+  // Rate limiter pour les tentatives de connexion (5 tentatives / 15 minutes)
+  const signInLimiter = useRateLimiter('signIn', 5, 15 * 60 * 1000);
 
   // Restore cooldown from localStorage on mount with robust validation
   useEffect(() => {
@@ -222,42 +226,50 @@ const Auth = memo(() => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('[Auth] Début de la connexion');
-    console.log('[Auth] Email:', email);
-    console.log('[Auth] Loading avant:', loading);
+    // Vérifier le rate limiting
+    if (!signInLimiter.canAttempt()) {
+      const remaining = Math.ceil(signInLimiter.getRemainingTime() / 1000 / 60);
+      toast.error(`Trop de tentatives. Réessayez dans ${remaining} minute${remaining > 1 ? 's' : ''}.`);
+      return;
+    }
     
     setLoading(true);
     
     try {
-      console.log('[Auth] Appel de signIn...');
       const { error } = await signIn(email, password);
-      console.log('[Auth] Réponse de signIn:', { error });
 
       if (error) {
-        console.error('[Auth] Erreur détectée:', error);
+        // Enregistrer la tentative échouée
+        signInLimiter.recordAttempt();
         
-        if (error.message.includes('Invalid login credentials')) {
-          toast.error('Email ou mot de passe incorrect');
+        // Messages d'erreur améliorés
+        if (error.message.includes('Invalid login credentials') || error.message.includes('Invalid')) {
+          toast.error('Email ou mot de passe incorrect. Vérifiez vos identifiants.');
         } else if (error.message.includes('Email not confirmed')) {
-          toast.error('Veuillez confirmer votre email avant de vous connecter');
+          toast.error('Veuillez confirmer votre email avant de vous connecter.');
+          setOtpError(true);
+          setLastSignUpEmail(email);
+        } else if (error.message.includes('User not found')) {
+          toast.error('Aucun compte trouvé avec cet email. Veuillez vous inscrire.');
         } else if (error.message.includes('requested path is invalid')) {
-          toast.error('Configuration Supabase incorrecte. Vérifiez les URLs de redirection.');
-          console.error('[Auth] Erreur de configuration Supabase - vérifiez Site URL et Redirect URLs');
+          toast.error('Configuration incorrecte. Contactez l\'administrateur.');
+        } else if (error.status === 422) {
+          toast.error('Configuration incorrecte. Contactez l\'administrateur.');
         } else {
-          toast.error('Erreur lors de la connexion: ' + error.message);
+          toast.error('Erreur lors de la connexion. Veuillez réessayer.');
         }
         
         setLoading(false);
       } else {
-        console.log('[Auth] Connexion réussie !');
+        // Réinitialiser le rate limiter en cas de succès
+        signInLimiter.reset();
         toast.success('Connexion réussie !');
-        // Rediriger vers la page d'origine ou le dashboard
         const from = (location.state as any)?.from || '/dashboard';
         navigate(from);
       }
     } catch (err) {
-      console.error('[Auth] Exception capturée:', err);
-      toast.error('Une erreur inattendue s\'est produite');
+      console.error('[Auth] Exception:', err);
+      toast.error('Une erreur inattendue s\'est produite. Veuillez réessayer.');
       setLoading(false);
     }
   };
@@ -391,6 +403,8 @@ const Auth = memo(() => {
                         required
                         disabled={loading}
                         className="bg-white/50"
+                        aria-label="Adresse email de connexion"
+                        aria-required="true"
                       />
                     </div>
                     
@@ -416,6 +430,9 @@ const Auth = memo(() => {
                           required
                           disabled={loading}
                           className="bg-white/50 pr-10"
+                          aria-label="Mot de passe"
+                          aria-required="true"
+                          aria-describedby="password-toggle"
                         />
                         <Button
                           type="button"
@@ -425,6 +442,8 @@ const Auth = memo(() => {
                           onClick={() => setShowPassword(!showPassword)}
                           disabled={loading}
                           aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                          aria-pressed={showPassword}
+                          id="password-toggle"
                         >
                           {showPassword ? (
                             <EyeOff className="h-4 w-4 text-muted-foreground" />

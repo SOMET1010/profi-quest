@@ -61,13 +61,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: redirectUrl,
+        data: {
+          full_name: '',
+          role: 'POSTULANT'
+        }
       }
     });
+    
+    // Améliorer les messages d'erreur
+    if (error) {
+      if (error.status === 422) {
+        return { error: new Error('Configuration incorrecte. Vérifiez les URLs de redirection dans Supabase.') };
+      }
+      if (error.message.includes('already registered')) {
+        return { error: new Error('Cette adresse email est déjà utilisée.') };
+      }
+      if (error.message.includes('invalid') || error.message.includes('email')) {
+        return { error: new Error('Adresse email invalide.') };
+      }
+    }
+    
     return { error };
   };
 
