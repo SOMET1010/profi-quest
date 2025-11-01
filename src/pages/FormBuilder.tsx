@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFormFields, useUpdateFormField, useCreateFormField, useDeleteFormField, FormField } from '@/hooks/useFormFields';
-import { AppLayout } from '@/components/AppLayout';
+import { ModernLayout } from '@/components/ModernLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,18 +71,18 @@ export default function FormBuilder() {
 
   if (isLoading) {
     return (
-      <AppLayout>
+      <ModernLayout>
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <p className="text-muted-foreground">Chargement...</p>
           </div>
         </div>
-      </AppLayout>
+      </ModernLayout>
     );
   }
 
   return (
-    <AppLayout>
+    <ModernLayout>
       <div className="container mx-auto p-6 space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Constructeur de formulaire</h1>
@@ -219,6 +219,6 @@ export default function FormBuilder() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </AppLayout>
+    </ModernLayout>
   );
 }

@@ -126,15 +126,19 @@ export default function RoleManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Shield className="h-8 w-8 text-primary" />
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-gradient-primary shadow-glow">
+              <Shield className="h-8 w-8 text-white" />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Gestion des Rôles</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                Gestion des Rôles
+              </h1>
+              <p className="text-muted-foreground mt-1">
                 Gérez les permissions et rôles des utilisateurs
               </p>
             </div>
@@ -145,7 +149,7 @@ export default function RoleManagement() {
         <RoleStatsCards stats={roleStats} />
 
         {/* Filters */}
-        <Card>
+        <Card className="bg-card/60 backdrop-blur-xl border-border/40 shadow-soft hover:shadow-glow transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Filter className="h-5 w-5" />
@@ -215,7 +219,7 @@ export default function RoleManagement() {
         </Card>
 
         {/* Users Table */}
-        <Card>
+        <Card className="bg-card/60 backdrop-blur-xl border-border/40 shadow-soft">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />

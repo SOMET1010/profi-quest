@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { AppLayout } from "@/components/AppLayout";
+import { ModernLayout } from "@/components/ModernLayout";
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -96,52 +96,52 @@ const App = () => (
               {/* Protected Routes - Dashboard */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
-                  <AppLayout><Index /></AppLayout>
+                  <ModernLayout><Index /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/profile" element={
                 <ProtectedRoute>
-                  <AppLayout><UserProfile /></AppLayout>
+                  <ModernLayout><UserProfile /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/mes-candidatures" element={
                 <ProtectedRoute>
-                  <AppLayout><MyApplications /></AppLayout>
+                  <ModernLayout><MyApplications /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/import" element={
                 <ProtectedRoute>
-                  <AppLayout><ImportProfiles /></AppLayout>
+                  <ModernLayout><ImportProfiles /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/database" element={
                 <ProtectedRoute>
-                  <AppLayout><Database /></AppLayout>
+                  <ModernLayout><Database /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/expert/:id" element={
                 <ProtectedRoute>
-                  <AppLayout><ExpertDetail /></AppLayout>
+                  <ModernLayout><ExpertDetail /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/qualification" element={
                 <ProtectedRoute>
-                  <AppLayout><Qualification /></AppLayout>
+                  <ModernLayout><Qualification /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/analytics" element={
                 <ProtectedRoute>
-                  <AppLayout><Analytics /></AppLayout>
+                  <ModernLayout><Analytics /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/admin/roles" element={
                 <ProtectedRoute>
-                  <AppLayout><RoleManagement /></AppLayout>
+                  <ModernLayout><RoleManagement /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/admin/permissions" element={
                 <ProtectedRoute>
-                  <AppLayout><PermissionManagement /></AppLayout>
+                  <ModernLayout><PermissionManagement /></ModernLayout>
                 </ProtectedRoute>
               } />
               <Route path="/admin/form-builder" element={

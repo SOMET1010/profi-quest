@@ -1,37 +1,41 @@
 import { ReactNode } from "react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { ModernHeader } from "./ModernHeader";
+import { MigrationHealthCheck } from "./MigrationHealthCheck";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { useLocation } from "react-router-dom";
-import { Menu } from "lucide-react";
-import { MigrationHealthCheck } from "./MigrationHealthCheck";
 
-interface AppLayoutProps {
+interface ModernLayoutProps {
   children: ReactNode;
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function ModernLayout({ children }: ModernLayoutProps) {
   const location = useLocation();
   
   const getBreadcrumbs = () => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
     
     const breadcrumbMap: Record<string, string> = {
-      '': 'Tableau de Bord',
+      'dashboard': 'Tableau de Bord',
       'import': 'Import de Profils',
       'database': 'Base de Données',
       'qualification': 'Qualification',
       'campaigns': 'Appels à Candidatures',
       'candidature': 'Candidature',
-      'analytics': 'Analytics'
+      'analytics': 'Analytics',
+      'admin': 'Administration',
+      'roles': 'Gestion des Rôles',
+      'permissions': 'Permissions',
+      'form-builder': 'Form Builder',
+      'profile': 'Mon Profil',
+      'mes-candidatures': 'Mes Candidatures',
     };
     
     if (pathSegments.length === 0) {
-      return [{ name: 'Tableau de Bord', path: '/', isLast: true }];
+      return [{ name: 'Tableau de Bord', path: '/dashboard', isLast: true }];
     }
     
     const breadcrumbs = [
-      { name: 'Accueil', path: '/', isLast: false }
+      { name: 'Accueil', path: '/dashboard', isLast: false }
     ];
     
     pathSegments.forEach((segment, index) => {
@@ -48,17 +52,16 @@ export function AppLayout({ children }: AppLayoutProps) {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <div className="min-h-screen flex flex-col w-full">
       <a href="#main-content" className="skip-to-main">
         Aller au contenu principal
       </a>
-      <AppSidebar />
-      <div className="flex-1 flex flex-col min-h-screen w-full bg-background">
-        {/* Header */}
-        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b border-border bg-background px-6" role="banner">
-          <SidebarTrigger className="h-8 w-8" aria-label="Ouvrir/fermer le menu de navigation" />
-          
-          {/* Breadcrumbs */}
+      
+      <ModernHeader />
+      
+      {/* Breadcrumbs */}
+      <div className="border-b bg-muted/30 backdrop-blur-sm">
+        <div className="container py-3 px-4">
           <Breadcrumb aria-label="Fil d'Ariane">
             <BreadcrumbList>
               {breadcrumbs.map((breadcrumb, index) => (
@@ -82,14 +85,15 @@ export function AppLayout({ children }: AppLayoutProps) {
               ))}
             </BreadcrumbList>
           </Breadcrumb>
-        </header>
-
-        {/* Main Content */}
-        <main id="main-content" className="flex-1 overflow-auto" role="main" tabIndex={-1}>
-          {children}
-        </main>
-        <MigrationHealthCheck />
+        </div>
       </div>
-    </SidebarProvider>
+
+      {/* Main Content */}
+      <main id="main-content" className="flex-1 w-full" role="main" tabIndex={-1}>
+        {children}
+      </main>
+
+      <MigrationHealthCheck />
+    </div>
   );
 }

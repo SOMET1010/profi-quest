@@ -85,15 +85,16 @@ export function RoleStatsCards({ stats }: RoleStatsCardsProps) {
       {statsConfig.map((stat, index) => (
         <Card 
           key={index}
-          className={`relative overflow-hidden transition-all hover:shadow-md ${
+          className={`relative overflow-hidden bg-card/60 backdrop-blur-xl border-border/40 shadow-soft hover:shadow-glow transition-all duration-300 animate-fade-in hover:scale-105 ${
             stat.warning ? 'border-destructive' : ''
           }`}
+          style={{ animationDelay: `${index * 50}ms` }}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               {stat.title}
             </CardTitle>
-            <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+            <div className={`p-2 rounded-lg ${stat.bgColor} transition-transform duration-200 hover:scale-110`}>
               <stat.icon className={`h-4 w-4 ${stat.color}`} />
             </div>
           </CardHeader>
@@ -103,7 +104,7 @@ export function RoleStatsCards({ stats }: RoleStatsCardsProps) {
                 {stat.value}
               </div>
               {stat.warning && stat.value > 0 && (
-                <Badge variant="destructive" className="text-xs">
+                <Badge variant="destructive" className="text-xs animate-pulse">
                   Action requise
                 </Badge>
               )}
