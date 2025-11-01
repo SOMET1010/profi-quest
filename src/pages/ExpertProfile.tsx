@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   User, 
   Mail, 
@@ -9,17 +10,22 @@ import {
   Calendar,
   FileText,
   Award,
-  LogOut
+  LogOut,
+  AlertCircle
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useUserApplications } from "@/hooks/useUserApplications";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import ansutLogo from "/lovable-uploads/eebdb674-f051-486d-bb7c-acc1f973cde9.png";
 
 export default function ExpertProfile() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { data: applications, isLoading } = useUserApplications();
+  const { data: profile } = useUserProfile();
+  const { percentage: completionPercentage, missingFields } = useProfileCompletion(profile);
 
   const handleSignOut = async () => {
     await signOut();
@@ -63,8 +69,14 @@ export default function ExpertProfile() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Profil complété</span>
-                  <Badge variant="outline">75%</Badge>
+                  <Badge variant="outline">{completionPercentage}%</Badge>
                 </div>
+                {completionPercentage < 100 && missingFields.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Champs manquants : {missingFields.slice(0, 3).join(', ')}
+                    {missingFields.length > 3 && ` +${missingFields.length - 3} autres`}
+                  </p>
+                )}
                 <Button className="w-full mt-4">
                   Voir / Modifier mon profil
                 </Button>
@@ -85,6 +97,21 @@ export default function ExpertProfile() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
+                {applications && applications.length === 0 && !isLoading && (
+                  <Alert className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Aucune candidature</AlertTitle>
+                    <AlertDescription>
+                      Complétez votre profil pour soumettre votre première candidature.
+                      {missingFields.length > 0 && completionPercentage < 100 && (
+                        <p className="mt-2 text-sm font-medium">
+                          Complétez encore {100 - completionPercentage}% de votre profil
+                        </p>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 {isLoading ? (
                   <div className="text-sm text-muted-foreground">Chargement...</div>
                 ) : applications && applications.length > 0 ? (
@@ -105,11 +132,8 @@ export default function ExpertProfile() {
                       </div>
                     ))}
                   </>
-                ) : (
-                  <div className="text-sm text-muted-foreground text-center py-4">
-                    Aucune candidature pour le moment
-                  </div>
-                )}
+                ) : null}
+                
                 <Button 
                   variant="outline" 
                   className="w-full"

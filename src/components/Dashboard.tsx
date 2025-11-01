@@ -176,17 +176,15 @@ export default function Dashboard() {
                 Plateforme complète de gestion, qualification et mobilisation d'experts thématiques
               </p>
               <div className="flex flex-wrap gap-4">
-                <Button 
-                  size="lg" 
-                  variant="secondary" 
-                  className="bg-white text-primary hover:bg-white/90"
-                  onClick={() => navigate('/candidature')}
-                  onMouseEnter={preloadPublicCandidature}
-                  onFocus={preloadPublicCandidature}
-                >
-                  <UserCircle className="mr-2 h-5 w-5" />
-                  Commencer ma candidature
-                </Button>
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="bg-white text-primary hover:bg-white/90"
+                onClick={() => navigate('/profile')}
+              >
+                <UserCircle className="mr-2 h-5 w-5" />
+                Voir mon profil
+              </Button>
                 <Button 
                   size="lg" 
                   variant="outline" 

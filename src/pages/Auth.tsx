@@ -104,11 +104,46 @@ const Auth = memo(() => {
     }
   }, [loading]);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated with intelligent routing
   useEffect(() => {
     if (user && !authLoading) {
-      const from = (location.state as any)?.from || '/dashboard';
-      navigate(from, { replace: true });
+      const checkProfileAndRedirect = async () => {
+        try {
+          // Check if user has a complete profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, application_submitted_at, first_name, last_name')
+            .eq('id', user.id)
+            .maybeSingle();
+
+          // Check if user has any applications
+          const { data: applications } = await supabase
+            .from('public_applications')
+            .select('id')
+            .eq('user_id', user.id)
+            .limit(1);
+
+          // Intelligent redirection logic
+          if (!profile || !profile.first_name || !profile.last_name) {
+            // New user or incomplete profile -> redirect to profile page
+            navigate('/profile?firstTime=true', { replace: true });
+          } else if (!applications || applications.length === 0) {
+            // Existing profile but no applications -> redirect to profile
+            navigate('/profile', { replace: true });
+          } else {
+            // User with profile and applications -> use default routing
+            const from = (location.state as any)?.from || '/dashboard';
+            navigate(from, { replace: true });
+          }
+        } catch (error) {
+          console.error('[Auth] Error checking profile:', error);
+          // Fallback to dashboard on error
+          const from = (location.state as any)?.from || '/dashboard';
+          navigate(from, { replace: true });
+        }
+      };
+
+      checkProfileAndRedirect();
     }
   }, [user, authLoading, navigate, location]);
 
