@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
+import { MigrationHealthCheck } from "./MigrationHealthCheck";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -87,6 +88,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <main id="main-content" className="flex-1 overflow-auto" role="main" tabIndex={-1}>
           {children}
         </main>
+        <MigrationHealthCheck />
       </div>
     </SidebarProvider>
   );

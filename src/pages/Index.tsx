@@ -1,12 +1,13 @@
 import SimpleDashboard from "@/components/SimpleDashboard";
-import { useHasRole } from "@/hooks/useRole";
+import { useUnifiedRole } from "@/hooks/useUnifiedRole";
+import { ROLE_SYSTEM_CONFIG } from "@/config/features";
 import ExpertProfile from "@/pages/ExpertProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHasPermission } from "@/hooks/usePermissions";
 
 const Index = () => {
   const { user } = useAuth();
-  const { userRole, isLoading } = useHasRole('POSTULANT'); // Get role info
+  const { role: userRole, isLoading, hasMinimumRole } = useUnifiedRole();
   const { hasPermission: canViewDashboard } = useHasPermission('view_dashboard');
   
   // Show loading while checking role
@@ -14,9 +15,11 @@ const Index = () => {
     return <div>Chargement...</div>;
   }
   
-  // SUPERADMIN and admin roles (DG, SI, DRH, RDRH, RH_ASSISTANT) always see Dashboard
-  if (userRole === 'SUPERADMIN' || userRole === 'DG' || userRole === 'SI' || 
-      userRole === 'DRH' || userRole === 'RDRH' || userRole === 'RH_ASSISTANT') {
+  // Utiliser la configuration unifiée
+  const isDashboardRole = userRole && 
+    (ROLE_SYSTEM_CONFIG.DASHBOARD_ROLES as readonly string[]).includes(userRole);
+    
+  if (isDashboardRole) {
     return <SimpleDashboard />;
   }
   

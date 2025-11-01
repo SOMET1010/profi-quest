@@ -24,7 +24,8 @@ import heroImage from "@/assets/ansut-cote-divoire-background.webp";
 import { useStats } from "@/hooks/useStats";
 import { useNavigate } from "react-router-dom";
 import { useNavigationPreload } from "@/hooks/useNavigationPreload";
-import { useHasRole } from "@/hooks/useRole";
+import { useUnifiedRole } from "@/hooks/useUnifiedRole";
+import { FEATURES } from "@/config/features";
 import { useHasPermission } from "@/hooks/usePermissions";
 import { PublicApplicationsSection } from "./PublicApplicationsSection";
 
@@ -33,7 +34,7 @@ const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
 
 export default function SimpleDashboard() {
   const navigate = useNavigate();
-  const { userRole } = useHasRole('DG');
+  const { role: userRole, hasMinimumRole, isSuperAdmin, isLoading } = useUnifiedRole();
   const { hasPermission: canViewApplications } = useHasPermission('view_all_applications');
   const { data: stats, isLoading: statsLoading } = useStats();
   const {
@@ -127,24 +128,15 @@ export default function SimpleDashboard() {
     }
   ];
 
-  // Filter modules based on user role
+  // Filter modules based on unified role system
   const modules = allModules.filter(module => {
-    // SUPERADMIN has access to everything
-    if (userRole === 'SUPERADMIN') return true;
+    if (!userRole) return false;
     
-    const roleHierarchy = { 
-      SUPERADMIN: 15,
-      DG: 10, 
-      SI: 9, 
-      DRH: 8, 
-      RDRH: 7, 
-      RH_ASSISTANT: 5, 
-      CONSULTANT: 3, 
-      POSTULANT: 1 
-    };
-    const userRoleLevel = userRole ? roleHierarchy[userRole] : 0;
-    const requiredRoleLevel = roleHierarchy[module.requiredRole];
-    return userRoleLevel >= requiredRoleLevel;
+    // SUPERADMIN voit tout
+    if (FEATURES.USE_UNIFIED_ROLES && isSuperAdmin) return true;
+    
+    // Vérification via le hook unifié
+    return hasMinimumRole(module.requiredRole);
   });
 
   const dashboardStats = [

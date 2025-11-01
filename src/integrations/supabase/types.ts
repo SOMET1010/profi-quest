@@ -137,15 +137,7 @@ export type Database = {
           role?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "ansut_profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "unified_user_roles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       ansut_roles: {
         Row: {
@@ -292,13 +284,6 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "application_workflow_reviewer_id_fkey"
-            columns: ["reviewer_id"]
-            isOneToOne: false
-            referencedRelation: "unified_user_roles"
             referencedColumns: ["id"]
           },
         ]
@@ -625,13 +610,6 @@ export type Database = {
             referencedRelation: "applications"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "events_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "unified_user_roles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       events_ledger: {
@@ -785,15 +763,7 @@ export type Database = {
           status?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "form_submissions_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "unified_user_roles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       jobs: {
         Row: {
@@ -847,15 +817,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "jobs_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "unified_user_roles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       kpi_data: {
         Row: {
@@ -1262,20 +1224,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "public_applications_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "unified_user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_applications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "unified_user_roles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       role_default_permissions: {
@@ -1394,25 +1342,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_permissions_granted_by_fkey"
-            columns: ["granted_by"]
-            isOneToOne: false
-            referencedRelation: "unified_user_roles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "user_permissions_permission_code_fkey"
             columns: ["permission_code"]
             isOneToOne: false
             referencedRelation: "permissions"
             referencedColumns: ["code"]
-          },
-          {
-            foreignKeyName: "user_permissions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "unified_user_roles"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -1438,15 +1372,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "unified_user_roles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       vectors: {
         Row: {
@@ -1476,12 +1402,13 @@ export type Database = {
     Views: {
       unified_user_roles: {
         Row: {
+          created_at: string | null
           current_role: Database["public"]["Enums"]["app_role"] | null
-          email: string | null
           id: string | null
           legacy_ansut_role: string | null
           legacy_profile_role: string | null
           role_source: string | null
+          updated_at: string | null
         }
         Relationships: []
       }
