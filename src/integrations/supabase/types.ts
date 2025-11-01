@@ -1431,6 +1431,7 @@ export type Database = {
         | "RH_ASSISTANT"
         | "CONSULTANT"
         | "POSTULANT"
+        | "SUPERADMIN"
       audit_action: "INSERT" | "UPDATE" | "DELETE"
       field_type:
         | "text"
@@ -1581,6 +1582,7 @@ export const Constants = {
         "RH_ASSISTANT",
         "CONSULTANT",
         "POSTULANT",
+        "SUPERADMIN",
       ],
       audit_action: ["INSERT", "UPDATE", "DELETE"],
       field_type: [
