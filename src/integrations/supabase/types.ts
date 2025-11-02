@@ -907,7 +907,6 @@ export type Database = {
           motivation_letter_url: string | null
           phone: string | null
           preferences: Json | null
-          role: string
           technical_skills: string | null
           updated_at: string | null
         }
@@ -938,7 +937,6 @@ export type Database = {
           motivation_letter_url?: string | null
           phone?: string | null
           preferences?: Json | null
-          role?: string
           technical_skills?: string | null
           updated_at?: string | null
         }
@@ -969,7 +967,6 @@ export type Database = {
           motivation_letter_url?: string | null
           phone?: string | null
           preferences?: Json | null
-          role?: string
           technical_skills?: string | null
           updated_at?: string | null
         }
@@ -1409,18 +1406,6 @@ export type Database = {
           role_updated_at: string | null
           status: string | null
           user_created_at: string | null
-        }
-        Relationships: []
-      }
-      unified_user_roles: {
-        Row: {
-          created_at: string | null
-          current_role: Database["public"]["Enums"]["app_role"] | null
-          id: string | null
-          legacy_ansut_role: string | null
-          legacy_profile_role: string | null
-          role_source: string | null
-          updated_at: string | null
         }
         Relationships: []
       }
