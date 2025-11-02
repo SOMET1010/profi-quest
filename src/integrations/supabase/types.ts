@@ -241,6 +241,44 @@ export type Database = {
           },
         ]
       }
+      application_status_history: {
+        Row: {
+          application_id: string
+          changed_by: string | null
+          created_at: string | null
+          id: string
+          new_status: string
+          notes: string | null
+          old_status: string | null
+        }
+        Insert: {
+          application_id: string
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          new_status: string
+          notes?: string | null
+          old_status?: string | null
+        }
+        Update: {
+          application_id?: string
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          new_status?: string
+          notes?: string | null
+          old_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_status_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "public_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_workflow: {
         Row: {
           application_id: string
@@ -1481,6 +1519,10 @@ export type Database = {
           profile_role: string
         }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      update_application_status: {
+        Args: { _application_id: string; _new_status: string; _notes?: string }
+        Returns: Json
       }
     }
     Enums: {

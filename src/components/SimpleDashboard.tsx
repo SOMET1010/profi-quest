@@ -28,6 +28,7 @@ import { useUnifiedRole } from "@/hooks/useUnifiedRole";
 import { FEATURES } from "@/config/features";
 import { useHasPermission } from "@/hooks/usePermissions";
 import { PublicApplicationsSection } from "./PublicApplicationsSection";
+import { PendingApplicationsWidget } from "./PendingApplicationsWidget";
 
 // Lazy load the charts component
 const DashboardCharts = lazy(() => import("@/components/DashboardCharts"));
@@ -118,12 +119,12 @@ export default function SimpleDashboard() {
     },
     {
       icon: ListChecks,
-      title: "Candidatures Publiques",
+      title: "Gestion Candidatures",
       description: "Gérez les candidatures spontanées reçues via le formulaire public",
       status: "active",
-      count: `${stats?.pendingApplications || 0} nouvelles`,
+      count: `${stats?.pendingApplications || 0} en attente`,
       color: "bg-success",
-      path: "/database",
+      path: "/admin/candidatures",
       requiredRole: "RDRH" as const
     }
   ];
@@ -258,10 +259,10 @@ export default function SimpleDashboard() {
         <DashboardCharts isLoading={statsLoading} stats={stats} />
       </Suspense>
 
-      {/* Public Applications Section - Only for RH */}
+      {/* Pending Applications Widget - Only for RH */}
       {canViewApplications && (
-        <section aria-labelledby="public-applications-heading" className="mt-8">
-          <PublicApplicationsSection />
+        <section aria-labelledby="pending-applications-heading">
+          <PendingApplicationsWidget />
         </section>
       )}
 

@@ -29,6 +29,7 @@ const ApplicantDashboard = lazy(() => import("./pages/ApplicantDashboard"));
 const ApplicantProfile = lazy(() => import("./pages/ApplicantProfile"));
 const MyApplications = lazy(() => import("./pages/MyApplications"));
 const Account = lazy(() => import("./pages/Account"));
+const ApplicationManagement = lazy(() => import("./pages/ApplicationManagement"));
 
 // Optimized React Query configuration
 const queryClient = new QueryClient({
@@ -192,6 +193,13 @@ const App = () => (
                 <ProtectedRoute>
                   <AdminRoute>
                     <FormBuilder />
+                  </AdminRoute>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/candidatures" element={
+                <ProtectedRoute>
+                  <AdminRoute>
+                    <ApplicationManagement />
                   </AdminRoute>
                 </ProtectedRoute>
               } />
