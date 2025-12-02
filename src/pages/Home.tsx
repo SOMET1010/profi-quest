@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
+import { SafeLink } from "@/components/ui/safe-link";
 import { Users, Target, Award, TrendingUp } from "lucide-react";
 import ansutLogo from "@/assets/ansut-logo-official.png";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,12 +23,12 @@ const Home = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center">
+          <SafeLink to="/" className="flex items-center">
             <img src={ansutLogo} alt="ANSUT - Agence Nationale du Service Universel des Télécommunications" className="h-16 w-auto" />
-          </Link>
-          <Link to="/auth">
+          </SafeLink>
+          <SafeLink to="/auth">
             <Button variant="outline">Se connecter</Button>
-          </Link>
+          </SafeLink>
         </div>
       </header>
 
@@ -42,16 +43,16 @@ const Home = () => {
             numérique en Côte d'Ivoire
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <Link to="/postuler">
+            <SafeLink to="/postuler">
               <Button size="lg" className="text-lg px-8">
                 Postuler maintenant
               </Button>
-            </Link>
-            <Link to="/auth">
+            </SafeLink>
+            <SafeLink to="/auth">
               <Button size="lg" variant="outline" className="text-lg px-8">
                 Créer un compte
               </Button>
-            </Link>
+            </SafeLink>
           </div>
         </div>
       </section>
@@ -118,11 +119,11 @@ const Home = () => {
               Déposez votre candidature en quelques minutes. Notre équipe RH 
               examinera votre profil et vous contactera rapidement.
             </p>
-            <Link to="/postuler">
+            <SafeLink to="/postuler">
               <Button size="lg" variant="secondary" className="text-lg px-8">
                 Démarrer ma candidature
               </Button>
-            </Link>
+            </SafeLink>
           </CardContent>
         </Card>
       </section>

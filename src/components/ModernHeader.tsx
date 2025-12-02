@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { SafeLink } from "@/components/ui/safe-link";
 import { Menu, ChevronDown, LogOut, User, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -161,7 +162,7 @@ export function ModernHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl border-border/40 shadow-soft">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo + Title */}
-        <Link to="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <SafeLink to="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img src={ansutLogo} alt="ANSUT" className="h-10 w-auto object-contain" />
           <div className="hidden md:block">
             <span className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent">
@@ -169,7 +170,7 @@ export function ModernHeader() {
             </span>
             <span className="text-xs text-muted-foreground"> EXPERTS</span>
           </div>
-        </Link>
+        </SafeLink>
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center gap-1">
@@ -185,7 +186,7 @@ export function ModernHeader() {
                   asChild
                   className="transition-all duration-200"
                 >
-                  <Link to={item.href}>{item.title}</Link>
+                  <SafeLink to={item.href}>{item.title}</SafeLink>
                 </Button>
               );
             } else {
@@ -205,14 +206,14 @@ export function ModernHeader() {
                   <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-xl border-border/40">
                     {group.items.map((item) => (
                       <DropdownMenuItem key={item.href} asChild>
-                        <Link
+                        <SafeLink
                           to={item.href}
                           className={`w-full cursor-pointer ${
                             isActive(item.href) ? "bg-accent text-accent-foreground font-medium" : ""
                           }`}
                         >
                           {item.title}
-                        </Link>
+                        </SafeLink>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -251,10 +252,10 @@ export function ModernHeader() {
               
               {userMenu.map((item) => (
                 <DropdownMenuItem key={item.href} asChild>
-                  <Link to={item.href} className="cursor-pointer">
+                  <SafeLink to={item.href} className="cursor-pointer">
                     <item.icon className="mr-2 h-4 w-4" />
                     {item.title}
-                  </Link>
+                  </SafeLink>
                 </DropdownMenuItem>
               ))}
               
@@ -297,7 +298,7 @@ export function ModernHeader() {
                         asChild
                         onClick={() => setMobileOpen(false)}
                       >
-                        <Link to={item.href}>{item.title}</Link>
+                        <SafeLink to={item.href}>{item.title}</SafeLink>
                       </Button>
                     ))}
                   </div>

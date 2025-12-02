@@ -7,7 +7,7 @@ import { Form, FormField as RHFFormField } from "@/components/ui/form";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { SafeLink } from "@/components/ui/safe-link";
 import { ArrowLeft, CheckCircle, Loader2, Save, User, Briefcase, FileText } from "lucide-react";
 import ansutLogo from "@/assets/ansut-logo-official.png";
 import { useFormFields } from "@/hooks/useFormFields";
@@ -345,11 +345,11 @@ const PublicCandidature = () => {
               Vous recevrez un email de confirmation à l'adresse que vous avez fournie.
             </p>
             <div className="flex gap-4 justify-center">
-              <Link to="/">
+              <SafeLink to="/">
                 <Button variant="outline">
                   Retour à l'accueil
                 </Button>
-              </Link>
+              </SafeLink>
             </div>
           </CardContent>
         </Card>
@@ -372,10 +372,10 @@ const PublicCandidature = () => {
       {/* Header */}
       <header className="bg-background border-b sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+          <SafeLink to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" />
             <span>Retour</span>
-          </Link>
+          </SafeLink>
           <div className="flex items-center gap-3">
             <img src={ansutLogo} alt="ANSUT" className="h-10 w-auto" />
           </div>
@@ -521,9 +521,9 @@ const PublicCandidature = () => {
 
                 <p className="text-sm text-center text-muted-foreground">
                   Vous avez déjà un compte ?{" "}
-                  <Link to="/auth" className="text-primary hover:underline">
+                  <SafeLink to="/auth" className="text-primary hover:underline">
                     Se connecter
-                  </Link>
+                  </SafeLink>
                 </p>
               </form>
             </Form>
