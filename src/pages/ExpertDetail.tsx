@@ -274,7 +274,7 @@ export default function ExpertDetail() {
               <CardContent className="space-y-2">
                 <Button 
                   className="w-full bg-gradient-primary"
-                  onClick={() => navigate(`/candidature?profile=${profile.id}`)}
+                  onClick={() => navigate(`/postuler?profile=${profile.id}`)}
                 >
                   Modifier le profil
                 </Button>

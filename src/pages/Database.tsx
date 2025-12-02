@@ -153,7 +153,7 @@ export default function Database() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => navigate(`/candidature?profile=${profile.id}`)}
+                          onClick={() => navigate(`/postuler?profile=${profile.id}`)}
                         >
                           Modifier
                         </Button>
