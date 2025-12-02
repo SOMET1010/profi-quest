@@ -1,5 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useUnifiedRole, type AppRole } from '@/hooks/useUnifiedRole';
+import { useRouteValidator } from '@/hooks/useRouteValidator';
+import { ROUTE_REGISTRY, isValidRoute, getRouteConfig } from '@/config/routes';
+
+// Re-export for convenience
+export { ROUTE_REGISTRY, isValidRoute, getRouteConfig };
 
 // Centralized route configuration
 export const APP_ROUTES = {
@@ -26,6 +31,7 @@ export const APP_ROUTES = {
 export function useAppNavigation() {
   const { role, isLoading } = useUnifiedRole();
   const navigate = useNavigate();
+  const { validateRoute, safeNavigate } = useRouteValidator();
 
   const isApplicant = role ? ['POSTULANT', 'CONSULTANT'].includes(role) : false;
 
@@ -72,6 +78,11 @@ export function useAppNavigation() {
     
     // Direct navigation
     navigate,
+    
+    // Route validation
+    validateRoute,
+    safeNavigate,
+    isValidRoute,
     
     // Role info
     role,
