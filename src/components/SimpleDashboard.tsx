@@ -195,7 +195,7 @@ export default function SimpleDashboard() {
               size="lg" 
               variant="secondary" 
               className="bg-white text-primary hover:bg-white/90"
-              onClick={() => navigate('/candidature')}
+              onClick={() => navigate('/postuler')}
               onMouseEnter={preloadPublicCandidature}
               aria-label="Commencer ma candidature en tant qu'expert"
             >
