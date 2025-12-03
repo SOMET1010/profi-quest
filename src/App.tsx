@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ModernLayout } from "@/components/ModernLayout";
 import { ApplicantRoute } from "@/components/ApplicantRoute";
 import { AdminRoute } from "@/components/AdminRoute";
+import { DevRouteAuditOverlay } from "@/components/dev/DevRouteAuditOverlay";
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -207,6 +208,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          <DevRouteAuditOverlay />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
